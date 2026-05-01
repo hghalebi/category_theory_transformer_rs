@@ -55,6 +55,12 @@ checks.
 {{#include ../../src/calculus.rs}}
 ```
 
+### `src/sketches.rs`
+
+```rust,ignore
+{{#include ../../src/sketches.rs}}
+```
+
 ### `src/demo.rs`
 
 ```rust,ignore
@@ -91,6 +97,12 @@ checks.
 
 ```rust,ignore
 {{#include ../../examples/04_structure_and_calculus.rs}}
+```
+
+### `examples/05_seven_sketches.rs`
+
+```rust,ignore
+{{#include ../../examples/05_seven_sketches.rs}}
 ```
 
 ## Project Configuration

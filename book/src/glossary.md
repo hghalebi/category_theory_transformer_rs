@@ -48,6 +48,44 @@ maps `Vec<A>` to `Option<A>` without depending on what `A` is.
 A type with an empty value and an associative combine operation.
 `PipelineTrace` uses this shape for combining trace steps.
 
+**Preorder**
+
+A relationship that is reflexive and transitive. `InformationLevel` uses a
+small preorder to show how observations can flow into features, scores, and
+decisions.
+
+**Galois Connection**
+
+A coordinated pair of conversions between two ordered worlds.
+`abstract_to_layer_budget` and `concretize_layer_budget` give the small Rust
+version in this course.
+
+**Monoidal Preorder**
+
+A preorder with a composition operation that is order-preserving.
+`ResourceBundle::tensor` is the resource example.
+
+**Profunctor**
+
+A generalized relationship between two categories. In the companion code,
+`FeasibilityRelation` is the small Bool-valued version: it relates requirements
+to implementation offers.
+
+**Functorial Semantics**
+
+An interpretation that preserves composition. `SignalMatrix::compose_after`
+shows the idea by interpreting signal-flow wiring as matrix composition.
+
+**Open System**
+
+A component with a typed boundary through which it connects to other
+components. `OpenCircuit` models inputs, outputs, and internal components.
+
+**Sheaf-Style Locality**
+
+The pattern where local facts can be glued into a global fact when they agree.
+`SafetyCover` is the small behavior-checking example.
+
 ## Rust Terms
 
 **Newtype**

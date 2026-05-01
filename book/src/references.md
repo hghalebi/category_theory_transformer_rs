@@ -13,6 +13,7 @@ the full treatment behind a concept.
 ## Category Theory
 
 - [Seven Sketches in Compositionality: An Invitation to Applied Category Theory](https://arxiv.org/abs/1803.05316) is a readable applied-category-theory text. It is the best next step for objects, morphisms, composition, products, and structure-preserving maps.
+- [Seven Sketches in Compositionality PDF](https://arxiv.org/pdf/1803.05316) is the direct paper file used by the Rust companion chapter.
 
 ## Machine Learning
 

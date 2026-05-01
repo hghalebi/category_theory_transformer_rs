@@ -53,6 +53,7 @@ require_reference "https://doc.rust-lang.org/stable/book/ch09-02-recoverable-err
 require_reference "https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html"
 require_reference "https://rust-lang.github.io/api-guidelines/checklist.html"
 require_reference "https://arxiv.org/abs/1803.05316"
+require_reference "https://arxiv.org/pdf/1803.05316"
 require_reference "https://d2l.ai/chapter_linear-classification/softmax-regression.html"
 require_reference "https://d2l.ai/chapter_linear-classification/softmax-regression-scratch.html"
 require_reference "https://cs231n.github.io/linear-classify/"

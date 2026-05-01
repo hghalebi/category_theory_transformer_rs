@@ -88,3 +88,27 @@ Pick one external resource and connect it to one source file in this course:
 1. Which idea does the external resource explain?
 2. Which Rust file implements a tiny version of that idea?
 3. What is one difference between the full external treatment and this tiny implementation?
+
+## Exercise 7: Test One Sketch Law
+
+Use [Seven Sketches Through Rust](seven-sketches-rust.md).
+
+Pick one law from `src/sketches.rs`:
+
+- preorder laws
+- feature/layer Galois law
+- resource monotonicity
+- foreign-key resolution
+- signal-flow matrix composition
+- local-to-global safety truth
+
+Change one input in `examples/05_seven_sketches.rs`, then run:
+
+```bash
+cargo run --example 05_seven_sketches
+```
+
+Pass condition:
+
+- you can explain which law still holds
+- you can explain which constructor or method prevents invalid structure

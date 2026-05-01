@@ -62,6 +62,7 @@ Read the chapters in order. Each one adds one idea:
 - [The Tiny ML Pipeline](03-ml-pipeline.md): prediction and loss
 - [Training as an Endomorphism](04-training-endomorphism.md): repeated updates
 - [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md): reusable structure
+- [Seven Sketches Through Rust](seven-sketches-rust.md): applied category theory as typed Rust models
 - [Glossary](glossary.md): short definitions
 - [References](references.md): credible external resources
 - [Transformer Roadmap](roadmap.md): how this foundation points toward attention

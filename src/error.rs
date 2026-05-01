@@ -17,6 +17,14 @@ pub enum CtError {
     InvalidProbability(&'static str),
     InvalidLoss(f32),
     InvalidLearningRate(f32),
+    InvalidQuantity {
+        kind: &'static str,
+        value: i64,
+    },
+    InvalidInterval {
+        start: usize,
+        end: usize,
+    },
 }
 
 impl Display for CtError {
@@ -34,6 +42,12 @@ impl Display for CtError {
             }
             CtError::InvalidLoss(value) => write!(f, "invalid loss value {value}"),
             CtError::InvalidLearningRate(value) => write!(f, "invalid learning rate {value}"),
+            CtError::InvalidQuantity { kind, value } => {
+                write!(f, "invalid {kind} quantity {value}")
+            }
+            CtError::InvalidInterval { start, end } => {
+                write!(f, "invalid interval: start {start} is after end {end}")
+            }
         }
     }
 }

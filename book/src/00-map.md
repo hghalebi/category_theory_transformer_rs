@@ -39,6 +39,7 @@ Each concept has a small Rust file:
 - [`src/training.rs`](../../src/training.rs): one training step
 - [`src/structure.rs`](../../src/structure.rs): functor, natural transformation, monoid
 - [`src/calculus.rs`](../../src/calculus.rs): local derivative example
+- [`src/sketches.rs`](../../src/sketches.rs): orders, resources, databases, co-design, signal flow, circuits, and behavior logic
 - [`src/demo.rs`](../../src/demo.rs): one guided terminal walkthrough
 
 The source snapshots keep each concept close to the code that implements it.
@@ -87,3 +88,4 @@ Say this in your own words before moving on:
 
 - [Glossary](glossary.md): object, morphism, composition, endomorphism
 - [References](references.md): Rust modules and applied category theory
+- [Seven Sketches Through Rust](seven-sketches-rust.md): a paper-length concept map made executable

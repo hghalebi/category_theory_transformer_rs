@@ -16,6 +16,7 @@
 # Structure
 
 - [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md)
+- [Seven Sketches Through Rust](seven-sketches-rust.md)
 
 # Practice
 

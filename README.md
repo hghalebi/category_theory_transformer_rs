@@ -60,6 +60,7 @@ By the end, you should be able to explain and run:
 - Monoid: `PipelineTrace`
 - Commutative diagram: composed prediction path equals direct prediction path
 - Chain rule: `MulOp` forward and backward local derivatives
+- Seven applied sketches: orders, resources, databases, co-design, signal flow, circuits, and behavior logic through `src/sketches.rs`
 
 ## Repository Map
 
@@ -71,6 +72,7 @@ The code is split into small parts:
 - `src/training.rs`: training as a repeated parameter endomorphism
 - `src/structure.rs`: functors, natural transformations, and monoids
 - `src/calculus.rs`: local derivative and chain-rule example
+- `src/sketches.rs`: Rust companion models for the seven applied-category-theory sketches
 - `src/demo.rs`: the complete terminal walkthrough
 - `examples/`: runnable lesson examples
 - `lessons/`: learner-facing reading path
@@ -90,11 +92,12 @@ Use the generated course lessons in order:
 5. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
 6. [Training as an Endomorphism](book/src/04-training-endomorphism.md)
 7. [Functors, Naturality, Monoids, and Chain Rule](book/src/05-structure-and-calculus.md)
-8. [Exercises](book/src/exercises.md)
-9. [Glossary](book/src/glossary.md)
-10. [References](book/src/references.md)
-11. [Transformer Roadmap](book/src/roadmap.md)
-12. [Repository Source Snapshots](book/src/source-snapshots.md)
+8. [Seven Sketches Through Rust](book/src/seven-sketches-rust.md)
+9. [Exercises](book/src/exercises.md)
+10. [Glossary](book/src/glossary.md)
+11. [References](book/src/references.md)
+12. [Transformer Roadmap](book/src/roadmap.md)
+13. [Repository Source Snapshots](book/src/source-snapshots.md)
 
 The `lessons/` folder is kept as a compact reading path, while `book/src/`
 contains the complete self-contained course.
@@ -108,6 +111,7 @@ cargo run --example 01_domain_objects
 cargo run --example 02_morphism_composition
 cargo run --example 03_training_endomorphism
 cargo run --example 04_structure_and_calculus
+cargo run --example 05_seven_sketches
 ```
 
 `cargo test --all-targets` also compiles the examples.
