@@ -1,24 +1,39 @@
 # References
 
-This course stays small on purpose. These resources are useful when you want
-the full treatment behind a concept.
+The problem this chapter solves is:
+
+> The course uses small Rust examples. These references point to the larger
+> Rust, ML, and category-theory treatments behind those examples.
+
+Use each reference with the same three questions:
+
+```text
+Rust syntax:
+which source file in this course uses the idea?
+
+ML concept:
+which model or training behavior does the reference explain?
+
+Category theory concept:
+which object, morphism, composition, or law does it deepen?
+```
 
 ## Rust
 
-- [The Rust Programming Language: Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html) explains how a Rust package is organized into library and binary crates.
-- [The Rust Programming Language: Recoverable Errors with `Result`](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) is the official starting point for explicit error handling.
-- [The rustdoc book: How to write documentation](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html) explains concise examples, summaries, and public API documentation.
+- [The Rust Programming Language: Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html) explains how Rust packages are organized into library and binary crates. Use it with `src/lib.rs`, `src/bin/category_ml.rs`, and the `examples/` files.
+- [The Rust Programming Language: Recoverable Errors with `Result`](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) explains the error pattern behind `CtResult<T>` and constructors such as `Distribution::new`.
+- [The rustdoc book: How to write documentation](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html) explains the documentation comments used above public types and methods.
 - [Rust API Guidelines Checklist](https://rust-lang.github.io/api-guidelines/checklist.html) is a practical review checklist for naming, documentation, type conversions, and error design.
 
 ## Category Theory
 
-- [Seven Sketches in Compositionality: An Invitation to Applied Category Theory](https://arxiv.org/abs/1803.05316) is a readable applied-category-theory text. It is the best next step for objects, morphisms, composition, products, and structure-preserving maps.
-- [Seven Sketches in Compositionality PDF](https://arxiv.org/pdf/1803.05316) is the direct paper file used by the Rust companion chapter.
+- [Seven Sketches in Compositionality: An Invitation to Applied Category Theory](https://arxiv.org/abs/1803.05316) is the larger applied-category-theory text behind the companion chapter. Use it with `src/sketches.rs`.
+- [Seven Sketches in Compositionality PDF](https://arxiv.org/pdf/1803.05316) is the direct paper file for offline reading and page-by-page study.
 
 ## Machine Learning
 
-- [Dive into Deep Learning: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html) explains multiclass classification, logits, softmax, and cross entropy.
-- [Dive into Deep Learning: Softmax Regression Implementation from Scratch](https://d2l.ai/chapter_linear-classification/softmax-regression-scratch.html) shows the implementation path behind the smaller Rust version in this course.
+- [Dive into Deep Learning: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html) explains multiclass classification, logits, softmax, and cross entropy. Use it with `src/ml.rs`.
+- [Dive into Deep Learning: Softmax Regression Implementation from Scratch](https://d2l.ai/chapter_linear-classification/softmax-regression-scratch.html) shows the implementation path behind this course's smaller Rust version.
 - [Stanford CS231n: Linear Classification](https://cs231n.github.io/linear-classify/) explains linear classifiers, scores, losses, and the softmax classifier from a widely used university course.
 
 ## Transformers

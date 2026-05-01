@@ -1,95 +1,227 @@
 # Seven Sketches Through Rust
 
-This chapter is a Rust companion to Brendan Fong and David I. Spivak's
-*Seven Sketches in Compositionality: An Invitation to Applied Category
-Theory*. The paper is book-length, so this chapter does not reproduce it. It
-turns every main sketch into a small typed Rust model you can run, inspect, and
-test.
+The problem this chapter solves is:
 
-The paper's repeated pattern is:
+> Applied category theory can feel too large to connect to code. This chapter
+> turns the seven major themes of *Seven Sketches in Compositionality* into
+> small Rust blocks with tests.
 
-```text
-structure + coherence -> compositional software model
-```
+This chapter does not reproduce the paper.
 
-Rust gives that pattern a concrete form:
+It gives executable handles for the ideas.
+
+The repeated pattern is:
 
 ```text
-newtypes + smart constructors + typed composition -> fewer invalid states
+mathematical structure
+  -> Rust type
+  -> constructor or method
+  -> law check
 ```
 
-## How to Read the Companion
+The Rust lesson is:
 
-Use the paper for the mathematics and this chapter for executable intuition.
-For each sketch, ask three questions:
+```text
+newtypes + private fields + validation + explicit composition
+```
 
-1. What are the objects?
-2. What are the arrows or relationships?
-3. What law makes composition reliable?
+The category-theory lesson is:
 
-In Rust, those questions usually become:
+```text
+objects + relationships + composition + laws
+```
+
+## Source Snapshots
+
+The main module:
+
+<details>
+<summary>Source snapshot: src/sketches.rs</summary>
 
 ```rust,ignore
-struct ObjectName(/* private representation */);
-
-impl ObjectName {
-    pub fn new(value: /* raw input */) -> CtResult<Self> {
-        // validate the invariant at the boundary
-    }
-}
+{{#include ../../src/sketches.rs}}
 ```
 
-Then composition becomes an ordinary method, trait implementation, or function
-whose type signature says what can connect to what.
+</details>
 
-## Paper Map to Rust
+The runnable companion:
 
-Use this map when moving between the paper and the repository.
+<details>
+<summary>Source snapshot: examples/05_seven_sketches.rs</summary>
+
+```rust,ignore
+{{#include ../../examples/05_seven_sketches.rs}}
+```
+
+</details>
+
+## Paper Map To Rust
+
+Use this table as the navigation layer.
 
 | Paper area | Main content | Rust companion |
 | --- | --- | --- |
-| Preface and reading guide | structure, coherence, applications, exercises | course learning loop and tests |
-| 1. Generative effects | preorders, monotone maps, meets, joins, Galois connections, closure | `InformationLevel`, `FeatureCount`, `LayerBudget` |
-| 2. Resources | monoidal preorders, wiring diagrams, enriched categories, quantale-style matrix multiplication | `ResourceBundle`, `ResourceAmount` |
-| 3. Databases | schemas as categories, instances as functors, natural transformations, data migration, limits and colimits | `CompanyInstance`, `EmployeeRecord`, `DepartmentId` |
-| 4. Co-design | Bool-valued feasibility, enriched profunctors, profunctor composition, compact closed structure | `DesignRequirement`, `ImplementationOffer`, `FeasibilityRelation` |
-| 5. Signal flow | props, presentations, rigs, matrix semantics, graphical linear algebra, feedback | `SignalMatrix`, `SignalCoefficient` |
-| 6. Circuits | cospans, pushouts, hypergraph categories, decorated cospans, electric circuits, operads | `OpenCircuit`, `CircuitComponent`, `PortName` |
-| 7. Logic of behavior | Set-like toposes, subobject classifiers, sheaves, predicates, quantification, temporal safety | `TruthValue`, `TimeInterval`, `LocalSafetyCheck`, `SafetyCover` |
-| Exercise solutions | active checks for the laws introduced in the sketches | unit tests in `src/sketches.rs` |
+| Generative effects | preorders, monotone maps, Galois connections | `InformationLevel`, `FeatureCount`, `LayerBudget` |
+| Resources | monoidal preorders, resource composition, enrichment | `ResourceBundle`, `ResourceAmount` |
+| Databases | schemas as categories, instances as functors | `CompanyInstance`, `EmployeeRecord`, `DepartmentId` |
+| Co-design | feasibility relations and profunctor-like reasoning | `DesignRequirement`, `ImplementationOffer`, `FeasibilityRelation` |
+| Signal flow | syntax, semantics, matrices, composition | `SignalMatrix`, `SignalCoefficient` |
+| Circuits | open systems, ports, serial and parallel composition | `OpenCircuit`, `CircuitComponent`, `PortName` |
+| Logic of behavior | truth values, intervals, local-to-global checks | `TruthValue`, `TimeInterval`, `SafetyCover` |
 
-## Sketch 1: Generative Effects, Orders, and Adjunctions
+Each section below uses the same three-part lens:
 
-The first sketch studies order. A preorder is a relationship that is reflexive
-and transitive. That is enough structure to talk about refinement, implication,
-abstraction, closure, and Galois connections.
-
-In this repository, `InformationLevel` is a small finite order:
-
-```rust,ignore
-Observation <= Feature <= Score <= Decision
+```text
+Rust syntax
+ML or software concept
+Category theory concept
 ```
 
-The Rust lesson is that an order is not just a list. It is a contract:
+## Sketch 1: Information Order
+
+The problem this block solves is:
+
+> Some concepts are ordered by refinement. An observation can be refined into a
+> feature, a feature into a score, and a score into a decision.
+
+The block begins:
 
 ```rust,ignore
-InformationLevel::Observation.can_flow_to(InformationLevel::Decision)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum InformationLevel {
+    Observation,
+    Feature,
+    Score,
+    Decision,
+}
 ```
 
-The helper `information_order_obeys_preorder_laws()` checks the law directly.
-That mirrors the paper's habit of making coherence explicit instead of hoping
-the reader infers it.
+## Rust Syntax
 
-The Galois connection appears as a pair of conversions:
+This is an enum.
+
+The variants are ordered because the enum derives:
 
 ```rust,ignore
-FeatureCount -> LayerBudget
-LayerBudget -> FeatureCount
+PartialOrd, Ord
 ```
 
-`abstract_to_layer_budget` compresses concrete features into an abstract layer
-budget. `concretize_layer_budget` expands a layer budget back to feature
-capacity. The checked law is:
+That means Rust can compare:
+
+```rust,ignore
+InformationLevel::Observation <= InformationLevel::Decision
+```
+
+The methods:
+
+```rust,ignore
+pub fn can_flow_to(self, target: Self) -> bool {
+    self <= target
+}
+
+pub fn join(self, other: Self) -> Self {
+    self.max(other)
+}
+```
+
+reuse that ordering.
+
+`can_flow_to` checks whether information can move upward.
+
+`join` returns the more informative of two levels in this total order.
+
+## ML Or Software Concept
+
+ML systems often move through levels of processed information:
+
+```text
+raw observation
+  -> extracted feature
+  -> model score
+  -> final decision
+```
+
+The order prevents treating a low-level observation as if it were already a
+decision.
+
+## Category Theory Concept
+
+This is a preorder-shaped example.
+
+A preorder needs:
+
+```text
+reflexivity: a <= a
+transitivity: if a <= b and b <= c, then a <= c
+```
+
+The law check:
+
+```rust,ignore
+information_order_obeys_preorder_laws()
+```
+
+iterates over the finite set and verifies those rules.
+
+## Sketch 1 Continued: Feature And Layer Galois Law
+
+The problem this block solves is:
+
+> A concrete feature count and an abstract layer budget are different worlds,
+> but they can be coordinated by a law.
+
+The key types:
+
+```rust,ignore
+pub struct FeatureCount(usize);
+pub struct LayerBudget(usize);
+```
+
+The conversion functions:
+
+```rust,ignore
+pub fn abstract_to_layer_budget(features: FeatureCount) -> CtResult<LayerBudget>
+
+pub fn concretize_layer_budget(layers: LayerBudget) -> FeatureCount
+```
+
+## Rust Syntax
+
+Both `FeatureCount` and `LayerBudget` are newtypes around `usize`.
+
+Their constructors reject zero because neither a zero feature count nor a zero
+layer budget is useful in this model.
+
+`abstract_to_layer_budget` divides feature count by `FEATURES_PER_LAYER` and
+rounds up:
+
+```rust,ignore
+features.value().div_ceil(FEATURES_PER_LAYER)
+```
+
+`concretize_layer_budget` multiplies layers by features per layer.
+
+## ML Or Software Concept
+
+This models capacity planning.
+
+Concrete features might be:
+
+```text
+9 measured feature channels
+```
+
+The abstract layer budget might be:
+
+```text
+3 layers
+```
+
+The law says the two planning views agree about what fits.
+
+## Category Theory Concept
+
+The checked law is:
 
 ```text
 abstract(features) <= layers
@@ -97,259 +229,524 @@ if and only if
 features <= concretize(layers)
 ```
 
-That is the engineering lesson behind adjunctions: two directions can be
-different but still coordinated by one law.
+That is the shape of a Galois connection.
 
-## Sketch 2: Resources, Monoidal Preorders, and Enrichment
+The two directions are not inverses.
 
-The second sketch studies resources. The practical question is whether one
-bundle of resources can supply another, and whether independent resources can
-be combined.
+They are coordinated by an order law.
 
-The Rust model is:
+## Sketch 2: Resources
+
+The problem this block solves is:
+
+> Independent resources need a way to combine, and resource supply must respect
+> demand ordering.
+
+The key block:
 
 ```rust,ignore
-ResourceBundle {
+pub struct ResourceBundle {
     compute: ResourceAmount,
     memory: ResourceAmount,
 }
 ```
 
-The preorder is `can_supply`. The monoidal product is `tensor`, which combines
-independent bundles component by component.
+## Rust Syntax
 
-The important law is monotonicity:
+`ResourceAmount` wraps a `usize`.
+
+`ResourceBundle` stores two resource dimensions:
 
 ```text
-if large can supply small,
-then large tensor fixed can supply small tensor fixed
+compute
+memory
 ```
 
-That is the resource-theory version of "composition should preserve meaning."
-It is also the same software rule you want when composing model components,
-pipelines, deployment capacity, or data-processing steps.
-
-The enrichment part of the paper generalizes the idea of a yes/no relationship.
-Instead of asking only "is this reachable?", an enriched relationship can carry
-cost, distance, latency, probability, or any other structured quantity. In Rust,
-that usually means replacing `bool` with a semantic newtype or enum.
-
-## Sketch 3: Databases, Categories, Functors, and Limits
-
-The third sketch treats a database schema as a category. Tables are objects.
-Foreign keys are arrows. A database instance is a functor from that schema into
-sets.
-
-The Rust model is deliberately small:
+The monoidal operation is:
 
 ```rust,ignore
-DepartmentId
-EmployeeId
-EmployeeRecord { id, department }
-CompanyInstance
+pub fn tensor(&self, other: &Self) -> Self
 ```
 
-`EmployeeRecord.department` is the schema arrow:
+It adds compute to compute and memory to memory.
+
+The preorder check is:
+
+```rust,ignore
+pub fn can_supply(&self, demand: &Self) -> bool
+```
+
+It returns true only when every resource component is large enough.
+
+## ML Or Software Concept
+
+This is the shape of deployment capacity:
+
+```text
+encoder resources + decoder resources = combined resources
+```
+
+A machine can satisfy a demand only when it has enough compute and memory.
+
+## Category Theory Concept
+
+This is a monoidal preorder.
+
+The preorder is `can_supply`.
+
+The monoidal product is `tensor`.
+
+The law check:
+
+```rust,ignore
+resource_tensor_is_monotone()
+```
+
+shows that adding the same fixed resource bundle to both sides preserves the
+order.
+
+## Sketch 3: Database Instance
+
+The problem this block solves is:
+
+> A database row with a foreign key should not point at a missing row.
+
+The key types:
+
+```rust,ignore
+pub struct DepartmentId(usize);
+pub struct EmployeeId(usize);
+
+pub struct EmployeeRecord {
+    id: EmployeeId,
+    department: DepartmentId,
+}
+
+pub struct CompanyInstance {
+    departments: Vec<DepartmentId>,
+    employees: Vec<EmployeeRecord>,
+}
+```
+
+## Rust Syntax
+
+`DepartmentId` and `EmployeeId` are distinct newtypes.
+
+That prevents mixing department IDs and employee IDs.
+
+`EmployeeRecord` contains:
+
+```text
+employee id
+department id
+```
+
+`CompanyInstance::new` collects departments and employees, then checks every
+employee department exists:
+
+```rust,ignore
+if !departments.contains(&employee.department()) {
+    return Err(CtError::ShapeMismatch { ... });
+}
+```
+
+## ML Or Software Concept
+
+Many ML systems depend on structured data.
+
+If a row references missing data, downstream feature extraction or training can
+fail later in a confusing place.
+
+This code rejects invalid relational structure at construction time.
+
+## Category Theory Concept
+
+The schema can be read as:
 
 ```text
 Employee -> Department
 ```
 
-`CompanyInstance::new` validates that every employee points at an existing
-department. That is the same boundary rule used throughout this repository:
-invalid data should be rejected before it reaches the core model.
+An instance assigns sets of rows to schema objects.
 
-The paper then uses functors and adjunctions to explain data migration:
+The foreign key is a function from employees to departments.
 
-```text
-source schema -> target schema
-```
+`CompanyInstance::new` checks that the function is defined for every employee.
 
-The Rust translation is a typed conversion boundary. Do not leak one external
-schema shape through the whole program. Convert at the edge, validate the
-foreign-key law, and keep the core model coherent.
+## Sketch 4: Co-Design Feasibility
 
-Limits and colimits explain universal ways to merge, project, summarize, or
-join structured data. The programming lesson is that a good schema API should
-make common migration and joining patterns explicit instead of leaving them as
-untyped string manipulation.
+The problem this block solves is:
 
-## Sketch 4: Co-Design, Profunctors, and Monoidal Categories
+> Some relationships are not functions. A requirement and an implementation
+> offer are related only when constraints are satisfied.
 
-The fourth sketch asks a design question:
-
-```text
-Can this implementation satisfy this requirement?
-```
-
-That relationship is not a normal function. One requirement may be satisfied by
-many offers, and one offer may satisfy many requirements. The paper models that
-shape with profunctors.
-
-The Rust model is:
+The key types:
 
 ```rust,ignore
-DesignRequirement {
+pub struct DesignRequirement {
     minimum_throughput: Throughput,
     maximum_latency: LatencyMs,
 }
 
-ImplementationOffer {
+pub struct ImplementationOffer {
     throughput: Throughput,
     latency: LatencyMs,
 }
+
+pub struct FeasibilityRelation;
 ```
 
-`FeasibilityRelation::relates(requirement, offer)` is a Bool-valued
-relationship. It returns true only when the offer provides enough throughput
-and stays under the latency boundary.
+## Rust Syntax
 
-The software lesson is that not every relationship should become `fn A -> B`.
-Sometimes the correct model is a relation, a search space, a constraint, or a
-feasibility check.
+`Throughput` and `LatencyMs` are validated newtypes.
 
-The monoidal part matters because designs compose. If a feature, service, and
-deployment each satisfy their local contracts, the larger design can be checked
-by composing those relationships rather than restarting the analysis from
-scratch.
+`DesignRequirement` stores the minimum acceptable throughput and maximum
+acceptable latency.
 
-## Sketch 5: Signal Flow Graphs, Props, Presentations, and Proofs
+`ImplementationOffer` stores what an implementation actually provides.
 
-The fifth sketch separates syntax from semantics.
-
-Signal-flow graphs are syntax:
-
-```text
-copy this signal
-multiply it by a gain
-add two signals
-wire boxes together
-```
-
-Matrices are semantics:
-
-```text
-the whole graph computes this linear map
-```
-
-The Rust model uses `SignalMatrix` as the semantic side. Matrix composition is
-the executable version of "wire these two signal processors in series":
+The relation is:
 
 ```rust,ignore
-let composed = add_weighted.compose_after(&duplicate)?;
-```
-
-The example duplicates one signal and then applies weights `2` and `3`, so the
-resulting one-input, one-output behavior has coefficient `5`.
-
-The deeper lesson is functorial semantics:
-
-```text
-big graph meaning
-=
-meaning of small pieces, composed in the same shape as the graph
-```
-
-That is exactly what you want from a typed ML pipeline. The code path and the
-mathematical meaning should compose in the same order.
-
-## Sketch 6: Circuits, Hypergraph Categories, and Operads
-
-The sixth sketch studies open systems. A circuit is not only a closed object.
-It has boundary ports where it can connect to other circuits.
-
-The Rust model is:
-
-```rust,ignore
-OpenCircuit {
-    inputs,
-    outputs,
-    components,
+pub fn relates(requirement: DesignRequirement, offer: ImplementationOffer) -> bool {
+    offer.throughput >= requirement.minimum_throughput
+        && offer.latency <= requirement.maximum_latency
 }
 ```
 
-Serial composition wires outputs into inputs:
+## ML Or Software Concept
 
-```rust,ignore
-let serial = first_circuit.then(&second_circuit)?;
-```
-
-Parallel composition keeps interfaces side by side:
-
-```rust,ignore
-let parallel = first_circuit.parallel(&second_circuit)?;
-```
-
-Hypergraph categories give the algebra of sharing, merging, copying, and
-discarding wires. Decorated cospans give a disciplined way to keep the boundary
-separate from the internal decoration. Operads describe the valid wiring
-patterns.
-
-In software architecture, the same idea shows up whenever a component has:
-
-- an external interface
-- internal implementation details
-- valid composition rules
-
-The boundary should be typed. The implementation details should stay internal.
-Composition should fail early if the interfaces do not match.
-
-## Sketch 7: Logic of Behavior, Sheaves, Toposes, and Languages
-
-The seventh sketch studies behavior and proof. The practical question is:
+This models feasibility:
 
 ```text
-How can we prove a system is safe over time?
+Can this model/service/deployment satisfy this requirement?
 ```
 
-The Rust model uses:
+For example:
+
+```text
+required throughput: at least 100 requests/sec
+required latency: at most 80 ms
+offer: 120 requests/sec and 50 ms
+```
+
+The offer is feasible.
+
+## Category Theory Concept
+
+This is relation-shaped rather than function-shaped.
+
+It is the small Bool-valued version of profunctor-like reasoning:
+
+```text
+Requirement x Offer -> Bool
+```
+
+Not every design problem should be forced into:
+
+```text
+A -> B
+```
+
+Some should be modeled as constraints or relations.
+
+## Sketch 5: Signal Matrices
+
+The problem this block solves is:
+
+> Signal-flow diagrams need executable semantics. In this companion, matrices
+> provide that meaning.
+
+The key types:
 
 ```rust,ignore
-TimeInterval
-LocalSafetyCheck
-SafetyCover
-TruthValue
+pub struct SignalCoefficient(i32);
+pub struct MatrixRows(usize);
+pub struct MatrixCols(usize);
+
+pub struct SignalMatrix {
+    rows: MatrixRows,
+    cols: MatrixCols,
+    coefficients: Vec<Vec<SignalCoefficient>>,
+}
 ```
 
-Each `LocalSafetyCheck` is a truth value over one interval. `SafetyCover` glues
-local checks into a global result:
+## Rust Syntax
+
+`MatrixRows` and `MatrixCols` reject zero.
+
+`SignalMatrix::new` validates that the coefficient matrix has the promised
+shape:
+
+```text
+number of rows matches MatrixRows
+number of columns in every row matches MatrixCols
+```
+
+The composition method:
 
 ```rust,ignore
-let global = safety.global_truth();
+pub fn compose_after(&self, previous: &Self) -> CtResult<Self>
 ```
 
-This is a small programming analogue for the sheaf idea: local information
-should combine into global information only when the overlap behavior is
-coherent.
+requires compatible middle dimensions.
 
-Toposes give a setting where objects, predicates, and logic live together. In
-Rust terms, this means a behavior model should not keep proofs as comments or
-informal promises. It should represent them as values with explicit
-constructors and checkable composition.
+Then it performs matrix multiplication using:
 
-## Appendix Role: Exercises and Solutions
+```text
+add
+multiply
+sum over the middle dimension
+```
 
-The paper includes many exercises and an appendix of solutions. This repository
-uses Rust tests for the same learning role.
+## ML Or Software Concept
 
-Every law in `src/sketches.rs` has a small test:
+This is the same shape as composing linear layers or signal-processing stages.
+
+If one stage maps:
+
+```text
+A -> B
+```
+
+and another maps:
+
+```text
+B -> C
+```
+
+then the composite maps:
+
+```text
+A -> C
+```
+
+The dimensions must line up.
+
+## Category Theory Concept
+
+Signal-flow syntax gets matrix semantics.
+
+The important principle is functorial semantics:
+
+```text
+meaning(composed diagram)
+=
+composition of meanings
+```
+
+The code enforces the same middle-dimension law that ordinary morphism
+composition enforces.
+
+## Sketch 6: Open Circuits
+
+The problem this block solves is:
+
+> A circuit is not only internal components. It also has a boundary where it can
+> connect to other circuits.
+
+The key types:
+
+```rust,ignore
+pub struct PortName(&'static str);
+pub struct ResistanceOhms(usize);
+
+pub struct CircuitComponent {
+    from: PortName,
+    to: PortName,
+    resistance: ResistanceOhms,
+}
+
+pub struct OpenCircuit {
+    inputs: Vec<PortName>,
+    outputs: Vec<PortName>,
+    components: Vec<CircuitComponent>,
+}
+```
+
+## Rust Syntax
+
+`PortName::new` rejects empty names.
+
+`ResistanceOhms::new` rejects zero resistance.
+
+`OpenCircuit::new` rejects circuits with no inputs or no outputs.
+
+Serial composition:
+
+```rust,ignore
+pub fn then(&self, next: &Self) -> CtResult<Self>
+```
+
+checks:
+
+```text
+self output count == next input count
+```
+
+Parallel composition:
+
+```rust,ignore
+pub fn parallel(&self, other: &Self) -> CtResult<Self>
+```
+
+puts the two boundaries side by side.
+
+## ML Or Software Concept
+
+This looks like component architecture:
+
+```text
+input interface
+internal implementation
+output interface
+```
+
+Composition should fail when interfaces do not match.
+
+That rule applies to services, data pipelines, neural layers, and circuit-like
+systems.
+
+## Category Theory Concept
+
+This is the open-system idea.
+
+The boundary is part of the object.
+
+Composition is controlled by boundary compatibility.
+
+The paper develops this with cospans, hypergraph categories, decorated
+cospans, and operads. The Rust code gives a small typed analogue.
+
+## Sketch 7: Logic Of Behavior
+
+The problem this block solves is:
+
+> A system may be safe on local time intervals. The code needs a way to combine
+> local safety checks into one global result.
+
+The key types:
+
+```rust,ignore
+pub enum TruthValue {
+    False,
+    True,
+}
+
+pub struct TimeTick(usize);
+
+pub struct TimeInterval {
+    start: TimeTick,
+    end: TimeTick,
+}
+
+pub struct LocalSafetyCheck {
+    interval: TimeInterval,
+    truth: TruthValue,
+}
+
+pub struct SafetyCover(Vec<LocalSafetyCheck>);
+```
+
+## Rust Syntax
+
+`TruthValue` implements Boolean-style operations:
+
+```rust,ignore
+and
+implies
+```
+
+`TimeInterval::new` rejects intervals where start is after end.
+
+`SafetyCover::new` rejects an empty list of checks.
+
+`global_truth` folds all local truths with `and`:
+
+```rust,ignore
+self.0
+    .iter()
+    .fold(TruthValue::True, |truth, check| truth.and(check.truth()))
+```
+
+## ML Or Software Concept
+
+This models safety or behavior validation over time:
+
+```text
+check interval 0..5
+check interval 5..10
+combine into global result
+```
+
+If every local check is true, global truth is true.
+
+If any local check is false, global truth is false.
+
+## Category Theory Concept
+
+This is a small analogue of local-to-global reasoning.
+
+The sheaf-like idea is:
+
+```text
+local facts can determine a global fact when they glue coherently
+```
+
+The code uses a simple conjunction model, not full sheaf theory.
+
+The important lesson is that proof-like information becomes explicit data, not
+an informal comment.
+
+## Tests As Exercise Solutions
+
+The problem this block solves is:
+
+> The laws should be runnable, not only described in prose.
+
+The test module checks:
 
 - preorder laws
-- Galois-connection law
-- monoidal resource monotonicity
+- feature/layer Galois law
+- resource tensor monotonicity
 - database foreign-key resolution
-- co-design feasibility
-- signal-flow matrix composition
-- open-circuit serial and parallel composition
-- local-to-global behavior truth
+- feasibility relation behavior
+- signal matrix composition
+- open circuit serial and parallel composition
+- local-to-global truth
 
-The discipline is the same:
+## Rust Syntax
 
-```text
-do not only read the law; run it
+Every law is a normal Rust test marked with:
+
+```rust,ignore
+#[test]
 ```
 
-## Run the Companion
+Tests that may fail through constructors return:
+
+```rust,ignore
+CtResult<()>
+```
+
+so they can use `?`.
+
+## ML Or Software Concept
+
+The tests act as executable learning checks.
+
+If a future change breaks a law, the project should fail quickly.
+
+## Category Theory Concept
+
+The tests are small law checks.
+
+They are not formal proofs, but they keep the implementation aligned with the
+claimed structure.
+
+## Run The Companion
+
+Run:
 
 ```bash
 cargo run --example 05_seven_sketches
@@ -361,44 +758,44 @@ For the full validation gate:
 bash scripts/check.sh
 ```
 
-## Source Snapshot: Seven Sketches Module
+## Core Mental Model
 
-<details>
-<summary>Source snapshot: src/sketches.rs</summary>
+In Rust terms:
 
-```rust,ignore
-{{#include ../../src/sketches.rs}}
+```text
+each sketch becomes concrete types, constructors, methods, and tests
 ```
 
-</details>
+In ML or software terms:
 
-## Source Snapshot: Runnable Example
-
-<details>
-<summary>Source snapshot: examples/05_seven_sketches.rs</summary>
-
-```rust,ignore
-{{#include ../../examples/05_seven_sketches.rs}}
+```text
+orders, resources, schemas, feasibility, signal flow, interfaces, and safety
+are all engineering structures
 ```
 
-</details>
+In category-theory terms:
 
-## What to Remember
+```text
+the useful part is compositionality: make structure visible, then make
+composition obey laws
+```
 
-The paper is about compositionality. The Rust version is about making
-composition inspectable:
+## What To Remember
 
-- orders become explicit comparison methods
-- adjunctions become coordinated conversion pairs
-- resources become monoidal bundles
-- database schemas become typed references
-- design feasibility becomes a relation
-- graph syntax gets matrix semantics
-- circuits get typed open interfaces
-- behavior proofs become values that can be checked locally and globally
+The seven sketches are not seven disconnected topics.
 
-The common rule is simple: make structure visible, then make composition obey a
-law.
+They repeat one engineering discipline:
+
+```text
+name the objects
+name the relationships
+control construction
+define composition
+check the law
+```
+
+That is also the discipline used by the tiny ML pipeline in the rest of the
+course.
 
 ## Further Reading
 

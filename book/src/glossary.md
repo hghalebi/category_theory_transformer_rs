@@ -1,148 +1,559 @@
 # Glossary
 
+The problem this chapter solves is:
+
+> Abstract terms are easier to remember when each term is tied to a Rust type,
+> an ML role, and a category-theory shape.
+
+Use this glossary as a lookup table while reading the source snapshots.
+
 ## Category-Theory Terms
 
-**Object**
+## Object
 
-A typed thing an arrow can start from or end at. In this course, `TokenId`,
-`Vector`, `Logits`, `Distribution`, `Loss`, and `Parameters` are the main
-objects.
+Rust syntax:
 
-**Morphism**
+```text
+TokenId
+Vector
+Logits
+Distribution
+Loss
+Parameters
+```
 
-A typed transformation from one object to another. In Rust, this course models
-that shape with `Morphism<Input, Output>`.
+ML concept:
 
-**Identity Morphism**
+An object is one kind of value in the pipeline, such as a token, vector,
+probability distribution, loss, or model state.
 
-The arrow that returns its input unchanged. It matters because composition needs
-a neutral arrow.
+Category theory concept:
 
-**Composition**
+An object is something a morphism can start from or end at.
 
-Connecting two arrows when the output type of the first arrow is exactly the
-input type of the second arrow.
+## Morphism
 
-**Product Object**
+Rust syntax:
 
-A pair of objects. `Product<A, B>` is used for `(Distribution, TokenId)` during
-loss calculation and `(TokenId, TokenId)` during training-set construction.
+```rust,ignore
+pub trait Morphism<Input, Output>
+```
 
-**Endomorphism**
+ML concept:
 
-An arrow from a type back to the same type. Training has this shape because one
-step maps `Parameters -> Parameters`.
+A morphism is one transformation stage, such as embedding lookup or softmax.
 
-**Functor**
+Category theory concept:
 
-A structure-preserving map over a wrapper. `VecFunctor` and `OptionFunctor`
-show the same idea: keep the wrapper shape and transform the inside.
+A morphism is a typed arrow:
 
-**Natural Transformation**
+```text
+Input -> Output
+```
 
-A consistent conversion from one wrapper shape to another. `VecToFirstOption`
-maps `Vec<A>` to `Option<A>` without depending on what `A` is.
+## Identity Morphism
 
-**Monoid**
+Rust syntax:
 
-A type with an empty value and an associative combine operation.
-`PipelineTrace` uses this shape for combining trace steps.
+```rust,ignore
+Identity<T>
+```
 
-**Preorder**
+ML concept:
 
-A relationship that is reflexive and transitive. `InformationLevel` uses a
-small preorder to show how observations can flow into features, scores, and
-decisions.
+Identity is a stage that leaves a value unchanged. It is useful for testing the
+idea of neutral transformations.
 
-**Galois Connection**
+Category theory concept:
 
-A coordinated pair of conversions between two ordered worlds.
-`abstract_to_layer_budget` and `concretize_layer_budget` give the small Rust
-version in this course.
+Every object has an identity arrow:
 
-**Monoidal Preorder**
+```text
+id_A : A -> A
+```
 
-A preorder with a composition operation that is order-preserving.
-`ResourceBundle::tensor` is the resource example.
+## Composition
 
-**Profunctor**
+Rust syntax:
 
-A generalized relationship between two categories. In the companion code,
-`FeasibilityRelation` is the small Bool-valued version: it relates requirements
-to implementation offers.
+```rust,ignore
+Compose<F, G, Middle>
+```
 
-**Functorial Semantics**
+ML concept:
 
-An interpretation that preserves composition. `SignalMatrix::compose_after`
-shows the idea by interpreting signal-flow wiring as matrix composition.
+Composition connects stages:
 
-**Open System**
+```text
+Embedding then LinearToLogits then Softmax
+```
 
-A component with a typed boundary through which it connects to other
-components. `OpenCircuit` models inputs, outputs, and internal components.
+Category theory concept:
 
-**Sheaf-Style Locality**
+If:
 
-The pattern where local facts can be glued into a global fact when they agree.
-`SafetyCover` is the small behavior-checking example.
+```text
+f : A -> B
+g : B -> C
+```
+
+then:
+
+```text
+g after f : A -> C
+```
+
+## Product Object
+
+Rust syntax:
+
+```rust,ignore
+Product<A, B>
+```
+
+ML concept:
+
+A product stores paired values, such as:
+
+```text
+input token x target token
+prediction distribution x target token
+```
+
+Category theory concept:
+
+The product object is written:
+
+```text
+A x B
+```
+
+Its projections correspond to `first()` and `second()`.
+
+## Endomorphism
+
+Rust syntax:
+
+```rust,ignore
+Endomorphism<T>
+TrainStep : Parameters -> Parameters
+```
+
+ML concept:
+
+A training step updates parameters and returns parameters again.
+
+Category theory concept:
+
+An endomorphism is an arrow from an object back to itself:
+
+```text
+A -> A
+```
+
+## Functor
+
+Rust syntax:
+
+```rust,ignore
+Functor<A, B>
+VecFunctor
+OptionFunctor
+```
+
+ML concept:
+
+Apply a transformation inside a wrapper such as a batch or optional value.
+
+Category theory concept:
+
+A functor maps objects and arrows while preserving structure.
+
+## Natural Transformation
+
+Rust syntax:
+
+```rust,ignore
+VecToFirstOption : Vec<A> -> Option<A>
+```
+
+ML concept:
+
+Convert one container shape into another consistently, such as many candidates
+to maybe one selected candidate.
+
+Category theory concept:
+
+A natural transformation converts one functor shape into another and commutes
+with mapping.
+
+## Monoid
+
+Rust syntax:
+
+```rust,ignore
+PipelineTrace
+Monoid::empty()
+Monoid::combine()
+```
+
+ML concept:
+
+Traces, logs, batches, and metric accumulators often need an empty value and a
+combine operation.
+
+Category theory concept:
+
+A monoid has an identity element and an associative binary operation.
+
+## Preorder
+
+Rust syntax:
+
+```rust,ignore
+InformationLevel::can_flow_to
+```
+
+ML or software concept:
+
+Information can flow from observation to feature to score to decision.
+
+Category theory concept:
+
+A preorder is reflexive and transitive.
+
+## Galois Connection
+
+Rust syntax:
+
+```rust,ignore
+abstract_to_layer_budget
+concretize_layer_budget
+```
+
+ML or software concept:
+
+Concrete feature counts and abstract layer budgets can be coordinated.
+
+Category theory concept:
+
+Two order-preserving views are connected by a law:
+
+```text
+abstract(x) <= y iff x <= concretize(y)
+```
+
+## Monoidal Preorder
+
+Rust syntax:
+
+```rust,ignore
+ResourceBundle::tensor
+ResourceBundle::can_supply
+```
+
+ML or software concept:
+
+Independent compute and memory resources can be combined.
+
+Category theory concept:
+
+A preorder with a product-like composition operation that preserves order.
+
+## Profunctor
+
+Rust syntax:
+
+```rust,ignore
+FeasibilityRelation::relates(requirement, offer)
+```
+
+ML or software concept:
+
+A requirement and implementation offer are related if constraints are
+satisfied.
+
+Category theory concept:
+
+A profunctor generalizes a relationship between categories. This course uses a
+small Bool-valued relation as the practical handle.
+
+## Functorial Semantics
+
+Rust syntax:
+
+```rust,ignore
+SignalMatrix::compose_after
+```
+
+ML or software concept:
+
+Composed signal-flow stages should have the same meaning as composing their
+matrix interpretations.
+
+Category theory concept:
+
+Interpretation preserves composition.
+
+## Open System
+
+Rust syntax:
+
+```rust,ignore
+OpenCircuit
+OpenCircuit::then
+OpenCircuit::parallel
+```
+
+ML or software concept:
+
+A component has an external interface plus internal implementation details.
+
+Category theory concept:
+
+An open system composes through typed boundaries.
+
+## Sheaf-Style Locality
+
+Rust syntax:
+
+```rust,ignore
+SafetyCover::global_truth
+```
+
+ML or software concept:
+
+Local safety checks over time intervals combine into a global safety result.
+
+Category theory concept:
+
+Local facts can determine a global fact when they glue coherently.
 
 ## Rust Terms
 
-**Newtype**
+## Newtype
 
-A small wrapper type around a lower-level representation. `TokenId(usize)` keeps
-a token index from being confused with a loop index or a vocabulary size.
+Rust syntax:
 
-**Smart Constructor**
+```rust,ignore
+pub struct TokenId(usize);
+```
 
-A constructor that validates invariants before a value enters the rest of the
-program. `Distribution::new` rejects invalid probability vectors.
+ML concept:
 
-**Invariant**
+The same raw number type can represent different concepts. Newtypes prevent
+accidental mixing.
 
-A rule that must stay true for a type to make sense. A `Distribution` must be
-non-empty, finite, non-negative, and sum to one.
+Category theory concept:
 
-**Typed Error**
+A newtype names a specific object instead of treating all raw representations
+as the same object.
 
-An explicit error enum that names failure cases. This crate uses `CtError`
-instead of returning plain strings.
+## Smart Constructor
+
+Rust syntax:
+
+```rust,ignore
+pub fn new(value: Raw) -> CtResult<Self>
+```
+
+ML concept:
+
+Invalid training inputs, probabilities, dimensions, or hyperparameters should
+be rejected early.
+
+Category theory concept:
+
+A smart constructor maps raw data into a validated subobject, using `Result`
+when the mapping can fail.
+
+## Invariant
+
+Rust syntax:
+
+```text
+Distribution must be non-empty, finite, non-negative, and sum to one.
+```
+
+ML concept:
+
+The model can trust a value only if the type protects the rule that makes it
+meaningful.
+
+Category theory concept:
+
+An invariant describes the subset or structure the object is meant to inhabit.
+
+## Typed Error
+
+Rust syntax:
+
+```rust,ignore
+CtError
+CtResult<T>
+```
+
+ML concept:
+
+Bad data should fail with a meaningful cause, not with a vague panic later.
+
+Category theory concept:
+
+`Result` turns a partial construction or morphism into a total error-aware
+mapping.
 
 ## Machine-Learning Terms
 
-**Token**
+## Token
 
-A discrete symbol. In this course, a token is represented by `TokenId`.
+Rust syntax:
 
-**Embedding**
+```rust,ignore
+TokenId
+```
 
-A learned vector representation for a token.
+ML concept:
 
-**Logits**
+A token is a discrete symbol from a vocabulary.
 
-Raw model scores before normalization.
+Category theory concept:
 
-**Softmax**
+The vocabulary is a finite discrete set of possible token objects.
 
-The operation that converts logits into a probability distribution.
+## Embedding
 
-**Cross Entropy**
+Rust syntax:
 
-The loss used to measure how surprised the model is by the target token.
+```rust,ignore
+Embedding : TokenId -> Vector
+```
 
-**Parameters**
+ML concept:
 
-The trainable state of the model: embedding table, linear head, and bias.
+An embedding maps a discrete token to a dense numerical representation.
 
-**Gradient**
+Category theory concept:
 
-The direction and scale of change used to update parameters.
+It is a morphism from a finite token object into a vector-space-like object.
 
-**Learning Rate**
+## Logits
 
-The step size used when moving parameters along a gradient.
+Rust syntax:
 
-**Chain Rule**
+```rust,ignore
+Logits(Vec<f32>)
+```
 
-The rule that lets local derivatives compose into a derivative for a larger
-calculation.
+ML concept:
+
+Logits are raw scores before softmax.
+
+Category theory concept:
+
+They live in a vector-space-like object:
+
+```text
+R^vocab_size
+```
+
+## Softmax
+
+Rust syntax:
+
+```rust,ignore
+Softmax : Logits -> Distribution
+```
+
+ML concept:
+
+Softmax turns raw scores into probabilities.
+
+Category theory concept:
+
+It maps from a score vector into the probability simplex.
+
+## Cross Entropy
+
+Rust syntax:
+
+```rust,ignore
+CrossEntropy : Product<Distribution, TokenId> -> Loss
+```
+
+ML concept:
+
+Cross entropy measures how much probability the model assigned to the correct
+target.
+
+Category theory concept:
+
+It is a morphism from prediction-target product into non-negative scalar loss.
+
+## Parameters
+
+Rust syntax:
+
+```rust,ignore
+Parameters
+```
+
+ML concept:
+
+The trainable state of the model: embedding table, output head, and bias.
+
+Category theory concept:
+
+The object transformed by the training endomorphism.
+
+## Gradient
+
+Rust syntax:
+
+```rust,ignore
+LocalGradient
+grad_embedding
+grad_lm_head
+grad_bias
+```
+
+ML concept:
+
+A gradient tells how parameters should change to reduce loss.
+
+Category theory concept:
+
+Gradient flow is local derivative information composed backward through a
+composed computation.
+
+## Learning Rate
+
+Rust syntax:
+
+```rust,ignore
+LearningRate
+```
+
+ML concept:
+
+The scalar step size in gradient descent.
+
+Category theory concept:
+
+It chooses a specific update morphism from a family of parameter endomorphisms.
+
+## Chain Rule
+
+Rust syntax:
+
+```rust,ignore
+MulOp::backward
+```
+
+ML concept:
+
+The chain rule lets local derivatives combine into gradients for a larger
+computation.
+
+Category theory concept:
+
+It is composition of local derivative maps.

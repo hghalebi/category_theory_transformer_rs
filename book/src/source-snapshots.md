@@ -5,6 +5,30 @@ course. The Rust snapshots are complete files, so they are marked `ignore` as
 standalone snippets. The real source files are still validated by the repository
 checks.
 
+The problem this appendix solves is:
+
+> The explanatory chapters should never drift away from the real code.
+
+Use this appendix as the exact-code lookup layer.
+
+When you inspect any block here, use the same reading pattern as the chapters:
+
+```text
+Rust syntax:
+what does the code literally declare or execute?
+
+ML or software concept:
+why does this block exist in the pipeline or system model?
+
+Category theory concept:
+what object, morphism, product, composition, endomorphism, or law does it
+represent?
+```
+
+The appendix is intentionally less narrative than the chapters. It keeps the
+full source available in one place so you can verify every explanation against
+the code itself.
+
 ## Rust Library Surface
 
 ### `src/lib.rs`

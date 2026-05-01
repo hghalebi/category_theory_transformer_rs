@@ -1,52 +1,215 @@
 # Course Map
 
-## Goal
+The problem this chapter solves is:
 
-Learn one idea:
+> Before reading individual Rust files, you need one map of how the whole
+> machine-learning pipeline, Rust type system, and category-theory vocabulary
+> fit together.
 
-> Category theory is a language for typed transformations.
+The repository is small, but it contains several layers:
 
-In this repo, the transformations are tiny ML operations:
+```text
+domain objects
+  -> typed morphisms
+  -> concrete ML morphisms
+  -> training endomorphism
+  -> reusable structure patterns
+  -> applied category-theory sketches
+```
 
-- token to vector
-- vector to logits
-- logits to probabilities
-- prediction plus target to loss
-- parameters to better parameters
+This chapter is the index of those layers.
 
-This is the whole course in one picture:
+## The Whole Pipeline
+
+The central pipeline is:
 
 ```text
 TokenSequence -> TrainingSet
-TokenId       -> Vector -> Logits -> Distribution
+TokenId       -> Vector
+Vector        -> Logits
+Logits        -> Distribution
 Distribution x TokenId -> Loss
-Parameters   -> Parameters
+Parameters    -> Parameters
 ```
 
-The ML side says: make training pairs, predict probabilities, measure loss,
-then update weights.
+Read this as three stories at once.
 
-The category-theory side says: name each typed transformation, then compose the
-legal transformations into a larger path.
+In ML terms:
+
+```text
+tokenized text
+  -> prediction examples
+  -> embeddings
+  -> vocabulary scores
+  -> probabilities
+  -> error measurement
+  -> updated weights
+```
+
+In Rust terms:
+
+```text
+validated input types
+  -> trait implementations
+  -> explicit error handling
+  -> private fields
+  -> read-only accessors
+  -> tests
+```
+
+In category-theory terms:
+
+```text
+objects
+  -> morphisms
+  -> products
+  -> composition
+  -> endomorphisms
+  -> laws
+```
+
+The course is about learning to see the same pipeline through all three views.
 
 ## Code Map
 
-Each concept has a small Rust file:
+Each Rust file owns one part of the idea.
 
-- [`src/domain.rs`](../../src/domain.rs): nouns, also called objects
-- [`src/category.rs`](../../src/category.rs): arrows, identity, composition, endomorphisms
-- [`src/ml.rs`](../../src/ml.rs): ML arrows
-- [`src/training.rs`](../../src/training.rs): one training step
-- [`src/structure.rs`](../../src/structure.rs): functor, natural transformation, monoid
-- [`src/calculus.rs`](../../src/calculus.rs): local derivative example
-- [`src/sketches.rs`](../../src/sketches.rs): orders, resources, databases, co-design, signal flow, circuits, and behavior logic
-- [`src/demo.rs`](../../src/demo.rs): one guided terminal walkthrough
+### `src/domain.rs`
 
-The source snapshots keep each concept close to the code that implements it.
+This file defines the nouns.
+
+Examples:
+
+- `TokenId`
+- `TokenSequence`
+- `Vector`
+- `Logits`
+- `Distribution`
+- `Loss`
+- `TrainingSet`
+- `Parameters`
+
+The problem this file solves is:
+
+> Raw numbers are too ambiguous for a training pipeline.
+
+For example, these are all machine numbers:
+
+```text
+token index
+vocabulary size
+model dimension
+loss value
+learning rate
+```
+
+But they are not the same concept.
+
+`src/domain.rs` gives each concept a separate type.
+
+### `src/category.rs`
+
+This file defines the arrows.
+
+The central trait is:
+
+```rust,ignore
+pub trait Morphism<Input, Output> {
+    fn name(&self) -> &'static str;
+    fn apply(&self, input: Input) -> CtResult<Output>;
+}
+```
+
+This says:
+
+> A morphism is something that knows how to transform an `Input` into an
+> `Output`, possibly failing with `CtError`.
+
+The rest of the file defines identity, composition, endomorphism, and repeated
+application.
+
+### `src/ml.rs`
+
+This file defines concrete ML arrows.
+
+The main transformations are:
+
+```text
+DatasetWindowing : TokenSequence -> TrainingSet
+Embedding        : TokenId -> Vector
+LinearToLogits   : Vector -> Logits
+Softmax          : Logits -> Distribution
+CrossEntropy     : Distribution x TokenId -> Loss
+```
+
+This file is where the abstract `Morphism` trait becomes a tiny learning
+system.
+
+### `src/training.rs`
+
+This file defines:
+
+```text
+TrainStep : Parameters -> Parameters
+```
+
+That shape is important.
+
+Because the output type is the same as the input type, training can be repeated:
+
+```text
+Parameters0 -> Parameters1 -> Parameters2 -> ... -> ParametersN
+```
+
+That is why training is taught as an endomorphism.
+
+### `src/structure.rs`
+
+This file teaches reusable structure:
+
+- functor: map inside a wrapper
+- natural transformation: convert wrapper shape consistently
+- monoid: combine values with an empty value
+
+These are not extra theory for decoration. They name patterns that appear in
+ordinary ML systems: batches, optional values, traces, logs, and composed
+workflows.
+
+### `src/calculus.rs`
+
+This file shows the smallest useful backpropagation idea:
+
+```text
+z = x * y
+dL/dx = dL/dz * y
+dL/dy = dL/dz * x
+```
+
+The code does not implement a full automatic differentiation engine. It gives
+you the local rule that larger systems compose.
+
+### `src/sketches.rs`
+
+This file connects the course to seven applied category-theory themes:
+
+- orders
+- resources
+- databases
+- co-design
+- signal flow
+- circuits
+- behavior logic
+
+Each theme is represented as typed Rust values plus law-checking tests.
 
 ## Guided Walkthrough Snapshot
 
-The terminal demo is the spine of the course. It touches every concept once.
+The terminal demo is the spine of the course.
+
+The problem this block solves is:
+
+> A learner should be able to run one command and see every major concept used
+> once in a concrete order.
 
 <details>
 <summary>Source snapshot: src/demo.rs</summary>
@@ -56,6 +219,60 @@ The terminal demo is the spine of the course. It touches every concept once.
 ```
 
 </details>
+
+## How To Read The Demo
+
+The demo is not random output. It is a staged proof that the pieces connect.
+
+Section 1 introduces an object:
+
+```text
+TokenId(1)
+```
+
+Section 2 applies a data-preparation morphism:
+
+```text
+TokenSequence -> TrainingSet
+```
+
+Section 3 applies identity:
+
+```text
+Vector -> Vector
+```
+
+Section 4 composes prediction:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+Section 5 uses a product object:
+
+```text
+Distribution x TokenId -> Loss
+```
+
+Section 6 repeats an endomorphism:
+
+```text
+Parameters -> Parameters
+```
+
+Sections 7 through 11 add the structural patterns:
+
+```text
+Functor
+NaturalTransformation
+Monoid
+Commutative diagram check
+Chain rule
+```
+
+So the demo is a miniature course outline in executable form.
+
+## Binary Entrypoint
 
 The binary entrypoint is deliberately tiny:
 
@@ -68,7 +285,35 @@ The binary entrypoint is deliberately tiny:
 
 </details>
 
+The whole file is:
+
+```rust,ignore
+use category_theory_transformer_rs::run_demo;
+
+fn main() {
+    run_demo().unwrap();
+}
+```
+
+Line by line:
+
+`use category_theory_transformer_rs::run_demo;`
+
+This imports the library function that owns the walkthrough.
+
+`fn main()`
+
+This is the process entrypoint. When you run the binary, Rust starts here.
+
+`run_demo().unwrap();`
+
+This runs the walkthrough and panics if it fails. In the library code, fallible
+work uses `CtResult`. The binary keeps the entrypoint short because the course
+focus is the library, not command-line error reporting.
+
 ## First Run
+
+Run:
 
 ```bash
 cargo run --bin category_ml
@@ -77,12 +322,47 @@ cargo run --bin category_ml
 You should see a tiny language-model pipeline and the loss decreasing after
 training.
 
+The important part is not the exact floating-point numbers.
+
+The important part is the shape:
+
+```text
+before training: higher loss
+after training:  lower loss
+```
+
+That means repeated `TrainStep` applications moved the parameters in a useful
+direction on the tiny dataset.
+
+## Core Mental Model
+
+Every chapter after this one zooms into one row of the map.
+
+Remember:
+
+```text
+object = typed thing
+morphism = typed transformation
+composition = legal connection of transformations
+endomorphism = transformation from a type back to itself
+law = property the code checks so composition remains trustworthy
+```
+
 ## Checkpoint
 
-Say this in your own words before moving on:
+Explain this line in your own words:
 
-> A morphism is a typed function. Composition lets small typed functions become
-> one larger typed pipeline.
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+A strong answer should mention:
+
+- token lookup
+- embedding vector
+- vocabulary scores
+- probability distribution
+- composition of typed morphisms
 
 ## Further Reading
 
