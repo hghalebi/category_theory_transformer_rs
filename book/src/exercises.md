@@ -162,7 +162,48 @@ Category theory concept:
 why can the update be repeated?
 ```
 
-## Exercise 6: Explain One Validation Boundary
+## Exercise 6: Explain `Distribution<T>::map`
+
+Use [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md).
+
+Explain the conceptual `Distribution<T>::map` example.
+
+Use this input distribution:
+
+```text
+TokenId(2) -> 0.70
+TokenId(3) -> 0.30
+```
+
+and this function:
+
+```text
+TokenId -> String
+```
+
+where:
+
+```text
+TokenId(2) -> "Rust"
+TokenId(3) -> "."
+```
+
+Write the output distribution.
+
+Then explain:
+
+```text
+Rust syntax:
+why does `self` plus `into_iter()` move the old outcomes?
+
+ML concept:
+why do the probabilities stay the same?
+
+Category theory concept:
+what does it mean to lift `T -> U` into `Distribution<T> -> Distribution<U>`?
+```
+
+## Exercise 7: Explain One Validation Boundary
 
 Pick one constructor:
 
@@ -188,7 +229,7 @@ Category theory concept:
 what intended object or relationship is being protected?
 ```
 
-## Exercise 7: Trace A Full Source File
+## Exercise 8: Trace A Full Source File
 
 Use [Repository Source Snapshots](source-snapshots.md).
 
@@ -200,7 +241,7 @@ Pick one complete source file and write a five-sentence summary:
 4. What category-theory concept does it teach?
 5. Which command proves the file still works?
 
-## Exercise 8: Connect One External Reference
+## Exercise 9: Connect One External Reference
 
 Use [References](references.md).
 
@@ -217,7 +258,7 @@ Category theory concept connection:
 One difference between the full treatment and this tiny implementation:
 ```
 
-## Exercise 9: Test One Sketch Law
+## Exercise 10: Test One Sketch Law
 
 Use [Seven Sketches Through Rust](seven-sketches-rust.md).
 
@@ -242,7 +283,7 @@ Pass condition:
 - you can explain which constructor or method prevents invalid structure
 - your explanation uses Rust syntax, ML or software concept, and category theory concept
 
-## Exercise 10: Write A New Block Explanation
+## Exercise 11: Write A New Block Explanation
 
 Choose any block from the source snapshots that the chapter did not explain in
 enough detail for you.

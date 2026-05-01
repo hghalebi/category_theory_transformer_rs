@@ -169,6 +169,33 @@ Category theory concept:
 
 A functor maps objects and arrows while preserving structure.
 
+## Functor Map
+
+Rust syntax:
+
+```rust,ignore
+fn map<U>(self, f: impl Fn(T) -> U) -> Distribution<U>
+```
+
+ML concept:
+
+For a probabilistic output, `map` transforms every possible outcome while
+leaving the attached probabilities unchanged.
+
+Category theory concept:
+
+`map` lifts a deterministic function:
+
+```text
+T -> U
+```
+
+into a context-aware transformation:
+
+```text
+Distribution<T> -> Distribution<U>
+```
+
 ## Natural Transformation
 
 Rust syntax:

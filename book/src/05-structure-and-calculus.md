@@ -314,6 +314,494 @@ to:
 Option<A> -> Option<B>
 ```
 
+## Conceptual Extension: `Distribution<T>::map`
+
+The problem this block solves is:
+
+> A probabilistic value may contain many possible outcomes. Sometimes you want
+> to transform every possible outcome while keeping its probability attached.
+
+The current crate's `Distribution` in `src/domain.rs` is a concrete validated
+probability vector:
+
+```rust,ignore
+pub struct Distribution(Vec<f32>);
+```
+
+The block below is a conceptual generic version that explains the functor idea
+for probabilistic outcomes:
+
+```rust,ignore
+pub struct Probability(f32);
+
+pub struct Distribution<T> {
+    outcomes: Vec<(T, Probability)>,
+}
+
+impl<T> Distribution<T> {
+    pub fn map<U>(
+        self,
+        f: impl Fn(T) -> U,
+    ) -> Distribution<U> {
+        let outcomes = self
+            .outcomes
+            .into_iter()
+            .map(|(value, probability)| {
+                (f(value), probability)
+            })
+            .collect();
+
+        Distribution { outcomes }
+    }
+}
+```
+
+The core idea is:
+
+```text
+map changes the values inside the distribution,
+but keeps the probabilities attached to them.
+```
+
+## Rust Syntax
+
+Start with the generic struct:
+
+```rust,ignore
+pub struct Distribution<T> {
+    outcomes: Vec<(T, Probability)>,
+}
+```
+
+This means:
+
+```text
+Distribution<T> = many possible T values, each paired with a probability
+```
+
+If `T` is `TokenId`, then the type is:
+
+```rust,ignore
+Distribution<TokenId>
+```
+
+If `T` is `String`, then the type is:
+
+```rust,ignore
+Distribution<String>
+```
+
+The method introduces a second generic type:
+
+```rust,ignore
+pub fn map<U>(...)
+```
+
+`T` is the old outcome type.
+
+`U` is the new outcome type.
+
+So the method has this shape:
+
+```text
+Distribution<T> -> Distribution<U>
+```
+
+The first parameter is:
+
+```rust,ignore
+self
+```
+
+That means the method consumes the old distribution.
+
+After calling:
+
+```rust,ignore
+let text_dist = token_dist.map(decode);
+```
+
+the old `token_dist` has been moved and cannot be used again.
+
+That is why the implementation can call:
+
+```rust,ignore
+self.outcomes.into_iter()
+```
+
+`into_iter()` consumes the vector and yields owned pairs:
+
+```text
+(T, Probability)
+```
+
+The function parameter is:
+
+```rust,ignore
+f: impl Fn(T) -> U
+```
+
+This means:
+
+```text
+give this method a function or closure that takes T and returns U
+```
+
+For example, a decoder might have this shape:
+
+```text
+TokenId -> String
+```
+
+Then:
+
+```text
+Distribution<TokenId> -> Distribution<String>
+```
+
+The inner mapping line is:
+
+```rust,ignore
+.map(|(value, probability)| {
+    (f(value), probability)
+})
+```
+
+For every pair:
+
+```text
+(value, probability)
+```
+
+the code applies `f` to the value and leaves the probability unchanged.
+
+So:
+
+```text
+(TokenId(2), Probability(0.70))
+```
+
+can become:
+
+```text
+("Rust", Probability(0.70))
+```
+
+Finally:
+
+```rust,ignore
+.collect()
+```
+
+collects the transformed pairs back into a vector, and:
+
+```rust,ignore
+Distribution { outcomes }
+```
+
+wraps them in the new distribution.
+
+## ML Concept
+
+Imagine a model returns possible next tokens:
+
+```text
+TokenId(2) -> 0.70
+TokenId(4) -> 0.20
+TokenId(3) -> 0.10
+```
+
+Those token IDs are useful to the model, but a learner or UI might need text:
+
+```text
+TokenId(2) -> "Rust"
+TokenId(4) -> "Python"
+TokenId(3) -> "."
+```
+
+`map` changes the representation:
+
+```text
+Distribution<TokenId> -> Distribution<String>
+```
+
+The values change:
+
+```text
+TokenId(2) becomes "Rust"
+TokenId(4) becomes "Python"
+TokenId(3) becomes "."
+```
+
+The probabilities do not change:
+
+```text
+0.70 stays 0.70
+0.20 stays 0.20
+0.10 stays 0.10
+```
+
+So `map` is for changing the meaning or representation of each possible
+outcome, not for changing the probability mass.
+
+## Category Theory Concept
+
+This is the functor pattern for probabilistic context.
+
+Given a normal deterministic function:
+
+```text
+f : T -> U
+```
+
+`map` lifts it into the distribution context:
+
+```text
+Distribution<T> -> Distribution<U>
+```
+
+In functional-programming notation:
+
+```text
+fmap : (T -> U) -> Distribution<T> -> Distribution<U>
+```
+
+The outer structure is preserved:
+
+```text
+same number of possible outcomes
+same probabilities
+same probabilistic context
+```
+
+Only the inner values are transformed.
+
+That is the same pattern as:
+
+```text
+Option<T> -> Option<U>
+Vec<T> -> Vec<U>
+Distribution<T> -> Distribution<U>
+```
+
+Different context, same functor idea.
+
+## Concrete Example
+
+Here is a complete conceptual example:
+
+```rust,ignore
+#[derive(Debug, Clone, Copy)]
+pub struct TokenId(pub usize);
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Probability(pub f32);
+
+#[derive(Debug, Clone)]
+pub struct Distribution<T> {
+    outcomes: Vec<(T, Probability)>,
+}
+
+impl<T> Distribution<T> {
+    pub fn new(outcomes: Vec<(T, Probability)>) -> Self {
+        Self { outcomes }
+    }
+
+    pub fn map<U, F>(self, mut f: F) -> Distribution<U>
+    where
+        F: FnMut(T) -> U,
+    {
+        let outcomes = self
+            .outcomes
+            .into_iter()
+            .map(|(value, probability)| {
+                (f(value), probability)
+            })
+            .collect();
+
+        Distribution { outcomes }
+    }
+}
+
+let vocab = ["I", "love", "Rust", "."];
+
+let token_dist = Distribution::new(vec![
+    (TokenId(2), Probability(0.70)),
+    (TokenId(3), Probability(0.30)),
+]);
+
+let text_dist = token_dist.map(|token| {
+    vocab[token.0].to_string()
+});
+```
+
+Conceptually, the result is:
+
+```text
+"Rust" -> 0.70
+"."    -> 0.30
+```
+
+## Why `Fn(T) -> U`
+
+The signature:
+
+```rust,ignore
+f: impl Fn(T) -> U
+```
+
+accepts functions and closures.
+
+It is more flexible than:
+
+```rust,ignore
+fn(T) -> U
+```
+
+because closures can capture values from the surrounding scope:
+
+```rust,ignore
+let vocab = ["I", "love", "Rust", "."];
+
+let text_dist = token_dist.map(|token| {
+    vocab[token.0].to_string()
+});
+```
+
+The closure uses `vocab` from outside the closure body.
+
+## Why A Library Might Use `FnMut`
+
+The pedagogical signature:
+
+```rust,ignore
+f: impl Fn(T) -> U
+```
+
+is easy to read.
+
+A more flexible library signature is often:
+
+```rust,ignore
+pub fn map<U, F>(self, mut f: F) -> Distribution<U>
+where
+    F: FnMut(T) -> U,
+```
+
+`FnMut` allows the closure to mutate captured state.
+
+For example:
+
+```rust,ignore
+let mut counter = 0;
+
+let numbered = token_dist.map(|token| {
+    counter += 1;
+    (counter, token)
+});
+```
+
+The key ownership rule is unchanged:
+
+```text
+the method consumes the old distribution and moves each T into f
+```
+
+## `map` Versus `flat_map`
+
+Use `map` when each possible value becomes one transformed value:
+
+```text
+T -> U
+```
+
+So:
+
+```text
+Distribution<T> -> Distribution<U>
+```
+
+Example:
+
+```text
+TokenId -> String
+```
+
+Use `flat_map` when each possible value produces another distribution:
+
+```text
+T -> Distribution<U>
+```
+
+Without flattening, the result would be:
+
+```text
+Distribution<Distribution<U>>
+```
+
+The simple distinction is:
+
+```text
+map:
+  one possible value becomes one transformed value
+
+flat_map:
+  one possible value becomes many possible future values
+```
+
+In language modeling:
+
+```text
+map decodes possible tokens into text
+flat_map chains uncertainty across another prediction step
+```
+
+## Algebra Version
+
+If:
+
+```text
+D<T> = [(t1, p1), (t2, p2), ..., (tn, pn)]
+```
+
+and:
+
+```text
+f : T -> U
+```
+
+then:
+
+```text
+map(f, D<T>) = [(f(t1), p1), (f(t2), p2), ..., (f(tn), pn)]
+```
+
+The probabilities are untouched.
+
+Only the values move through `f`.
+
+## Core Mental Model
+
+In Rust terms:
+
+```text
+consume self, move each T into f, preserve each Probability, collect into
+Distribution<U>
+```
+
+In ML terms:
+
+```text
+decode or transform every possible outcome without changing model confidence
+```
+
+In category-theory terms:
+
+```text
+lift a deterministic morphism T -> U into the probabilistic context
+Distribution<T> -> Distribution<U>
+```
+
 ## `NaturalTransformation<A>`
 
 The problem this block solves is:
