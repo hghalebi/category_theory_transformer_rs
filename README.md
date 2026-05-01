@@ -3,7 +3,7 @@
 This is a small, modular, compile-checked tutorial for learning category-theory
 ideas through a tiny machine-learning pipeline in Rust.
 
-The teaching style is short-loop and ADHD-friendly:
+The teaching style is short-loop and low-friction:
 
 - one concept at a time
 - one Rust file per concept cluster
@@ -23,6 +23,20 @@ Run the full validation gate:
 
 ```bash
 bash scripts/check.sh
+```
+
+Build the mdBook:
+
+```bash
+bash scripts/build-mdbook.sh
+```
+
+The generated HTML will be written to `book/html/`.
+
+The GitHub Pages workflow publishes the book from `main` to:
+
+```text
+https://hghalebi.github.io/category_theory_transformer_rs/
 ```
 
 ## What You Will Learn
@@ -54,6 +68,9 @@ The code is split into small parts:
 - `src/demo.rs`: the complete terminal walkthrough
 - `examples/`: runnable lesson examples
 - `lessons/`: learner-facing reading path
+- `book/src/`: mdBook source chapters
+- `book/html/`: generated mdBook output, ignored by git
+- `.github/workflows/mdbook-pages.yml`: CI plus GitHub Pages deployment
 
 ## Lesson Path
 
@@ -105,7 +122,30 @@ Before trusting changes, run:
 bash scripts/check.sh
 ```
 
-That checks formatting, clippy, unit tests, examples, and the full demo.
+That checks formatting, clippy, unit tests, examples, the full demo, the
+mdBook build, and mdBook chapter tests.
+
+## Serve the Book
+
+```bash
+mdbook serve --open
+```
+
+If the browser does not open automatically, use the local URL printed by
+`mdbook`.
+
+## GitHub Pages Deployment
+
+The workflow in `.github/workflows/mdbook-pages.yml` runs on pull requests,
+pushes to `main`, and manual dispatches.
+
+Pull requests run validation only.
+
+Pushes to `main` run validation, upload `book/html`, and deploy through GitHub
+Pages. In the GitHub repository settings, set:
+
+```text
+Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
+```
 
 This is pedagogical code, not a production ML framework.
-# category_theory_transformer_rs

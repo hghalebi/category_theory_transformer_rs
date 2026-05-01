@@ -1,0 +1,20 @@
+[book]
+title = "Category Theory for Tiny ML in Rust"
+description = "A modular, compile-checked tutorial for learning category-theory ideas through a tiny Rust ML pipeline."
+authors = ["Hamze Ghalebi"]
+language = "en"
+src = "book/src"
+
+[build]
+build-dir = "book/html"
+create-missing = false
+
+[output.html]
+git-repository-url = ""
+edit-url-template = ""
+site-url = "/category_theory_transformer_rs/"
+additional-css = ["book/theme/learning.css"]
+default-theme = "light"
+preferred-dark-theme = "navy"
+mathjax-support = false
+no-section-label = false

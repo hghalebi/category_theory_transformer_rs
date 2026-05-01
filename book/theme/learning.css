@@ -1,0 +1,23 @@
+:root {
+  --content-max-width: 860px;
+}
+
+.content main {
+  line-height: 1.65;
+}
+
+.content main h1,
+.content main h2,
+.content main h3 {
+  letter-spacing: 0;
+}
+
+.content main blockquote {
+  border-left: 0.25rem solid #4f46e5;
+  background: rgba(79, 70, 229, 0.06);
+  padding: 0.5rem 1rem;
+}
+
+.content main code {
+  font-size: 0.94em;
+}

@@ -1,0 +1,88 @@
+name: CI and GitHub Pages
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  MDBOOK_VERSION: "0.5.2"
+
+concurrency:
+  group: ci-pages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Rust and mdBook
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup component add rustfmt clippy
+
+      - name: Cache cargo and mdBook
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/mdbook
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-cargo-mdbook-${{ env.MDBOOK_VERSION }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-mdbook-${{ env.MDBOOK_VERSION }}-
+            ${{ runner.os }}-cargo-
+
+      - name: Install mdBook
+        run: |
+          if ! command -v mdbook >/dev/null 2>&1 || [ "$(mdbook --version)" != "mdbook v${MDBOOK_VERSION}" ]; then
+            cargo install mdbook --version "${MDBOOK_VERSION}" --locked --force
+          fi
+          mdbook --version
+
+      - name: Run full validation gate
+        run: bash scripts/check.sh
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: book/html
+
+  deploy-pages:
+    name: Deploy mdBook to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
