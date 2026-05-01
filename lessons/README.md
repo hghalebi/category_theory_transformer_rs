@@ -1,9 +1,13 @@
-# Category Theory for Tiny ML: Lesson Path
+# Category Theory for Tiny ML: Compact Lesson Path
 
-This folder is the slow, friendly path through the codebase.
+This folder is the compact reading path through the codebase.
 
-Use it in order. Each lesson is intentionally short and points to a real Rust
-file that `cargo` checks.
+For the complete self-contained course, use the chapters in `book/src/`. They
+include source snapshots, runnable examples, exercises, a glossary, references,
+and the full source appendix.
+
+These compact lessons are kept for quick review. Each lesson is intentionally
+short and points to a real Rust file that `cargo` checks.
 
 ## The Learning Loop
 

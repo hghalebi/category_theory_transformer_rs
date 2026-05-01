@@ -20,4 +20,10 @@
 # Practice
 
 - [Exercises](exercises.md)
-- [Validation and Troubleshooting](validation.md)
+- [Glossary](glossary.md)
+- [References](references.md)
+- [Transformer Roadmap](roadmap.md)
+
+# Source Appendix
+
+- [Repository Source Snapshots](source-snapshots.md)

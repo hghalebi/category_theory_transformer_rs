@@ -11,5 +11,6 @@ cargo run --example 03_training_endomorphism
 cargo run --example 04_structure_and_calculus
 cargo run --bin category_ml
 
+bash scripts/check-mdbook-coverage.sh
 bash scripts/build-mdbook.sh
 mdbook test

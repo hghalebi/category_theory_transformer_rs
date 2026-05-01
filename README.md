@@ -3,11 +3,12 @@
 This is a small, modular, compile-checked tutorial for learning category-theory
 ideas through a tiny machine-learning pipeline in Rust.
 
-The teaching style is short-loop and low-friction:
+The teaching style is short-loop, low-friction, and example-first:
 
 - one concept at a time
 - one Rust file per concept cluster
 - one runnable example per lesson group
+- exact learner source snapshots embedded in the course
 - fast feedback from `cargo`
 - no hidden pseudo-code examples
 
@@ -32,6 +33,11 @@ bash scripts/build-mdbook.sh
 ```
 
 The generated HTML will be written to `book/html/`.
+
+The generated course is the canonical tutorial surface. It embeds the Rust
+modules, runnable examples, compact lesson notes, a glossary, curated external
+references, and a Transformer roadmap. Build and publishing details stay in
+repository docs and scripts rather than inside the learner course.
 
 The GitHub Pages workflow publishes the book from `main` to:
 
@@ -70,18 +76,28 @@ The code is split into small parts:
 - `lessons/`: learner-facing reading path
 - `book/src/`: mdBook source chapters
 - `book/html/`: generated mdBook output, ignored by git
+- `scripts/check-mdbook-coverage.sh`: verifies course source snapshots and required references
 - `.github/workflows/mdbook-pages.yml`: CI plus GitHub Pages deployment
 
 ## Lesson Path
 
-Use the lessons in order:
+Use the generated course lessons in order:
 
-1. [Map of the Course](lessons/00-map.md)
-2. [Domain Objects](lessons/01-domain-objects.md)
-3. [Morphism and Composition](lessons/02-morphisms-composition.md)
-4. [The Tiny ML Pipeline](lessons/03-ml-pipeline.md)
-5. [Training as an Endomorphism](lessons/04-training-endomorphism.md)
-6. [Functors, Naturality, Monoids, and Chain Rule](lessons/05-structure-and-calculus.md)
+1. [Welcome](book/src/welcome.md)
+2. [Map of the Course](book/src/00-map.md)
+3. [Domain Objects](book/src/01-domain-objects.md)
+4. [Morphism and Composition](book/src/02-morphisms-composition.md)
+5. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
+6. [Training as an Endomorphism](book/src/04-training-endomorphism.md)
+7. [Functors, Naturality, Monoids, and Chain Rule](book/src/05-structure-and-calculus.md)
+8. [Exercises](book/src/exercises.md)
+9. [Glossary](book/src/glossary.md)
+10. [References](book/src/references.md)
+11. [Transformer Roadmap](book/src/roadmap.md)
+12. [Repository Source Snapshots](book/src/source-snapshots.md)
+
+The `lessons/` folder is kept as a compact reading path, while `book/src/`
+contains the complete self-contained course.
 
 ## Runnable Examples
 
@@ -123,7 +139,11 @@ bash scripts/check.sh
 ```
 
 That checks formatting, clippy, unit tests, examples, the full demo, the
-mdBook build, and mdBook chapter tests.
+course source snapshot coverage, the generated-book build, and chapter tests.
+
+The source coverage script also checks that the learner course does not discuss
+the documentation-generation tool and does not explicitly name the previously
+disallowed instructor reference.
 
 ## Serve the Book
 

@@ -4,7 +4,7 @@ These exercises are intentionally small. Each one changes one idea at a time.
 
 ## Exercise 1: Add a Token
 
-Open [`src/demo.rs`](../../src/demo.rs).
+Use the `src/demo.rs` snapshot in [Course Map](00-map.md).
 
 Add one new vocabulary item and extend the token sequence.
 
@@ -21,7 +21,8 @@ Pass condition:
 
 ## Exercise 2: Break a Composition
 
-Open [`examples/02_morphism_composition.rs`](../../examples/02_morphism_composition.rs).
+Use the `examples/02_morphism_composition.rs` snapshot in
+[Morphism and Composition](02-morphisms-composition.md).
 
 Try to compose `Embedding` directly with `Softmax`.
 
@@ -40,7 +41,8 @@ Lesson:
 
 ## Exercise 3: Change the Training Repetition Count
 
-Open [`examples/03_training_endomorphism.rs`](../../examples/03_training_endomorphism.rs).
+Use the `examples/03_training_endomorphism.rs` snapshot in
+[Training as an Endomorphism](04-training-endomorphism.md).
 
 Change `StepCount::new(80)` to:
 
@@ -66,3 +68,23 @@ Pick one constructor:
 - `TrainingSet::new`
 
 Write one sentence explaining what invalid state it prevents.
+
+## Exercise 5: Trace a Full Source File
+
+Use [Repository Source Snapshots](source-snapshots.md).
+
+Pick one complete source file and write a three-sentence summary:
+
+1. What object or arrow does this file define?
+2. Which invariant does the file protect?
+3. Which command proves the file still works?
+
+## Exercise 6: Connect One External Reference
+
+Use [References](references.md).
+
+Pick one external resource and connect it to one source file in this course:
+
+1. Which idea does the external resource explain?
+2. Which Rust file implements a tiny version of that idea?
+3. What is one difference between the full external treatment and this tiny implementation?

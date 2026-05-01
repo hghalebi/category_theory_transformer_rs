@@ -21,3 +21,16 @@
 .content main code {
   font-size: 0.94em;
 }
+
+.content main details {
+  border: 1px solid rgba(79, 70, 229, 0.24);
+  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: rgba(79, 70, 229, 0.035);
+}
+
+.content main summary {
+  cursor: pointer;
+  font-weight: 600;
+}
