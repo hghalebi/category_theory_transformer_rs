@@ -1,5 +1,6 @@
 # Summary
 
+[Cover](cover.md)
 [Welcome](welcome.md)
 
 # Foundations

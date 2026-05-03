@@ -85,19 +85,20 @@ The code is split into small parts:
 
 Use the generated course lessons in order:
 
-1. [Welcome](book/src/welcome.md)
-2. [Map of the Course](book/src/00-map.md)
-3. [Domain Objects](book/src/01-domain-objects.md)
-4. [Morphism and Composition](book/src/02-morphisms-composition.md)
-5. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
-6. [Training as an Endomorphism](book/src/04-training-endomorphism.md)
-7. [Functors, Naturality, Monoids, and Chain Rule](book/src/05-structure-and-calculus.md)
-8. [Seven Sketches Through Rust](book/src/seven-sketches-rust.md)
-9. [Exercises](book/src/exercises.md)
-10. [Glossary](book/src/glossary.md)
-11. [References](book/src/references.md)
-12. [Transformer Roadmap](book/src/roadmap.md)
-13. [Repository Source Snapshots](book/src/source-snapshots.md)
+1. [Cover](book/src/cover.md)
+2. [Welcome](book/src/welcome.md)
+3. [Map of the Course](book/src/00-map.md)
+4. [Domain Objects](book/src/01-domain-objects.md)
+5. [Morphism and Composition](book/src/02-morphisms-composition.md)
+6. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
+7. [Training as an Endomorphism](book/src/04-training-endomorphism.md)
+8. [Functors, Naturality, Monoids, and Chain Rule](book/src/05-structure-and-calculus.md)
+9. [Seven Sketches Through Rust](book/src/seven-sketches-rust.md)
+10. [Exercises](book/src/exercises.md)
+11. [Glossary](book/src/glossary.md)
+12. [References](book/src/references.md)
+13. [Transformer Roadmap](book/src/roadmap.md)
+14. [Repository Source Snapshots](book/src/source-snapshots.md)
 
 The `lessons/` folder is kept as a compact reading path, while `book/src/`
 contains the complete self-contained course.

@@ -1,7 +1,7 @@
 [book]
 title = "Category Theory for Tiny ML in Rust"
 description = "A modular, compile-checked tutorial for learning category-theory ideas through a tiny Rust ML pipeline."
-authors = ["Hamze Ghalebi"]
+authors = ["Hamze Ghalebi", "Farzad Jafarranmani"]
 language = "en"
 src = "book/src"
 
