@@ -12,6 +12,7 @@ cargo run --example 04_structure_and_calculus
 cargo run --example 05_seven_sketches
 cargo run --bin category_ml
 
+python3 scripts/check-prose-style.py
 bash scripts/check-mdbook-coverage.sh
 bash scripts/build-mdbook.sh
 mdbook test

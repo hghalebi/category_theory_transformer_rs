@@ -6,6 +6,12 @@ The problem this chapter solves is:
 > appear across many systems: mapping inside containers, converting containers
 > consistently, combining traces, and composing local derivatives.
 
+The previous chapters were mostly about one pipeline. This chapter zooms out
+from that pipeline and asks which shapes keep appearing even when the concrete
+data changes. Once you can see those repeated shapes, the category-theory
+vocabulary stops feeling like a separate subject. It becomes a set of names for
+ordinary engineering moves.
+
 This chapter covers four patterns:
 
 ```text
@@ -23,6 +29,12 @@ They explain patterns you already saw:
 - converting one wrapper shape to another
 - combining pipeline traces
 - composing gradients through layers
+
+> Reader orientation:
+> This chapter is more abstract than the previous ones. Read each section in
+> this order: first the Rust mechanism, then the ML use, then the
+> category-theory name. The names are not decoration; they are compression for
+> patterns that appear repeatedly in real model code.
 
 ## Source Snapshots
 
@@ -65,12 +77,32 @@ PipelineTrace
 
 Each block gives a Rust handle to one abstract pattern.
 
+Before reading the traits, start with the plain Rust operation that motivates
+them. Mapping over a vector means taking each item out, applying a function, and
+collecting the new values into another vector:
+
+```rust
+let values = vec![1, 2, 3];
+let doubled: Vec<i32> = values.into_iter().map(|x| x * 2).collect();
+
+assert_eq!(doubled, vec![2, 4, 6]);
+```
+
+There is no category theory hidden in that snippet. It is just ordinary Rust.
+The category-theory word `functor` appears when we notice the reusable shape:
+the code changes the contents while preserving the surrounding container.
+
 ## `Functor<A, B>`
 
 The problem this block solves is:
 
 > The code needs a name for "apply a function inside a wrapper while keeping the
 > wrapper shape."
+
+First principle: a trait is a contract. It says, "any type that implements this
+trait must provide these associated types and this method." Here the contract is
+small on purpose. It does not try to model every possible functor in
+mathematics; it gives this tutorial one precise place to talk about `fmap`.
 
 The block:
 
@@ -88,12 +120,25 @@ pub trait Functor<A, B> {
 
 ## Rust Syntax
 
-`Functor<A, B>` is a trait with two type parameters:
+`Functor<A, B>` is a trait. A trait is Rust's way to name behavior that many
+types can implement.
+
+Here, the behavior is:
+
+```text
+map a function through some wrapper shape
+```
+
+`A` and `B` are generic type parameters:
 
 ```text
 A = input item type
 B = output item type
 ```
+
+Generic means the trait is not tied to one concrete type like `i32` or
+`String`. The same trait can describe `Vec<i32> -> Vec<String>`,
+`Option<TokenId> -> Option<Embedding>`, or any other pair of item types.
 
 It has associated types:
 
@@ -102,7 +147,16 @@ type WrappedA;
 type WrappedB;
 ```
 
-These say what wrapper shape is used around `A` and `B`.
+Associated types are type names chosen by each implementation of the trait.
+They let the trait say:
+
+```text
+every implementer must tell us what wrapped input and wrapped output mean
+```
+
+For `VecFunctor`, those associated types become `Vec<A>` and `Vec<B>`.
+
+For `OptionFunctor`, they become `Option<A>` and `Option<B>`.
 
 The method:
 
@@ -115,6 +169,30 @@ where
 means:
 
 > Given a wrapped `A` and a function `A -> B`, produce a wrapped `B`.
+
+The `where` clause is a readable place to put a bound. The bound:
+
+```rust,ignore
+F: Fn(A) -> B
+```
+
+means `F` must be callable like a function that consumes an `A` and returns a
+`B`.
+
+Here is the real crate API in the smallest useful form:
+
+```rust,ignore
+use category_theory_transformer_rs::{Functor, VecFunctor};
+
+let lengths = VecFunctor::fmap(vec!["cat", "rust"], |word| word.len());
+
+assert_eq!(lengths, vec![3, 4]);
+```
+
+> What to notice:
+> The call names the structure once: `VecFunctor::fmap`. The closure only
+> describes the item-level operation: `&str -> usize`. The vector shape is
+> handled by the functor implementation.
 
 ## ML Concept
 
@@ -183,7 +261,19 @@ impl<A, B> Functor<A, B> for VecFunctor {
 
 `VecFunctor` is a unit struct. It stores no state.
 
-The implementation says:
+The `impl` block is a trait implementation:
+
+```rust,ignore
+impl<A, B> Functor<A, B> for VecFunctor
+```
+
+Read it as:
+
+```text
+for every A and B, VecFunctor knows how to behave as Functor<A, B>
+```
+
+The implementation chooses the associated types:
 
 ```text
 WrappedA = Vec<A>
@@ -206,6 +296,17 @@ and collects the result:
 
 ```rust,ignore
 .collect()
+```
+
+The runnable companion example uses the same real crate API:
+
+```rust,ignore
+use category_theory_transformer_rs::{Functor, VecFunctor};
+
+let token_ids = vec![1, 2, 3];
+let shifted = VecFunctor::fmap(token_ids, |id| id + 100);
+
+assert_eq!(shifted, vec![101, 102, 103]);
 ```
 
 ## ML Concept
@@ -285,6 +386,20 @@ If the value is `Some(a)`, it becomes `Some(f(a))`.
 
 If the value is `None`, it stays `None`.
 
+The important beginner point is that `Option` makes absence explicit in the
+type. You cannot accidentally treat a missing value as a real value without
+handling the `None` case.
+
+```rust,ignore
+use category_theory_transformer_rs::{Functor, OptionFunctor};
+
+let present = OptionFunctor::fmap(Some(7), |value| value * 2);
+let missing = OptionFunctor::fmap(None::<i32>, |value| value * 2);
+
+assert_eq!(present, Some(14));
+assert_eq!(missing, None);
+```
+
 ## ML Concept
 
 Optional values appear when data may be absent:
@@ -331,7 +446,7 @@ pub struct Distribution(Vec<f32>);
 The block below is a conceptual generic version that explains the functor idea
 for probabilistic outcomes:
 
-```rust,ignore
+```rust
 pub struct Probability(f32);
 
 pub struct Distribution<T> {
@@ -367,7 +482,9 @@ but keeps the probabilities attached to them.
 
 Start with the generic struct:
 
-```rust,ignore
+```rust
+pub struct Probability(f32);
+
 pub struct Distribution<T> {
     outcomes: Vec<(T, Probability)>,
 }
@@ -590,7 +707,7 @@ Different context, same functor idea.
 
 Here is a complete conceptual example:
 
-```rust,ignore
+```rust
 #[derive(Debug, Clone, Copy)]
 pub struct TokenId(pub usize);
 
@@ -633,6 +750,14 @@ let token_dist = Distribution::new(vec![
 let text_dist = token_dist.map(|token| {
     vocab[token.0].to_string()
 });
+
+assert_eq!(
+    text_dist.outcomes,
+    vec![
+        ("Rust".to_string(), Probability(0.70)),
+        (".".to_string(), Probability(0.30)),
+    ],
+);
 ```
 
 Conceptually, the result is:
@@ -809,6 +934,11 @@ The problem this block solves is:
 > Sometimes you need to convert one wrapper shape into another without caring
 > about the specific item type.
 
+The beginner trap is to think a natural transformation is just any conversion.
+It is more disciplined than that. The conversion must be compatible with
+mapping. If you transform the wrapper first and then map the item, you should get
+the same result as mapping first and then transforming the wrapper.
+
 The block:
 
 ```rust,ignore
@@ -839,6 +969,13 @@ fn transform(from: Self::From) -> Self::To;
 converts the wrapper.
 
 The type parameter `A` represents the item type inside the wrapper.
+
+This trait has the same shape as `Functor`: the abstract contract is public,
+but each implementation chooses the concrete wrapper types through associated
+types.
+
+That is why the implementation can be generic over `A` without knowing whether
+`A` is a token, a sentence, a loss value, or a trace step.
 
 ## ML Concept
 
@@ -888,6 +1025,16 @@ impl<A> NaturalTransformation<A> for VecToFirstOption {
 
 The implementation works for every `A`.
 
+That is the role of:
+
+```rust,ignore
+impl<A> NaturalTransformation<A> for VecToFirstOption
+```
+
+The implementation does not ask for any bound on `A`. There is no `A: Clone`,
+no `A: Debug`, and no `A: PartialEq`. It does not need those capabilities
+because it never looks inside the item. It only changes the outer shape.
+
 It consumes a vector:
 
 ```rust,ignore
@@ -903,6 +1050,16 @@ then takes the first item:
 If the vector is empty, the result is `None`.
 
 If it has at least one item, the result is `Some(first_item)`.
+
+```rust,ignore
+use category_theory_transformer_rs::{NaturalTransformation, VecToFirstOption};
+
+let first = VecToFirstOption::transform(vec!["embed", "linear", "softmax"]);
+let empty = VecToFirstOption::transform(Vec::<&str>::new());
+
+assert_eq!(first, Some("embed"));
+assert_eq!(empty, None);
+```
 
 ## ML Concept
 
@@ -960,6 +1117,14 @@ Vec<i32> -> Option<i32> -> Option<i32>
 
 Both should produce the same value.
 
+The crate exposes this as a small law check:
+
+```rust,ignore
+use category_theory_transformer_rs::naturality_square_holds_for_first_option;
+
+assert!(naturality_square_holds_for_first_option());
+```
+
 ## ML Concept
 
 This is a consistency check for pipeline shape conversions.
@@ -999,6 +1164,22 @@ The problem this block solves is:
 > Some values can be combined repeatedly, and there should be an empty value
 > that changes nothing.
 
+The first-principles version is string concatenation. The empty string changes
+nothing, and grouping does not change the final text:
+
+```rust
+let empty = String::new();
+let a = String::from("embed");
+let b = String::from(" -> linear");
+let c = String::from(" -> softmax");
+
+assert_eq!(format!("{empty}{a}"), "embed");
+assert_eq!(format!("{}{}", format!("{a}{b}"), c), format!("{a}{}", format!("{b}{c}")));
+```
+
+`PipelineTrace` uses the same idea, but with named pipeline steps instead of
+raw text.
+
 The trait:
 
 ```rust,ignore
@@ -1010,7 +1191,14 @@ pub trait Monoid: Sized {
 
 ## Rust Syntax
 
-`Sized` means values of this type have a known size at compile time.
+`Sized` means values of this type have a known size at compile time. In this
+trait, it keeps the return type `Self` straightforward:
+
+```rust,ignore
+fn empty() -> Self;
+```
+
+`Self` means "the type implementing this trait."
 
 The trait requires:
 
@@ -1021,15 +1209,20 @@ combine(&self, other: &Self) -> Self
 
 So a monoid can produce an identity value and combine two values into one.
 
+The `combine` method borrows both traces:
+
+```rust,ignore
+fn combine(&self, other: &Self) -> Self;
+```
+
+`&self` and `&Self` are references. They let the method read the two existing
+values without taking ownership of them. The method returns a new combined
+value.
+
 ## ML Concept
 
-Common monoid-like values in ML systems include:
-
-- logs
-- traces
-- metrics
-- batches
-- accumulated gradients
+Common monoid-like values in ML systems include logs, traces, metrics, batches,
+and accumulated gradients.
 
 You often need to combine many small values into one larger value.
 
@@ -1079,6 +1272,10 @@ pub struct PipelineTrace(Vec<TraceStep>);
 ```rust,ignore
 self.0.iter().map(TraceStep::name).collect()
 ```
+
+These wrappers matter because two values may both be strings but mean different
+things. A `TraceStep` is not a model name, a token, or a user-facing sentence.
+The type keeps that meaning attached to the value.
 
 ## ML Concept
 
@@ -1130,6 +1327,20 @@ impl Monoid for PipelineTrace {
 `combine` clones the first trace, appends the second trace, and wraps the result
 again as `PipelineTrace`.
 
+The clone is intentional here: `combine` borrows both inputs, so it cannot move
+steps out of either trace. Cloning the small `TraceStep` values lets the method
+produce a fresh trace while leaving the inputs usable.
+
+```rust,ignore
+use category_theory_transformer_rs::{Monoid, PipelineTrace, TraceStep};
+
+let encoder = PipelineTrace::from_steps([TraceStep::new("embedding")]);
+let head = PipelineTrace::from_steps([TraceStep::new("softmax")]);
+let trace = encoder.combine(&head);
+
+assert_eq!(trace.names(), vec!["embedding", "softmax"]);
+```
+
 ## ML Concept
 
 This is how many execution logs work:
@@ -1171,6 +1382,12 @@ The function constructs three traces and checks three booleans.
 
 It returns true only if all monoid laws hold for those examples.
 
+```rust,ignore
+use category_theory_transformer_rs::monoid_laws_hold_for_pipeline_trace;
+
+assert!(monoid_laws_hold_for_pipeline_trace());
+```
+
 ## ML Concept
 
 Grouping trace combination should not change the final trace.
@@ -1192,6 +1409,11 @@ The problem `src/calculus.rs` solves is:
 
 > Backpropagation is easier to understand if you first see one local derivative
 > rule in isolation.
+
+> What to notice:
+> Backpropagation does not require every operation to know the whole model. Each
+> operation only needs to know how its own output changes when its own inputs
+> change. Composition does the rest.
 
 The file defines:
 
@@ -1217,6 +1439,27 @@ pub struct Scalar(f32);
 `Scalar::new` rejects non-finite values.
 
 `value()` returns the raw float.
+
+This repeats a pattern from the earlier domain-object chapter:
+
+```text
+private field
+validating constructor
+accessor
+```
+
+The raw `f32` is private, so callers cannot construct `Scalar(f32::NAN)`
+directly. They must use `Scalar::new`, which returns a `Result`.
+
+```rust,ignore
+use category_theory_transformer_rs::Scalar;
+
+let scalar = Scalar::new(2.5)?;
+
+assert_eq!(scalar.value(), 2.5);
+
+# Ok::<(), category_theory_transformer_rs::CtError>(())
+```
 
 ## ML Concept
 
@@ -1255,6 +1498,9 @@ The semantic difference is important:
 Scalar = forward value
 LocalGradient = derivative signal
 ```
+
+This is the same newtype move used throughout the crate. Both wrappers store
+an `f32`, but the types prevent accidental mixing at function boundaries.
 
 ## ML Concept
 
@@ -1319,6 +1565,37 @@ and returns:
 
 The return type is a Rust tuple.
 
+The `?` operator appears twice in `backward`:
+
+```rust,ignore
+LocalGradient::new(upstream.value() * dz_dx)?
+```
+
+It means:
+
+```text
+if construction succeeded, keep the value
+if construction failed, return the error from backward immediately
+```
+
+That keeps invalid numeric states at the boundary where they are created.
+
+```rust,ignore
+use category_theory_transformer_rs::{LocalGradient, MulOp, Scalar};
+
+let mul = MulOp;
+let x = Scalar::new(2.0)?;
+let y = Scalar::new(3.0)?;
+let z = mul.forward(x, y)?;
+let (dl_dx, dl_dy) = mul.backward(x, y, LocalGradient::new(1.0)?)?;
+
+assert_eq!(z.value(), 6.0);
+assert_eq!(dl_dx.value(), 3.0);
+assert_eq!(dl_dy.value(), 2.0);
+
+# Ok::<(), category_theory_transformer_rs::CtError>(())
+```
+
 ## ML Concept
 
 For:
@@ -1365,14 +1642,8 @@ Run:
 cargo run --example 04_structure_and_calculus
 ```
 
-You should see:
-
-- mapping over `Vec`
-- mapping over `Option`
-- a naturality check
-- a combined trace
-- monoid law check
-- local gradients for multiplication
+You should see mapping over `Vec`, mapping over `Option`, a naturality check, a
+combined trace, a monoid law check, and local gradients for multiplication.
 
 ## Core Mental Model
 
@@ -1408,7 +1679,22 @@ A strong answer:
 > Each operation only needs its local derivative; the chain rule composes those
 > local derivatives into the gradient for the whole computation.
 
+## Where This Leaves Us
+
+This chapter named the repeated structures that sit underneath the small ML
+pipeline. A functor explains mapping inside a wrapper. A natural transformation
+explains changing wrappers consistently. A monoid explains safe accumulation. A
+local gradient explains why a large training computation can be assembled from
+small derivative rules.
+
+The next chapter uses the same engineering habit on a wider set of ideas from
+applied category theory. Instead of adding a larger ML model, it shows how the
+same typed-Rust style can model orders, resources, database instances, design
+relations, signal flow, circuits, and local-to-global behavior.
+
 ## Further Reading
+
+These pages reinforce the structure vocabulary used here:
 
 - [Glossary](glossary.md): functor, natural transformation, monoid, chain rule
 - [References](references.md): applied category theory, deep learning math, and attention

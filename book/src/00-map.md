@@ -19,6 +19,11 @@ domain objects
 
 This chapter is the index of those layers.
 
+> Reader orientation:
+> The map is not a list of things to memorize. It is a promise about how the
+> book will move: first name the values, then name the arrows, then compose the
+> arrows into a tiny learning system.
+
 ## The Whole Pipeline
 
 The central pipeline is:
@@ -70,6 +75,21 @@ objects
 
 The course is about learning to see the same pipeline through all three views.
 
+Here is the smallest Rust idea behind that map. A function has an input type and
+an output type:
+
+```rust
+fn token_to_vector_id(token_id: usize) -> usize {
+    token_id + 100
+}
+
+assert_eq!(token_to_vector_id(7), 107);
+```
+
+The real code does not leave those values as raw `usize` forever. It gives each
+pipeline stage a domain type, then uses morphisms to make the connections
+explicit.
+
 ## Code Map
 
 Each Rust file owns one part of the idea.
@@ -78,16 +98,8 @@ Each Rust file owns one part of the idea.
 
 This file defines the nouns.
 
-Examples:
-
-- `TokenId`
-- `TokenSequence`
-- `Vector`
-- `Logits`
-- `Distribution`
-- `Loss`
-- `TrainingSet`
-- `Parameters`
+The main examples are `TokenId`, `TokenSequence`, `Vector`, `Logits`,
+`Distribution`, `Loss`, `TrainingSet`, and `Parameters`.
 
 The problem this file solves is:
 
@@ -190,15 +202,8 @@ you the local rule that larger systems compose.
 
 ### `src/sketches.rs`
 
-This file connects the course to seven applied category-theory themes:
-
-- orders
-- resources
-- databases
-- co-design
-- signal flow
-- circuits
-- behavior logic
+This file connects the course to seven applied category-theory themes: orders,
+resources, databases, co-design, signal flow, circuits, and behavior logic.
 
 Each theme is represented as typed Rust values plus law-checking tests.
 
@@ -356,15 +361,23 @@ Explain this line in your own words:
 TokenId -> Vector -> Logits -> Distribution
 ```
 
-A strong answer should mention:
+A strong answer should mention token lookup, the embedding vector, vocabulary
+scores, the probability distribution, and the fact that the whole path is a
+composition of typed morphisms.
 
-- token lookup
-- embedding vector
-- vocabulary scores
-- probability distribution
-- composition of typed morphisms
+## Where This Leaves Us
+
+This chapter gave the whole shape before the details. You now know the names of
+the source files, the major pipeline objects, and the difference between
+objects, morphisms, composition, endomorphisms, and laws.
+
+The next chapter slows down and studies the objects themselves. Before a
+pipeline can compose arrows safely, it needs values whose meanings are clear
+enough for arrows to start and end at them.
 
 ## Further Reading
+
+These pages are the best next stops after the map:
 
 - [Glossary](glossary.md): object, morphism, composition, endomorphism
 - [References](references.md): Rust modules and applied category theory

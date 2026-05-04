@@ -15,17 +15,19 @@ Logits        -> Distribution
 Distribution x TokenId -> Loss
 ```
 
-In ordinary ML language:
-
-1. Turn a token stream into adjacent training pairs.
-2. Look up an embedding vector for the current token.
-3. Use a linear layer to score every possible next token.
-4. Use softmax to convert scores into probabilities.
-5. Use cross entropy to measure surprise at the target token.
+In ordinary ML language, the path turns a token stream into adjacent training
+pairs, looks up an embedding vector for the current token, uses a linear layer
+to score every possible next token, normalizes those scores with softmax, and
+then measures surprise with cross entropy.
 
 In category-theory language:
 
 > Each stage is a morphism, and the legal stages compose.
+
+> Reader orientation:
+> This is the first chapter where all three subjects meet at once. When the code
+> feels dense, follow the pipeline order: data preparation first, prediction
+> second, loss third.
 
 ## Source Snapshot
 
@@ -69,6 +71,22 @@ which prediction, loss, or data-preparation step does the block implement?
 Category theory concept:
 which object, product, morphism, composition, or commutative check appears?
 ```
+
+The smallest first-principles version of "normalize scores into probabilities"
+does not need a model yet:
+
+```rust
+let scores = [1.0_f32, 2.0, 3.0];
+let total: f32 = scores.iter().sum();
+let probabilities: Vec<f32> = scores.iter().map(|score| score / total).collect();
+
+let probability_sum: f32 = probabilities.iter().sum();
+assert!((probability_sum - 1.0).abs() < 1e-6);
+```
+
+The real `Softmax` implementation is more careful than this toy normalization:
+it uses exponentials, subtracts the maximum score for numerical stability, and
+validates the result through `Distribution::new`.
 
 ## `DatasetWindowing`
 
@@ -848,13 +866,10 @@ path:
 context token -> hidden vector -> next-token probabilities -> loss
 ```
 
-The implementation is small, but the boundaries are real:
-
-- invalid token lookup returns `OutOfRange`
-- invalid matrix shape returns `ShapeMismatch`
-- empty logits return `EmptyInput`
-- invalid probabilities return `InvalidProbability`
-- invalid loss returns `InvalidLoss`
+The implementation is small, but the boundaries are real. Invalid token lookup
+returns `OutOfRange`, invalid matrix shape returns `ShapeMismatch`, empty
+logits return `EmptyInput`, invalid probabilities return `InvalidProbability`,
+and invalid loss returns `InvalidLoss`.
 
 Errors are caught where the invalid data first becomes meaningful.
 
@@ -890,7 +905,20 @@ Correct answer:
 > Inside `CrossEntropy`, because that is where the target is used to index the
 > predicted distribution.
 
+## Where This Leaves Us
+
+This chapter assembled the first complete tiny ML path. A token sequence becomes
+training examples, a token becomes a vector, a vector becomes logits, logits
+become probabilities, and a probability distribution plus a target token becomes
+loss.
+
+The next chapter changes the question from "how do we evaluate one prediction?"
+to "how do repeated updates change the model state?" That is where training
+enters as an endomorphism.
+
 ## Further Reading
+
+These pages connect the tiny pipeline to the surrounding vocabulary:
 
 - [Glossary](glossary.md): logits, softmax, probability distribution, cross entropy
 - [References](references.md): softmax regression and linear classifiers

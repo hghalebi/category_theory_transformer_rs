@@ -35,6 +35,34 @@ Those are different concepts.
 
 So the code creates different types.
 
+> Reader orientation:
+> In this chapter, focus on why a type exists before focusing on its syntax. A
+> tuple struct, private field, constructor, or accessor is not decoration. It is
+> a small boundary that tells the rest of the pipeline which states it may trust.
+
+The smallest version of the pattern looks like this:
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct TokenId(usize);
+
+impl TokenId {
+    fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    fn index(self) -> usize {
+        self.0
+    }
+}
+
+assert_eq!(TokenId::new(3).index(), 3);
+```
+
+The real source file repeats that pattern with stronger validation where the
+value has an invariant, such as "a distribution must contain probabilities that
+sum to one."
+
 ## Source Snapshot
 
 This is the domain layer used by the whole tutorial.
@@ -1130,7 +1158,20 @@ Distribution wraps Vec<f32>, rejects invalid probability mass, and is produced
 by Softmax before CrossEntropy consumes it.
 ```
 
+## Where This Leaves Us
+
+This chapter gave names to the values in the system. A token id is not a model
+dimension, logits are not probabilities, and a training set is not just any
+vector of pairs. Each type marks a stage where raw storage becomes a meaningful
+object.
+
+The next chapter adds arrows between those objects. Once the arrows exist, the
+book can talk about identity, composition, and repeated transformations without
+falling back to loose wiring conventions.
+
 ## Further Reading
+
+These pages extend the domain-object vocabulary used in this chapter:
 
 - [Glossary](glossary.md): object, product object, invariant, smart constructor
 - [References](references.md): Rust error handling, Rust API design, and Rust documentation

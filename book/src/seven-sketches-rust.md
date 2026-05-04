@@ -6,9 +6,14 @@ The problem this chapter solves is:
 > turns the seven major themes of *Seven Sketches in Compositionality* into
 > small Rust blocks with tests.
 
-This chapter does not reproduce the paper.
+The previous chapter introduced reusable structures such as functors, natural
+transformations, monoids, and local derivative rules. This chapter keeps the
+same reading style but changes scale. Instead of following the tiny ML pipeline,
+it takes seven broader ideas and asks how each one can be made concrete enough
+to inspect in Rust.
 
-It gives executable handles for the ideas.
+This chapter does not reproduce the paper. It gives executable handles for the
+ideas.
 
 The repeated pattern is:
 
@@ -30,6 +35,11 @@ The category-theory lesson is:
 ```text
 objects + relationships + composition + laws
 ```
+
+> Reader orientation:
+> Treat each sketch as a small modeling exercise. You are not expected to know
+> the full mathematical theory before reading the Rust. Start from the type,
+> then read the constructor, then read the law check.
 
 ## Source Snapshots
 
@@ -76,6 +86,25 @@ Rust syntax
 ML or software concept
 Category theory concept
 ```
+
+The smallest first-principles version of this chapter is an ordered enum. Rust
+can derive an order for enum variants, and that gives the code a concrete way to
+ask whether one information level can safely flow into another:
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Level {
+    Observation,
+    Feature,
+    Decision,
+}
+
+assert!(Level::Observation <= Level::Decision);
+assert!(Level::Feature <= Level::Feature);
+```
+
+The real `src/sketches.rs` module uses the same idea with named domain types,
+validation, and law checks.
 
 ## Sketch 1: Information Order
 
@@ -704,16 +733,10 @@ The problem this block solves is:
 
 > The laws should be runnable, not only described in prose.
 
-The test module checks:
-
-- preorder laws
-- feature/layer Galois law
-- resource tensor monotonicity
-- database foreign-key resolution
-- feasibility relation behavior
-- signal matrix composition
-- open circuit serial and parallel composition
-- local-to-global truth
+The test module checks preorder laws, the feature/layer Galois law, resource
+tensor monotonicity, database foreign-key resolution, feasibility relation
+behavior, signal matrix composition, open circuit serial and parallel
+composition, and local-to-global truth.
 
 ## Rust Syntax
 
@@ -797,7 +820,22 @@ check the law
 That is also the discipline used by the tiny ML pipeline in the rest of the
 course.
 
+## Where This Leaves Us
+
+This chapter showed that the book's main discipline is not limited to language
+modeling. Orders, resources, database instances, feasibility relations, signal
+matrices, open circuits, and local behavior checks can all be read in the same
+way: name the values, constrain construction, define composition, and test the
+law that makes the composition trustworthy.
+
+The remaining practice material asks you to use that reading method yourself.
+The exercises are not meant to test memorized definitions. They are meant to
+train the habit of translating one Rust block into its software role and its
+categorical shape.
+
 ## Further Reading
+
+These pages are useful once you have the executable sketch map:
 
 - [References](references.md): paper links and supporting Rust/materials
 - [Glossary](glossary.md): terms used by the course

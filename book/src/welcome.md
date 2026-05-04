@@ -5,12 +5,9 @@ pipeline.
 
 The goal is not to memorize abstract vocabulary.
 
-The goal is to connect each abstract word to:
-
-- a concrete machine-learning operation
-- a Rust type or trait
-- an invariant the code protects
-- a command you can run
+The goal is to connect each abstract word to a concrete machine-learning
+operation, a Rust type or trait, an invariant the code protects, and a command
+you can run.
 
 The whole course follows one central idea:
 
@@ -64,25 +61,20 @@ Read it as:
 a validated, owned, non-empty list of token IDs
 ```
 
-That one type carries several meanings at once:
-
-- Rust meaning: private tuple struct wrapping `Vec<TokenId>`
-- ML meaning: tokenized text before it becomes examples
-- API meaning: callers cannot construct an empty sequence directly
-- category-theory meaning: a non-empty list-like object
+That one type carries several meanings at once. In Rust, it is a private tuple
+struct wrapping `Vec<TokenId>`. In the ML pipeline, it is tokenized text before
+it becomes examples. At the API boundary, it prevents callers from constructing
+an empty sequence directly. Categorically, it behaves like a non-empty list-like
+object.
 
 This is the level of reading used throughout the course.
 
 ## Learning Contract
 
-Use this loop for every chapter:
-
-1. Read the concrete problem first.
-2. Study the code block or source snapshot.
-3. Translate every type into plain English.
-4. Translate every method into the pipeline stage it serves.
-5. Run the command from the chapter.
-6. Answer the checkpoint without looking back.
+Use the same loop for every chapter. Start with the concrete problem, study the
+code block or source snapshot, translate each type into plain English, and then
+translate each method into the pipeline stage it serves. After that, run the
+chapter command and answer the checkpoint without looking back.
 
 The chapters are deliberately repetitive in structure. That repetition is part
 of the learning design. You should start to recognize the same pattern:
@@ -105,13 +97,10 @@ cargo run --bin category_ml
 
 That command runs the full guided walkthrough.
 
-You should see:
-
-- token IDs becoming training pairs
-- a prediction path built from embedding, linear projection, and softmax
-- cross entropy producing a loss
-- repeated training lowering the loss
-- functor, naturality, monoid, and chain-rule examples
+You should see token IDs becoming training pairs, a prediction path built from
+embedding, linear projection, and softmax, cross entropy producing a loss,
+repeated training lowering the loss, and small examples for functors,
+naturality, monoids, and the chain rule.
 
 ## The Main Picture
 
@@ -152,19 +141,21 @@ data + model + probabilities + loss + training
 
 ## Reading Path
 
-Read the chapters in order:
+Read the chapters in order. The [Course Map](00-map.md) gives the whole
+pipeline shape. [Domain Objects](01-domain-objects.md) names the typed nouns,
+and [Morphism and Composition](02-morphisms-composition.md) names the typed
+arrows between them. [The Tiny ML Pipeline](03-ml-pipeline.md) turns those
+arrows into prediction and loss, while
+[Training as an Endomorphism](04-training-endomorphism.md) shows why repeated
+updates have the shape `Parameters -> Parameters`.
 
-- [Course Map](00-map.md): the whole pipeline shape
-- [Domain Objects](01-domain-objects.md): the typed nouns
-- [Morphism and Composition](02-morphisms-composition.md): the typed arrows
-- [The Tiny ML Pipeline](03-ml-pipeline.md): prediction and loss
-- [Training as an Endomorphism](04-training-endomorphism.md): repeated updates
-- [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md): reusable structure
-- [Seven Sketches Through Rust](seven-sketches-rust.md): applied category theory as typed Rust models
-- [Exercises](exercises.md): practice tasks
-- [Glossary](glossary.md): definitions tied to this codebase
-- [References](references.md): deeper external material
-- [Transformer Roadmap](roadmap.md): how this foundation points toward attention
+After the core pipeline, [Functors, Naturality, Monoids, and Chain
+Rule](05-structure-and-calculus.md) introduces reusable structure, and
+[Seven Sketches Through Rust](seven-sketches-rust.md) widens the same style to
+applied category theory. The [Exercises](exercises.md),
+[Glossary](glossary.md), [References](references.md), and
+[Transformer Roadmap](roadmap.md) are there for practice, review, deeper
+reading, and the path toward attention.
 
 ## What To Remember
 
@@ -186,3 +177,10 @@ Parameters -> Parameters
 
 The result is a small codebase where every concept has a name, every boundary
 has a type, and every composition has to make sense before Rust lets it run.
+
+## Where This Leaves Us
+
+The welcome page sets the reading contract. You will see the same idea through
+three lenses: Rust syntax, tiny ML behavior, and category-theory shape. The next
+chapter gives the full map before the book starts reading individual source
+files.

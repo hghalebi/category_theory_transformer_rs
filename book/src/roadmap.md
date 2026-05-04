@@ -20,6 +20,15 @@ training updates
 composition
 ```
 
+This distinction matters. A roadmap should not pretend the current crate already
+implements attention, residual blocks, or a full sequence model. It should show
+how the current typed skeleton can grow without losing the discipline that made
+the small examples understandable.
+
+> Reader orientation:
+> Read this chapter as an engineering migration plan, not as a promise that the
+> current code already contains every Transformer component.
+
 ## What Exists Now
 
 The current model has this prediction path:
@@ -94,6 +103,33 @@ The future problem:
 
 > Attention does not operate on one token alone. It operates on a sequence of
 > hidden states.
+
+The first-principles Rust move is the same one used throughout the book: do not
+let a meaningful value travel as a raw primitive once it crosses a conceptual
+boundary. A future sequence length can start as a small validating type:
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct SequenceLength(usize);
+
+impl SequenceLength {
+    fn new(value: usize) -> Result<Self, &'static str> {
+        if value == 0 {
+            return Err("sequence length must be positive");
+        }
+
+        Ok(Self(value))
+    }
+
+    fn value(self) -> usize {
+        self.0
+    }
+}
+
+assert_eq!(SequenceLength::new(3)?.value(), 3);
+assert!(SequenceLength::new(0).is_err());
+# Ok::<(), &'static str>(())
+```
 
 ## Rust Syntax
 
@@ -388,3 +424,19 @@ The practical rule stays the same:
 
 > Make every intermediate object explicit, then compose only arrows whose types
 > actually match.
+
+## Where This Leaves Us
+
+The roadmap keeps the book honest. The current implementation is a tiny
+next-token system, not a production Transformer. Its value is that it gives the
+future system a typed foundation: tokens become vectors, vectors become logits,
+logits become probabilities, probabilities become loss, and training updates
+parameters through a repeatable endomorphism.
+
+A future Transformer should extend that foundation by adding sequence objects,
+position information, query/key/value projections, attention weights,
+multi-head structure, residual blocks, normalization, and richer training
+state. Each new concept should enter the codebase the same way the current
+concepts did: as a named type, a validated boundary, a typed morphism, a
+compiled example, and a law or regression test where the concept has a law worth
+checking.

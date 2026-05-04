@@ -5,6 +5,12 @@ The problem this chapter solves is:
 > Reading detailed explanations is not enough. You need to practice explaining
 > the code through Rust syntax, ML concept, and category-theory concept.
 
+The exercises are deliberately small. A strong answer is not a long essay; it
+is a precise explanation that connects a line of Rust to the value it protects,
+the ML step it supports, and the categorical shape it names. When an exercise
+asks you to edit code, make the smallest change, run the command, and then
+explain what changed.
+
 For every exercise, use this answer shape:
 
 ```text
@@ -21,6 +27,16 @@ Category theory concept:
 The point is not to write long answers.
 
 The point is to connect the same block of code across all three meanings.
+
+Before starting, make sure the basic Rust feedback loop works:
+
+```bash
+cargo test --all-targets --all-features
+```
+
+That command is part of the learning method. It proves that the examples in the
+book are not only explanatory text; they are tied to code that the compiler can
+check.
 
 ## Exercise 1: Explain One Domain Type
 
@@ -52,6 +68,29 @@ Pass condition:
 - You name the raw representation.
 - You name the invariant or semantic distinction.
 - You name the pipeline stage where the type appears.
+
+First-principles hint:
+
+```rust
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct LocalTokenId(usize);
+
+impl LocalTokenId {
+    fn new(index: usize) -> Self {
+        Self(index)
+    }
+
+    fn index(self) -> usize {
+        self.0
+    }
+}
+
+assert_eq!(LocalTokenId::new(7).index(), 7);
+```
+
+That snippet is intentionally smaller than the real crate. It shows the raw
+idea: a named wrapper can make one `usize` mean "token id" instead of "any
+number."
 
 ## Exercise 2: Add A Token
 
@@ -309,3 +348,10 @@ Pass condition:
 - A beginner can understand the Rust syntax.
 - An ML learner can understand why the block exists.
 - A category-theory learner can name the shape.
+
+## Where This Leaves Us
+
+If you can complete these exercises, you can read the project without treating
+category theory, Rust, and ML as three disconnected subjects. You can start from
+a line of code, name the syntax, identify the software or ML role, and then
+describe the categorical shape only as far as the code justifies it.

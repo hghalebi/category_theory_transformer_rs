@@ -27,6 +27,11 @@ The central Rust sentence is:
 > A morphism is a trait implementation with an input type, output type, and
 > typed error result.
 
+> Reader orientation:
+> The previous chapter defined the objects of the tiny ML system. This chapter
+> explains how values move between those objects. That movement is the bridge
+> between ordinary Rust functions and the categorical idea of morphisms.
+
 ## Source Snapshot
 
 This file defines the typed arrow interface and the composition adapter.
@@ -78,6 +83,26 @@ which model pipeline behavior does the shape support?
 Category theory concept:
 which arrow, identity, composition, or endomorphism idea is being modeled?
 ```
+
+Before reading the generic trait, start with an ordinary Rust function:
+
+```rust
+fn add_one(input: i32) -> i32 {
+    input + 1
+}
+
+assert_eq!(add_one(41), 42);
+```
+
+That function already has an arrow shape:
+
+```text
+i32 -> i32
+```
+
+The real `Morphism<Input, Output>` trait makes that shape explicit, gives the
+arrow a name, and lets the arrow fail with a typed error when the input cannot
+be transformed safely.
 
 ## `Morphism<Input, Output>`
 
@@ -171,12 +196,11 @@ or:
 Err(CtError)
 ```
 
-This is important because many arrows can fail:
-
-- embedding can receive an out-of-range token
-- softmax can receive empty logits
-- cross entropy can receive an invalid target
-- training can receive malformed parameters
+This is important because many arrows can fail. Embedding can receive an
+out-of-range token, softmax can receive empty logits, cross entropy can receive
+an invalid target, and training can receive malformed parameters. The shared
+return type keeps those failures explicit instead of hiding them behind a
+panic.
 
 ### ML Concept
 
@@ -751,7 +775,19 @@ TokenId -> Vector -> Distribution
 
 A strong answer should mention that `Softmax` expects `Logits`, not `Vector`.
 
+## Where This Leaves Us
+
+This chapter turned ordinary transformations into named arrows. `Identity<T>`
+leaves a value unchanged, `Compose<F, G, Middle>` connects compatible arrows,
+and `Endomorphism<T>` names the special case where the input and output object
+are the same.
+
+The next chapter fills those arrow shapes with concrete ML behavior: token
+windowing, embedding lookup, linear projection, softmax, and cross entropy.
+
 ## Further Reading
+
+These pages give the supporting vocabulary for the arrow layer:
 
 - [Glossary](glossary.md): morphism, identity morphism, composition, endomorphism
 - [References](references.md): applied category theory and Rust module structure

@@ -31,6 +31,11 @@ A -> A
 
 Because the input and output type are the same, the step can be repeated.
 
+> Reader orientation:
+> Do not read this chapter as a full backpropagation engine. It is a small,
+> explicit training step whose purpose is to make the shape `Parameters ->
+> Parameters` visible and runnable.
+
 ## Source Snapshot
 
 This file implements one full-batch optimizer update.
@@ -60,6 +65,24 @@ The whole file is about one idea:
 ```text
 training is a repeatable typed transformation of model state
 ```
+
+The smallest first-principles version of a repeated update is a number being
+moved a little at a time:
+
+```rust
+fn step_toward_zero(value: f32, learning_rate: f32) -> f32 {
+    value - learning_rate * value
+}
+
+let once = step_toward_zero(10.0, 0.1);
+let twice = step_toward_zero(once, 0.1);
+
+assert!(twice < once);
+```
+
+The real training code applies the same repeatable-update idea to `Parameters`,
+not to one scalar. The output stays the same kind of object as the input, so the
+update can be run again.
 
 ## `TrainStep`
 
@@ -725,12 +748,8 @@ fn repeated_training_step_reduces_loss() -> CtResult<()> {
 
 The test returns `CtResult<()>`, so it can use `?`.
 
-It builds:
-
-- a token sequence
-- a training set
-- initial parameters
-- a training step
+It builds a token sequence, turns it into a training set, initializes
+parameters, and configures a training step.
 
 Then it applies the endomorphism 80 times and checks the loss decreased.
 
@@ -807,7 +826,19 @@ A strong answer:
 > Because the output can immediately be used as the input to the next
 > `TrainStep`, preserving the `Parameters -> Parameters` endomorphism shape.
 
+## Where This Leaves Us
+
+This chapter turned training into a repeatable typed transformation. The model
+state enters as `Parameters`, the training step computes gradients from the tiny
+dataset, and the updated model state leaves as `Parameters` again.
+
+The next chapter steps back from the training loop and names reusable structures
+that appear across the whole course: mapping inside wrappers, changing wrapper
+shapes consistently, combining traces, and composing local derivative rules.
+
 ## Further Reading
+
+These pages give the terms behind the training update:
 
 - [Glossary](glossary.md): endomorphism, parameters, learning rate, gradient
 - [References](references.md): gradient descent, softmax regression, and Rust error handling

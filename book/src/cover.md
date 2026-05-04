@@ -83,16 +83,11 @@ discipline required to keep abstractions precise instead of merely fashionable.
 
 Public feedback is welcome while the book is still growing.
 
-Useful feedback includes:
-
-- unclear explanations,
-- broken examples,
-- missing references,
-- awkward terminology,
-- incorrect or overloaded mathematical language,
-- Rust examples that could be clearer or more idiomatic,
-- places where the connection between Rust, machine learning, and category
-  theory should be made more explicit.
+Useful feedback includes unclear explanations, broken examples, missing
+references, awkward terminology, incorrect or overloaded mathematical language,
+Rust examples that could be clearer or more idiomatic, and places where the
+connection between Rust, machine learning, and category theory should be made
+more explicit.
 
 This edition is intentionally public before it is final.
 

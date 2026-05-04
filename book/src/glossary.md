@@ -7,6 +7,15 @@ The problem this chapter solves is:
 
 Use this glossary as a lookup table while reading the source snapshots.
 
+Do not read it as a separate dictionary. Each entry is deliberately anchored to
+the codebase. If a definition sounds abstract, jump from the term to the Rust
+syntax and then back to the chapter where the type or trait appears.
+
+> Reader orientation:
+> The glossary uses compact entries, but the entries still follow the book's
+> main discipline: first the Rust handle, then the ML or software role, then the
+> categorical shape.
+
 ## Category-Theory Terms
 
 ## Object
@@ -30,6 +39,12 @@ probability distribution, loss, or model state.
 Category theory concept:
 
 An object is something a morphism can start from or end at.
+
+First-principles reading:
+
+An object is the kind of thing an arrow is allowed to receive or return. In this
+book, `TokenId` and `Vector` are different objects because the pipeline should
+not confuse a vocabulary index with a dense numeric representation.
 
 ## Morphism
 
@@ -376,6 +391,12 @@ Category theory concept:
 A newtype names a specific object instead of treating all raw representations
 as the same object.
 
+First-principles reading:
+
+A newtype is the smallest move from "just data" to "data with a role." The
+runtime representation can stay cheap, but the type checker now knows that a
+token id, vocabulary size, and model dimension are not the same concept.
+
 ## Smart Constructor
 
 Rust syntax:
@@ -584,3 +605,10 @@ computation.
 Category theory concept:
 
 It is composition of local derivative maps.
+
+## Where This Leaves Us
+
+The glossary is not a substitute for the chapters. It is the index of the
+book's repeated translation habit. When a term feels unfamiliar, connect it back
+to one of three things: the Rust syntax that names it, the ML or software role
+that motivates it, and the categorical shape that explains how it composes.
