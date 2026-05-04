@@ -38,6 +38,70 @@ That command is part of the learning method. It proves that the examples in the
 book are not only explanatory text; they are tied to code that the compiler can
 check.
 
+## Worked Example
+
+First study a complete answer. The exercise is:
+
+```text
+Explain why TokenId is not a raw usize.
+```
+
+A strong answer:
+
+```text
+Rust syntax:
+TokenId is a tuple struct around usize. The field is private, so callers use
+TokenId::new and index() instead of reaching into the raw value directly.
+
+ML concept:
+The number represents a vocabulary position, not an arbitrary count or shape.
+
+Category theory concept:
+TokenId is one object in the small category of typed pipeline values. Morphisms
+such as Embedding can start from it.
+```
+
+Notice the order: name the syntax, connect it to the ML role, then name only the
+categorical shape the code supports.
+
+## Partially Completed Example
+
+Complete the missing lines for `Distribution`:
+
+```text
+Rust syntax:
+Distribution wraps ________ and construction can return ________.
+
+ML concept:
+It represents probabilities over possible next tokens, so the values must be
+non-negative and sum to ________.
+
+Category theory concept:
+It is an object produced by ________ and consumed with a target token by
+________.
+```
+
+Expected completion:
+
+```text
+Vec<f32>
+CtResult<Self>
+one
+Softmax
+CrossEntropy
+```
+
+## Your Turn
+
+Now solve the same kind of exercise without the filled answer. Pick `Loss`,
+`TrainingSet`, or `LearningRate` and explain it through the same three lenses.
+
+## Transfer Exercise
+
+Design a new wrapper type for a future Transformer chapter, such as
+`SequenceLength`, `HeadCount`, or `AttentionScore`. State the raw representation,
+the invariant, and one function that should consume or produce it.
+
 ## Exercise 1: Explain One Domain Type
 
 Use [Domain Objects](01-domain-objects.md).

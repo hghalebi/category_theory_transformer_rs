@@ -78,6 +78,7 @@ The code is split into small parts:
 - `lessons/`: learner-facing reading path
 - `book/src/`: mdBook source chapters
 - `book/html/`: generated mdBook output, ignored by git
+- `scripts/check-prose-style.py`: checks prose density and learning-scaffold markers
 - `scripts/check-mdbook-coverage.sh`: verifies course source snapshots and required references
 - `.github/workflows/mdbook-pages.yml`: CI plus GitHub Pages deployment
 
@@ -144,7 +145,8 @@ bash scripts/check.sh
 ```
 
 That checks formatting, clippy, unit tests, examples, the full demo, the
-course source snapshot coverage, the generated-book build, and chapter tests.
+prose-style and learning-scaffold rules, the course source snapshot coverage,
+the generated-book build, and chapter tests.
 
 The source coverage script also checks that the learner course does not discuss
 the documentation-generation tool and does not explicitly name the previously

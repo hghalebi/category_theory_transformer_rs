@@ -24,6 +24,14 @@ This chapter is the index of those layers.
 > book will move: first name the values, then name the arrows, then compose the
 > arrows into a tiny learning system.
 
+## What You Already Know
+
+If you already read programs from top to bottom, you know how to follow a flow.
+If you know Rust function signatures, you know that each step has an input type
+and an output type. If you know ML pipelines, you know that raw data becomes
+features, predictions, loss, and updates. This chapter puts those familiar
+habits on one map.
+
 ## The Whole Pipeline
 
 The central pipeline is:
@@ -75,6 +83,8 @@ objects
 
 The course is about learning to see the same pipeline through all three views.
 
+## Worked Example: A Tiny Typed Movement
+
 Here is the smallest Rust idea behind that map. A function has an input type and
 an output type:
 
@@ -89,6 +99,11 @@ assert_eq!(token_to_vector_id(7), 107);
 The real code does not leave those values as raw `usize` forever. It gives each
 pipeline stage a domain type, then uses morphisms to make the connections
 explicit.
+
+## Self-Check
+
+Before moving into the file map, explain why `TokenId -> Vector` is easier to
+reason about than `usize -> Vec<f32>`.
 
 ## Code Map
 
@@ -382,3 +397,19 @@ These pages are the best next stops after the map:
 - [Glossary](glossary.md): object, morphism, composition, endomorphism
 - [References](references.md): Rust modules and applied category theory
 - [Seven Sketches Through Rust](seven-sketches-rust.md): a paper-length concept map made executable
+
+## Retrieval Practice
+
+### Recall
+
+Name the three readings used throughout the course.
+
+### Explain
+
+Why does the course start with a whole-pipeline map before reading individual
+source files?
+
+### Apply
+
+Write a one-line diagram for a pipeline you already know, then label the input
+object, arrow, and output object.

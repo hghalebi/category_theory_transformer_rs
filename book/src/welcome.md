@@ -13,6 +13,30 @@ The whole course follows one central idea:
 
 > A useful ML system is a chain of typed transformations.
 
+## What You Already Know
+
+If you have written a Rust function, you already know the informal shape behind
+much of this book. A function receives a value of one type and returns a value
+of another type. If you have seen an ML pipeline, you already know that data
+moves through staged transformations. Category theory asks us to look at that
+movement structurally.
+
+## Worked Example: One Typed Transformation
+
+Start with the smallest version:
+
+```rust
+fn token_to_position(token_id: usize) -> usize {
+    token_id + 100
+}
+
+assert_eq!(token_to_position(3), 103);
+```
+
+Rust reads this as a function from `usize` to `usize`. The book's real examples
+make the same movement safer by replacing raw `usize` values with named domain
+types such as `TokenId`, `VocabSize`, and `ModelDimension`.
+
 In this repository, that chain is small enough to read completely:
 
 ```text
@@ -68,6 +92,11 @@ an empty sequence directly. Categorically, it behaves like a non-empty list-like
 object.
 
 This is the level of reading used throughout the course.
+
+## Self-Check
+
+Before continuing, explain this in your own words: what changes when a raw
+number becomes a named type such as `TokenId`?
 
 ## Learning Contract
 
@@ -184,3 +213,19 @@ The welcome page sets the reading contract. You will see the same idea through
 three lenses: Rust syntax, tiny ML behavior, and category-theory shape. The next
 chapter gives the full map before the book starts reading individual source
 files.
+
+## Retrieval Practice
+
+### Recall
+
+What is the central pipeline shape this book keeps returning to?
+
+### Explain
+
+Why does the book connect every concept to Rust syntax, ML meaning, and
+category-theory shape?
+
+### Apply
+
+Pick one raw value from the pipeline, such as a token index or probability
+vector. Give it a domain-type name and explain what confusion the name prevents.

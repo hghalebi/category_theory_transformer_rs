@@ -32,6 +32,13 @@ The central Rust sentence is:
 > explains how values move between those objects. That movement is the bridge
 > between ordinary Rust functions and the categorical idea of morphisms.
 
+## What You Already Know
+
+If you know Rust functions, you already know that computation moves from an
+input type to an output type. If you know ML pipelines, you already know that a
+prediction path is built from stages. This chapter gives that familiar movement
+a shared interface: `Morphism<Input, Output>`.
+
 ## Source Snapshot
 
 This file defines the typed arrow interface and the composition adapter.
@@ -84,6 +91,8 @@ Category theory concept:
 which arrow, identity, composition, or endomorphism idea is being modeled?
 ```
 
+## Worked Example: A Function As An Arrow
+
 Before reading the generic trait, start with an ordinary Rust function:
 
 ```rust
@@ -103,6 +112,11 @@ i32 -> i32
 The real `Morphism<Input, Output>` trait makes that shape explicit, gives the
 arrow a name, and lets the arrow fail with a typed error when the input cannot
 be transformed safely.
+
+## Self-Check
+
+Before reading the trait, explain why `i32 -> i32` and `TokenId -> Vector` have
+the same arrow shape even though they mean very different things.
 
 ## `Morphism<Input, Output>`
 
@@ -791,3 +805,18 @@ These pages give the supporting vocabulary for the arrow layer:
 
 - [Glossary](glossary.md): morphism, identity morphism, composition, endomorphism
 - [References](references.md): applied category theory and Rust module structure
+
+## Retrieval Practice
+
+### Recall
+
+What does `Morphism<Input, Output>` require an implementation to provide?
+
+### Explain
+
+Why does `Compose<F, G, Middle>` need the middle type to match?
+
+### Apply
+
+Write a diagram for the legal path from `TokenId` to `Distribution`, naming the
+middle objects.

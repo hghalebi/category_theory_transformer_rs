@@ -40,6 +40,16 @@ So the code creates different types.
 > tuple struct, private field, constructor, or accessor is not decoration. It is
 > a small boundary that tells the rest of the pipeline which states it may trust.
 
+## What You Already Know
+
+If you have used a Rust struct, you already know that a value can carry a name
+instead of floating around as raw data. If you have used an ML pipeline, you
+already know that a token index, a vector, a probability distribution, and a
+loss value play different roles. This chapter turns that familiar separation
+into explicit domain types.
+
+## Worked Example: Naming One Number
+
 The smallest version of the pattern looks like this:
 
 ```rust
@@ -62,6 +72,11 @@ assert_eq!(TokenId::new(3).index(), 3);
 The real source file repeats that pattern with stronger validation where the
 value has an invariant, such as "a distribution must contain probabilities that
 sum to one."
+
+## Self-Check
+
+Before reading the full source snapshot, explain why `TokenId(3)` communicates
+more than the raw number `3`.
 
 ## Source Snapshot
 
@@ -1175,3 +1190,19 @@ These pages extend the domain-object vocabulary used in this chapter:
 
 - [Glossary](glossary.md): object, product object, invariant, smart constructor
 - [References](references.md): Rust error handling, Rust API design, and Rust documentation
+
+## Retrieval Practice
+
+### Recall
+
+What is a domain object in this book?
+
+### Explain
+
+Why does `Distribution::new` validate probability mass at construction time
+instead of leaving that check to `CrossEntropy`?
+
+### Apply
+
+Design a one-field newtype for a future `SequenceLength`. State one invariant
+its constructor should protect.

@@ -23,6 +23,22 @@ LIST_DENSITY_IGNORED_FILES = {
     "exercises.md",
 }
 
+MAIN_CHAPTER_FILES = {
+    "welcome.md",
+    "00-map.md",
+    "01-domain-objects.md",
+    "02-morphisms-composition.md",
+    "03-ml-pipeline.md",
+    "04-training-endomorphism.md",
+    "05-structure-and-calculus.md",
+    "seven-sketches-rust.md",
+    "roadmap.md",
+}
+
+PRACTICE_FILES = {
+    "exercises.md",
+}
+
 VERY_SHORT_WORDS = 8
 MAX_SHORT_PARAGRAPH_RUN = 5
 MAX_SECTION_LIST_DENSITY = 0.48
@@ -268,12 +284,48 @@ def heading_list_issues(path: Path, stats: FileStats) -> list[str]:
     ]
 
 
+def learning_scaffold_issues(path: Path) -> list[str]:
+    text = (ROOT / path).read_text(encoding="utf-8")
+    lowered = text.lower()
+    issues: list[str] = []
+
+    if path.name in MAIN_CHAPTER_FILES:
+        required = {
+            "## What You Already Know": "activate prior knowledge near the start",
+            "Worked Example": "show the move before asking the reader to solve it",
+            "Self-check": "prompt self-explanation after important material",
+            "## Retrieval Practice": "end with recall, explanation, and application",
+            "### Recall": "include a recall prompt",
+            "### Explain": "include an explanation prompt",
+            "### Apply": "include an application prompt",
+        }
+
+        for marker, reason in required.items():
+            if marker.lower() not in lowered:
+                issues.append(f"{path}:1: missing {marker!r}; {reason}.")
+
+    if path.name in PRACTICE_FILES:
+        required_practice = {
+            "## Worked Example": "start practice with a complete example",
+            "## Partially Completed Example": "fade support before independent work",
+            "## Your Turn": "give the reader a near-transfer exercise",
+            "## Transfer Exercise": "ask for transfer beyond the worked example",
+        }
+
+        for marker, reason in required_practice.items():
+            if marker.lower() not in lowered:
+                issues.append(f"{path}:1: missing {marker!r}; {reason}.")
+
+    return issues
+
+
 def check_file(path: Path) -> list[str]:
     stats = classify_content(path)
     return [
         *heading_list_issues(path, stats),
         *short_paragraph_issues(path, stats),
         *list_density_issues(path, stats),
+        *learning_scaffold_issues(path),
     ]
 
 

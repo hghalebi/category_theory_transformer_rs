@@ -36,6 +36,13 @@ Because the input and output type are the same, the step can be repeated.
 > explicit training step whose purpose is to make the shape `Parameters ->
 > Parameters` visible and runnable.
 
+## What You Already Know
+
+If you have seen gradient descent, you already know the informal movement:
+parameters are adjusted and then used again. If you know Rust, you already know
+that a function can return the same type it receives. This chapter names that
+shape precisely: a training step is an endomorphism on `Parameters`.
+
 ## Source Snapshot
 
 This file implements one full-batch optimizer update.
@@ -66,6 +73,8 @@ The whole file is about one idea:
 training is a repeatable typed transformation of model state
 ```
 
+## Worked Example: Repeating One Update
+
 The smallest first-principles version of a repeated update is a number being
 moved a little at a time:
 
@@ -83,6 +92,11 @@ assert!(twice < once);
 The real training code applies the same repeatable-update idea to `Parameters`,
 not to one scalar. The output stays the same kind of object as the input, so the
 update can be run again.
+
+## Self-Check
+
+Before reading the full training step, explain why `Parameters -> Parameters`
+is repeatable but `Parameters -> Loss` is not.
 
 ## `TrainStep`
 
@@ -842,3 +856,18 @@ These pages give the terms behind the training update:
 
 - [Glossary](glossary.md): endomorphism, parameters, learning rate, gradient
 - [References](references.md): gradient descent, softmax regression, and Rust error handling
+
+## Retrieval Practice
+
+### Recall
+
+What makes `TrainStep` an endomorphism?
+
+### Explain
+
+Why does the training code validate token bounds before accumulating gradients?
+
+### Apply
+
+If you changed `StepCount::new(80)` to `StepCount::new(1)`, what would you
+expect to happen to the loss, and why?

@@ -41,6 +41,13 @@ objects + relationships + composition + laws
 > the full mathematical theory before reading the Rust. Start from the type,
 > then read the constructor, then read the law check.
 
+## What You Already Know
+
+If you have modeled business rules, resource limits, database relationships, or
+state machines in Rust, you already know the software version of this chapter.
+The new idea is that applied category theory gives names to those compositional
+structures and asks which laws make them trustworthy.
+
 ## Source Snapshots
 
 The main module:
@@ -87,6 +94,8 @@ ML or software concept
 Category theory concept
 ```
 
+## Worked Example: Ordering Information Levels
+
 The smallest first-principles version of this chapter is an ordered enum. Rust
 can derive an order for enum variants, and that gives the code a concrete way to
 ask whether one information level can safely flow into another:
@@ -105,6 +114,11 @@ assert!(Level::Feature <= Level::Feature);
 
 The real `src/sketches.rs` module uses the same idea with named domain types,
 validation, and law checks.
+
+## Self-Check
+
+Before reading the first sketch, explain why `Observation <= Decision` is a
+modeling rule, not just a comparison between enum variants.
 
 ## Sketch 1: Information Order
 
@@ -840,3 +854,20 @@ These pages are useful once you have the executable sketch map:
 - [References](references.md): paper links and supporting Rust/materials
 - [Glossary](glossary.md): terms used by the course
 - [Repository Source Snapshots](source-snapshots.md): complete source files
+
+## Retrieval Practice
+
+### Recall
+
+Name three applied structures modeled in this chapter.
+
+### Explain
+
+Why does each sketch include constructors or law checks instead of only type
+definitions?
+
+### Apply
+
+Pick one engineering concept from your own work, such as permissions, queues, or
+resource budgets. Describe the objects, relationships, and one law you would
+want tests to check.

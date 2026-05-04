@@ -29,6 +29,13 @@ In category-theory language:
 > feels dense, follow the pipeline order: data preparation first, prediction
 > second, loss third.
 
+## What You Already Know
+
+If you know ML, you already know the rough path: prepare data, make a
+prediction, and measure the error. If you know Rust, you already know that each
+step can have a concrete input and output type. This chapter combines those two
+habits by making each ML step implement the same morphism interface.
+
 ## Source Snapshot
 
 This file owns the concrete ML arrows.
@@ -72,6 +79,8 @@ Category theory concept:
 which object, product, morphism, composition, or commutative check appears?
 ```
 
+## Worked Example: Normalizing Scores
+
 The smallest first-principles version of "normalize scores into probabilities"
 does not need a model yet:
 
@@ -87,6 +96,11 @@ assert!((probability_sum - 1.0).abs() < 1e-6);
 The real `Softmax` implementation is more careful than this toy normalization:
 it uses exponentials, subtracts the maximum score for numerical stability, and
 validates the result through `Distribution::new`.
+
+## Self-Check
+
+Why is it useful for the probability-validation boundary to live in
+`Distribution::new` instead of in every caller that uses probabilities?
 
 ## `DatasetWindowing`
 
@@ -922,3 +936,18 @@ These pages connect the tiny pipeline to the surrounding vocabulary:
 
 - [Glossary](glossary.md): logits, softmax, probability distribution, cross entropy
 - [References](references.md): softmax regression and linear classifiers
+
+## Retrieval Practice
+
+### Recall
+
+What are the concrete ML arrows in the prediction-and-loss path?
+
+### Explain
+
+Why does `CrossEntropy` consume a product of `Distribution` and `TokenId`?
+
+### Apply
+
+Given `TokenId -> Vector -> Logits -> Distribution`, write the Rust type that
+must appear between `Embedding` and `Softmax`.

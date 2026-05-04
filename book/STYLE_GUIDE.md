@@ -17,6 +17,98 @@ machine rhythm. Use it when the section is doing real explanatory work. Between
 those lens labels, write in full paragraphs that connect ideas instead of
 stacking isolated one-line statements.
 
+## Learning Path
+
+The book should manage difficulty instead of pretending the material is easy.
+Each major chapter should make the learner's path visible:
+
+1. Activate prior knowledge.
+2. Introduce one new hard idea.
+3. Give a tiny worked example before the formal abstraction.
+4. Explain the Rust shape.
+5. Explain the invariant or boundary the code protects.
+6. Explain the ML or software meaning.
+7. Explain the category-theory meaning without overclaiming.
+8. Prompt self-explanation.
+9. End with retrieval practice.
+10. Connect to the next chapter.
+
+Use this section pattern when a concept is difficult enough to need scaffolding:
+
+```text
+What You Already Know
+Why This Exists
+Smallest Concrete Example
+Rust Shape
+What The Code Protects
+ML Meaning
+Category-Theory Meaning
+Self-Check
+Next Step
+```
+
+Do not force every small paragraph into this exact heading structure. Do make
+sure every chapter contains the pattern in substance.
+
+## Cognitive Load
+
+Introduce one new hard idea per section. If the section is teaching Rust syntax,
+keep the ML example familiar. If the section is teaching category-theory
+vocabulary, keep the Rust code small. If the section is teaching an ML operation,
+use already-known Rust patterns.
+
+When a paragraph contains Rust syntax, ML vocabulary, and category-theory
+vocabulary all at once, check whether the reader already has enough context. If
+not, split it into a worked example followed by the three lenses.
+
+Use signposts such as:
+
+```text
+What to notice
+Do not worry about training yet
+Read this left to right
+Self-check
+```
+
+These are navigation aids, not apologies for difficulty.
+
+## Worked Examples And Practice
+
+Hard abstractions should move through this progression:
+
+1. A complete worked example.
+2. The same example explained.
+3. A partially completed example.
+4. A reader exercise.
+5. A transfer exercise.
+
+The early chapters should show more complete code and explain it directly. Later
+chapters may ask the reader to explain why a type, reference, error, or
+composition boundary has the shape it has.
+
+Every major chapter should end with retrieval practice:
+
+```text
+Recall: ask for the key term or shape.
+Explain: ask why the design choice matters.
+Apply: ask the reader to use or modify the idea.
+```
+
+These questions should make the reader retrieve and reason, not reread passively.
+
+## Diagrams
+
+Diagrams must stay attached to nearby explanation. After a diagram, explain how
+to read it. For pipeline diagrams, use the same three readings:
+
+```text
+Rust reading
+ML reading
+Category-theory reading
+```
+
+Do not let diagrams float away from code or prose.
+
 ## Paragraphs
 
 Prefer paragraphs that carry a complete thought. Short paragraphs are useful

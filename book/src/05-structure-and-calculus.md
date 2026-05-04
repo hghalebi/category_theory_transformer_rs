@@ -36,6 +36,13 @@ They explain patterns you already saw:
 > category-theory name. The names are not decoration; they are compression for
 > patterns that appear repeatedly in real model code.
 
+## What You Already Know
+
+If you have mapped over a `Vec`, handled an `Option`, appended logs, or applied
+the chain rule in calculus, you already know informal versions of this chapter.
+The new work is to name those repeated shapes and connect them to the same
+typed pipeline discipline used earlier.
+
 ## Source Snapshots
 
 `src/structure.rs` covers functors, natural transformations, and monoids.
@@ -77,6 +84,8 @@ PipelineTrace
 
 Each block gives a Rust handle to one abstract pattern.
 
+## Worked Example: Mapping Over A Vector
+
 Before reading the traits, start with the plain Rust operation that motivates
 them. Mapping over a vector means taking each item out, applying a function, and
 collecting the new values into another vector:
@@ -91,6 +100,11 @@ assert_eq!(doubled, vec![2, 4, 6]);
 There is no category theory hidden in that snippet. It is just ordinary Rust.
 The category-theory word `functor` appears when we notice the reusable shape:
 the code changes the contents while preserving the surrounding container.
+
+## Self-Check
+
+Before reading the `Functor` trait, explain what stayed the same and what
+changed in the `Vec` mapping example.
 
 ## `Functor<A, B>`
 
@@ -1698,3 +1712,18 @@ These pages reinforce the structure vocabulary used here:
 
 - [Glossary](glossary.md): functor, natural transformation, monoid, chain rule
 - [References](references.md): applied category theory, deep learning math, and attention
+
+## Retrieval Practice
+
+### Recall
+
+What does a functor do to values inside a wrapper?
+
+### Explain
+
+Why is a pipeline trace a good example of a monoid?
+
+### Apply
+
+Write a small example of a value in your own codebase that has an empty value
+and a combine operation. State the identity law it should satisfy.

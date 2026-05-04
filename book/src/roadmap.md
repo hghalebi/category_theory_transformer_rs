@@ -29,6 +29,13 @@ the small examples understandable.
 > Read this chapter as an engineering migration plan, not as a promise that the
 > current code already contains every Transformer component.
 
+## What You Already Know
+
+If you understand the current prediction path, you already know the skeleton a
+Transformer will extend. Tokens become vectors, vectors move through typed
+transformations, and probabilities feed a loss. The future work is to replace
+the one-token middle with sequence-aware structure.
+
 ## What Exists Now
 
 The current model has this prediction path:
@@ -104,6 +111,8 @@ The future problem:
 > Attention does not operate on one token alone. It operates on a sequence of
 > hidden states.
 
+## Worked Example: Validating Sequence Length
+
 The first-principles Rust move is the same one used throughout the book: do not
 let a meaningful value travel as a raw primitive once it crosses a conceptual
 boundary. A future sequence length can start as a small validating type:
@@ -130,6 +139,11 @@ assert_eq!(SequenceLength::new(3)?.value(), 3);
 assert!(SequenceLength::new(0).is_err());
 # Ok::<(), &'static str>(())
 ```
+
+## Self-Check
+
+Before reading the roadmap steps, explain why a future `SequenceLength` should
+not be passed around as a bare `usize`.
 
 ## Rust Syntax
 
@@ -440,3 +454,18 @@ state. Each new concept should enter the codebase the same way the current
 concepts did: as a named type, a validated boundary, a typed morphism, a
 compiled example, and a law or regression test where the concept has a law worth
 checking.
+
+## Retrieval Practice
+
+### Recall
+
+Which current pipeline objects would still exist in a future Transformer?
+
+### Explain
+
+Why should attention weights be validated like probability distributions?
+
+### Apply
+
+Sketch one future morphism for query/key/value attention and name its input and
+output types.
