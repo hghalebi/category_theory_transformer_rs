@@ -1,0 +1,25 @@
+name: Rust example request
+description: Request or propose a runnable Rust example.
+title: "[needs Rust example] "
+labels:
+  - needs Rust example
+body:
+  - type: input
+    id: concept
+    attributes:
+      label: Concept
+      placeholder: "Morphism as typed transformation"
+    validations:
+      required: true
+  - type: textarea
+    id: desired_output
+    attributes:
+      label: What should the example prove?
+      description: Describe the runnable win a reader should get.
+    validations:
+      required: true
+  - type: textarea
+    id: related_files
+    attributes:
+      label: Related files
+      placeholder: "src/category.rs, examples/02_morphism_composition.rs"

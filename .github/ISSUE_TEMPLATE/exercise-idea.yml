@@ -1,0 +1,26 @@
+name: Exercise idea
+description: Propose a learner exercise with expected outcome.
+title: "[exercise idea] "
+labels:
+  - exercise idea
+body:
+  - type: input
+    id: concept
+    attributes:
+      label: Concept
+      placeholder: "Compose two transformations safely"
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Exercise task
+    validations:
+      required: true
+  - type: textarea
+    id: pass_condition
+    attributes:
+      label: Pass condition
+      description: How should a learner know they succeeded?
+    validations:
+      required: true

@@ -121,6 +121,15 @@ raw representation
 From the repository root:
 
 ```bash
+cargo run --example 01_token_sequence
+```
+
+That command gives the fastest first run: raw text becomes a token sequence and
+then next-token training pairs.
+
+For the full guided walkthrough:
+
+```bash
 cargo run --bin category_ml
 ```
 
@@ -185,6 +194,10 @@ applied category theory. The [Exercises](exercises.md),
 [Glossary](glossary.md), [References](references.md), and
 [Transformer Roadmap](roadmap.md) are there for practice, review, deeper
 reading, and the path toward attention.
+
+The source repository is public at
+[github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
+Use that page for issues, examples, and contribution work.
 
 ## What To Remember
 

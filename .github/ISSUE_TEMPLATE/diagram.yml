@@ -1,0 +1,24 @@
+name: Diagram request
+description: Suggest a diagram that would make a concept easier to understand.
+title: "[needs diagram] "
+labels:
+  - needs diagram
+  - documentation
+body:
+  - type: input
+    id: flow
+    attributes:
+      label: Flow or concept
+      placeholder: "Text -> Tokens -> TrainingPairs"
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this diagram helps
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Related chapter or example

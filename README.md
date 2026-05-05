@@ -1,23 +1,96 @@
 # Category Theory for Tiny ML in Rust
 
-This is a small, modular, compile-checked tutorial for learning category-theory
-ideas through a tiny machine-learning pipeline in Rust.
+Frameworks made AI accessible.
+Tiny typed systems make parts of AI understandable.
 
-The teaching style is short-loop, low-friction, and example-first:
+This is a public book and Rust lab for rebuilding tiny ML systems from first
+principles using:
 
-- one concept at a time
-- one Rust file per concept cluster
-- one runnable example per lesson group
-- exact learner source snapshots embedded in the course
-- fast feedback from `cargo`
-- no hidden pseudo-code examples
+- Rust types
+- typed transformations
+- composition
+- training loops
+- category theory as an engineering tool
+
+Not abstraction cosplay.
+Executable structure.
+
+## Who This Is For
+
+This project is for engineers who:
+
+- can use AI frameworks but want to understand what they hide
+- know Rust and want a serious path into AI
+- are curious about category theory but want executable examples
+- prefer small systems they can inspect completely
+
+## What You Will Build
+
+A tiny ML pipeline:
+
+```text
+Text
+-> Tokens
+-> Training Pairs
+-> Model State
+-> Prediction
+-> Loss
+-> Updated Model State
+```
+
+The implementation is intentionally small. The point is not to compete with AI
+frameworks. The point is to make the structure that frameworks hide visible,
+typed, and runnable.
 
 ## Start Here
 
-Run the guided demo:
+1. Read [START_HERE.md](START_HERE.md).
+2. Run the first Rust example.
+3. Try one beginner exercise.
+4. Open a specific feedback issue.
+
+## Five-Minute Win
+
+Run:
 
 ```bash
-cargo run --bin category_ml
+cargo run --example 01_token_sequence
+```
+
+Expected shape:
+
+```text
+Raw input:
+"rust makes ai structure visible"
+
+TokenSequence:
+[TokenId(12), TokenId(44), TokenId(7), TokenId(19), TokenId(91)]
+
+TrainingPairs:
+(TokenId(12) -> TokenId(44))
+(TokenId(44) -> TokenId(7))
+(TokenId(7) -> TokenId(19))
+(TokenId(19) -> TokenId(91))
+
+Typed transformation:
+Text -> TokenSequence -> TrainingPairs
+
+No framework magic.
+Just explicit structure.
+```
+
+That is the whole project promise in one run: raw text becomes typed structure
+you can inspect.
+
+## Quickstart
+
+```bash
+cargo run --example 01_token_sequence
+cargo run --example 01_domain_objects
+cargo run --example 02_morphism_composition
+cargo run --example 03_training_endomorphism
+cargo run --example 04_structure_and_calculus
+cargo run --example 05_seven_sketches
 ```
 
 Run the full validation gate:
@@ -26,20 +99,24 @@ Run the full validation gate:
 bash scripts/check.sh
 ```
 
-Build the mdBook:
+Build the public book locally:
 
 ```bash
 bash scripts/build-mdbook.sh
 ```
 
-The generated HTML will be written to `book/html/`.
+The generated HTML is written to `book/html/`.
 
-The generated course is the canonical tutorial surface. It embeds the Rust
-modules, runnable examples, compact lesson notes, a glossary, curated external
-references, and a Transformer roadmap. Build and publishing details stay in
-repository docs and scripts rather than inside the learner course.
+## Project Status
 
-The GitHub Pages workflow publishes the book from `main` to:
+This is a working draft.
+
+Some chapters are stable. Some are still expanding. Some need diagrams,
+examples, mathematical review, Rust idiom review, and reader feedback.
+
+Public feedback is part of the process.
+
+The GitHub Pages version is published at:
 
 ```text
 https://hghalebi.github.io/category_theory_transformer_rs/
@@ -64,7 +141,23 @@ By the end, you should be able to explain and run:
 
 ## Repository Map
 
-The code is split into small parts:
+The repository is organized as a learning product:
+
+- `START_HERE.md`: first-session path
+- `ROADMAP.md`: project milestones and sponsor-worthy work
+- `CONTRIBUTING.md`: specific ways to help
+- `SPONSORS.md`: why support matters
+- `GOVERNANCE.md`: project decision rules
+- `CHANGELOG.md`: visible momentum
+- `src/`: compile-checked teaching modules
+- `examples/`: runnable lesson examples
+- `book/src/`: book chapters
+- `docs/`: learning paths and project FAQ
+- `exercises/`: beginner, intermediate, and advanced practice tracks
+- `community/`: reading-club and contributor-growth materials
+- `.github/`: issue templates and workflow automation
+
+The current Rust modules are:
 
 - `src/domain.rs`: typed nouns used by the whole tutorial
 - `src/category.rs`: morphisms, identity, composition, endomorphisms
@@ -74,15 +167,8 @@ The code is split into small parts:
 - `src/calculus.rs`: local derivative and chain-rule example
 - `src/sketches.rs`: Rust companion models for the seven applied-category-theory sketches
 - `src/demo.rs`: the complete terminal walkthrough
-- `examples/`: runnable lesson examples
-- `lessons/`: learner-facing reading path
-- `book/src/`: mdBook source chapters
-- `book/html/`: generated mdBook output, ignored by git
-- `scripts/check-prose-style.py`: checks prose density and learning-scaffold markers
-- `scripts/check-mdbook-coverage.sh`: verifies course source snapshots and required references
-- `.github/workflows/mdbook-pages.yml`: CI plus GitHub Pages deployment
 
-## Lesson Path
+## Book Path
 
 Use the generated course lessons in order:
 
@@ -101,40 +187,22 @@ Use the generated course lessons in order:
 13. [Transformer Roadmap](book/src/roadmap.md)
 14. [Repository Source Snapshots](book/src/source-snapshots.md)
 
-The `lessons/` folder is kept as a compact reading path, while `book/src/`
-contains the complete self-contained course.
+## How To Help
 
-## Runnable Examples
+Do not send vague feedback if you can send specific feedback.
 
-Each example is a real Rust file:
+Useful first contributions:
 
-```bash
-cargo run --example 01_domain_objects
-cargo run --example 02_morphism_composition
-cargo run --example 03_training_endomorphism
-cargo run --example 04_structure_and_calculus
-cargo run --example 05_seven_sketches
-```
+- tell us where a chapter becomes unclear
+- add or improve a Rust example
+- propose a diagram for one pipeline step
+- review terminology for category-theory precision
+- review examples for Rust idiom
+- turn one outline into a fuller explanation
+- add an exercise idea with an expected answer
 
-`cargo test --all-targets` also compiles the examples.
-
-## Fast Mental Model
-
-Think of the tiny model as arrows:
-
-```text
-TokenId -> Vector -> Logits -> Distribution
-Distribution x TokenId -> Loss
-Parameters -> Parameters
-```
-
-The first line is prediction.
-
-The second line is evaluation.
-
-The third line is training.
-
-Category theory gives names to those shapes. Rust checks that the shapes connect.
+Start with [CONTRIBUTING.md](CONTRIBUTING.md), then choose an issue template
+that matches the help you want to give.
 
 ## Quality Gate
 
@@ -144,35 +212,15 @@ Before trusting changes, run:
 bash scripts/check.sh
 ```
 
-That checks formatting, clippy, unit tests, examples, the full demo, the
-prose-style and learning-scaffold rules, the course source snapshot coverage,
-the generated-book build, and chapter tests.
+That checks formatting, clippy, unit tests, examples, the full demo,
+prose-style rules, course source snapshot coverage, the generated-book build,
+and chapter tests.
 
-The source coverage script also checks that the learner course does not discuss
-the documentation-generation tool and does not explicitly name the previously
-disallowed instructor reference.
+## License
 
-## Serve the Book
+The repository does not declare a final license yet. Choosing the code and book
+licenses is a project-owner decision on the roadmap before broader community
+promotion.
 
-```bash
-mdbook serve --open
-```
-
-If the browser does not open automatically, use the local URL printed by
-`mdbook`.
-
-## GitHub Pages Deployment
-
-The workflow in `.github/workflows/mdbook-pages.yml` runs on pull requests,
-pushes to `main`, and manual dispatches.
-
-Pull requests run validation only.
-
-Pushes to `main` run validation, upload `book/html`, and deploy through GitHub
-Pages. In the GitHub repository settings, set:
-
-```text
-Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
-```
-
-This is pedagogical code, not a production ML framework.
+Until a license is added, do not assume reuse rights beyond the explicit
+reference guidance inside the book draft.

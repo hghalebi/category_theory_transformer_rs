@@ -1,0 +1,39 @@
+- name: good first feedback
+  color: "2ea44f"
+  description: First-time reader feedback with one clear confusion point.
+- name: needs Rust example
+  color: "f97316"
+  description: Needs a runnable Rust example or clearer code path.
+- name: needs diagram
+  color: "0ea5e9"
+  description: Needs a visual explanation.
+- name: chapter expansion
+  color: "8b5cf6"
+  description: Needs fuller prose, examples, or exercises.
+- name: ML intuition
+  color: "14b8a6"
+  description: Needs clearer machine-learning intuition.
+- name: category theory precision
+  color: "6366f1"
+  description: Needs review for mathematical terminology.
+- name: Rust idiom review
+  color: "f59e0b"
+  description: Needs review for Rust style, types, or APIs.
+- name: exercise idea
+  color: "84cc16"
+  description: Suggests a learner exercise or checkpoint.
+- name: glossary needed
+  color: "06b6d4"
+  description: Needs a glossary entry or clearer definition.
+- name: reader confusion
+  color: "ef4444"
+  description: Reports a specific confusing place in the material.
+- name: bug
+  color: "d73a4a"
+  description: Something is broken or incorrect.
+- name: documentation
+  color: "0075ca"
+  description: Documentation-only work.
+- name: sponsor-worthy milestone
+  color: "a855f7"
+  description: Work that clearly improves sponsor value.

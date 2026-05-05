@@ -11,6 +11,8 @@ machine-learning systems</p>
 <a href="https://www.linkedin.com/in/hamze/">Hamze Ghalebi</a><br>
 <a href="https://www.linkedin.com/in/farzad-jafarranmani-5a1b4768/">Farzad Jafarranmani</a></p>
 
+<p><a href="https://github.com/hghalebi/category_theory_transformer_rs">GitHub repository</a></p>
+
 </div>
 
 ## About This Book
@@ -33,6 +35,9 @@ it as an engineering tool:
 
 This is not a finalized edition. Chapters, examples, terminology, diagrams,
 code, and references may evolve as the work continues.
+
+The public source repository is available at
+[github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
 
 ## Coauthors
 
@@ -88,6 +93,10 @@ references, awkward terminology, incorrect or overloaded mathematical language,
 Rust examples that could be clearer or more idiomatic, and places where the
 connection between Rust, machine learning, and category theory should be made
 more explicit.
+
+Feedback is easiest to act on when it is opened in the
+[GitHub repository](https://github.com/hghalebi/category_theory_transformer_rs)
+with a specific chapter, command, or source file.
 
 This edition is intentionally public before it is final.
 

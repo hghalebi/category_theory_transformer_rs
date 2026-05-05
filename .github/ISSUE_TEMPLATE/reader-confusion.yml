@@ -1,0 +1,29 @@
+name: Reader confusion
+description: Report the exact place where the learning path becomes unclear.
+title: "[reader confusion] "
+labels:
+  - reader confusion
+  - good first feedback
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: File, chapter, section, or command.
+      placeholder: "book/src/01-domain-objects.md"
+    validations:
+      required: true
+  - type: textarea
+    id: quote
+    attributes:
+      label: Confusing text or output
+      description: Quote the sentence, snippet, or command output.
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: What did you expect next?
+      description: Explain what would have made the path clearer.
+    validations:
+      required: true

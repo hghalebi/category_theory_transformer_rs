@@ -48,6 +48,7 @@ require_summary_entry "[References](references.md)"
 require_summary_entry "[Transformer Roadmap](roadmap.md)"
 require_summary_entry "[Repository Source Snapshots](source-snapshots.md)"
 
+require_reference "https://github.com/hghalebi/category_theory_transformer_rs"
 require_reference "https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html"
 require_reference "https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html"
 require_reference "https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html"

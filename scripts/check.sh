@@ -5,6 +5,7 @@ cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets --all-features
 
+cargo run --example 01_token_sequence
 cargo run --example 01_domain_objects
 cargo run --example 02_morphism_composition
 cargo run --example 03_training_endomorphism

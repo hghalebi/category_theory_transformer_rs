@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Start Here
+    url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/START_HERE.md
+    about: Start here if you are new to the project.

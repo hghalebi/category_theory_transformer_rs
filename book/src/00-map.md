@@ -333,7 +333,16 @@ focus is the library, not command-line error reporting.
 
 ## First Run
 
-Run:
+Start with the smallest visible pipeline:
+
+```bash
+cargo run --example 01_token_sequence
+```
+
+It turns text into token ids and next-token training pairs before any model
+weights appear.
+
+Then run the full guided demo:
 
 ```bash
 cargo run --bin category_ml

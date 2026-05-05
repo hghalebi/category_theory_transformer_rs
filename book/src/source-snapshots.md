@@ -99,6 +99,12 @@ the code itself.
 
 ## Runnable Examples
 
+### `examples/01_token_sequence.rs`
+
+```rust,ignore
+{{#include ../../examples/01_token_sequence.rs}}
+```
+
 ### `examples/01_domain_objects.rs`
 
 ```rust,ignore

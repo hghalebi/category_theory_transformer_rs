@@ -1,0 +1,25 @@
+name: Terminology review
+description: Review category-theory or ML wording for precision.
+title: "[category theory precision] "
+labels:
+  - category theory precision
+  - documentation
+body:
+  - type: input
+    id: term
+    attributes:
+      label: Term or phrase
+      placeholder: "object, morphism, functor, loss"
+    validations:
+      required: true
+  - type: textarea
+    id: concern
+    attributes:
+      label: Precision concern
+      description: Explain what may be imprecise or overloaded.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested_wording
+    attributes:
+      label: Suggested wording

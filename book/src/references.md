@@ -20,6 +20,7 @@ which object, morphism, composition, or law does it deepen?
 
 ## Rust
 
+- [Category Theory for Tiny ML in Rust GitHub repository](https://github.com/hghalebi/category_theory_transformer_rs) is the public source for this book, including Rust modules, examples, exercises, and issue templates.
 - [The Rust Programming Language: Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html) explains how Rust packages are organized into library and binary crates. Use it with `src/lib.rs`, `src/bin/category_ml.rs`, and the `examples/` files.
 - [The Rust Programming Language: Recoverable Errors with `Result`](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) explains the error pattern behind `CtResult<T>` and constructors such as `Distribution::new`.
 - [The rustdoc book: How to write documentation](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html) explains the documentation comments used above public types and methods.
