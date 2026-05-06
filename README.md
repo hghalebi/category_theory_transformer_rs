@@ -107,14 +107,19 @@ bash scripts/build-mdbook.sh
 
 The generated HTML is written to `book/html/`.
 
-## Project Status
+## Current status
 
 This is a working draft.
 
-Some chapters are stable. Some are still expanding. Some need diagrams,
-examples, mathematical review, Rust idiom review, and reader feedback.
+Some chapters are stable.
+Some chapters are skeletal.
+Some sections are intentionally public before they are polished.
 
-Public feedback is part of the process.
+The goal is to build the clearest possible path from tiny ML concepts to typed
+Rust implementations, with public feedback from readers.
+
+If something feels too compressed, unclear, or too bullet-point-like, please
+open an issue. That feedback is useful.
 
 The GitHub Pages version is published at:
 

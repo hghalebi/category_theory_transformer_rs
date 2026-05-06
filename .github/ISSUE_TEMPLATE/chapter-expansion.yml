@@ -1,0 +1,28 @@
+name: Chapter expansion
+description: Expand a compressed section into clearer learner prose.
+title: "[chapter expansion] "
+labels:
+  - chapter expansion
+  - documentation
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Section to expand
+      placeholder: "book/src/03-ml-pipeline.md"
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What feels compressed?
+      description: Quote the bullet list, paragraph, or code block that needs more explanation.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired reader outcome
+      description: What should the reader understand after the expansion?
+    validations:
+      required: true

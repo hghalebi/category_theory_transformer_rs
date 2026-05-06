@@ -37,3 +37,6 @@
 - name: sponsor-worthy milestone
   color: "a855f7"
   description: Work that clearly improves sponsor value.
+- name: FAQ
+  color: "64748b"
+  description: Frequently asked question or answer candidate.

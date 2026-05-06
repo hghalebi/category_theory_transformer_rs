@@ -34,6 +34,7 @@ The project uses these labels to keep contribution work specific:
 - `bug`
 - `documentation`
 - `sponsor-worthy milestone`
+- `FAQ`
 
 The label manifest lives at [.github/labels.yml](.github/labels.yml).
 
@@ -41,14 +42,11 @@ The label manifest lives at [.github/labels.yml](.github/labels.yml).
 
 Good starter issues are concrete. Examples:
 
-- `[good first feedback] Where does Chapter 1 become unclear?`
-- `[needs diagram] Text -> Tokens -> TrainingPairs`
+- `[good first feedback] Where does the book become unclear?`
+- `[needs diagram] Text → Tokens → TrainingPairs → ModelState pipeline`
 - `[needs Rust example] Morphism as typed transformation`
-- `[ML intuition] Explain loss without framework magic`
-- `[category theory precision] Review use of "object" and "morphism"`
-- `[Rust idiom review] Improve newtype examples`
-- `[exercise idea] Compose two transformations safely`
-- `[chapter expansion] Turn bullet outline into full explanation`
+- `[chapter expansion] Turn bullet sections into full explanations`
+- `[FAQ] What does this project unlock?`
 
 See [community/starter-issues.md](community/starter-issues.md) for ready-to-open
 issue drafts.

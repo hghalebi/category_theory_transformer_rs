@@ -30,3 +30,10 @@ Then read [START_HERE.md](../START_HERE.md).
 
 Open a specific issue. The best first issues point to one unclear sentence, one
 missing diagram, one Rust example, or one exercise idea.
+
+## What does this project unlock?
+
+It helps readers move below framework calls and see a tiny AI pipeline as typed
+structure: domain objects, transformations, composition, loss, and repeated
+model-state updates. The payoff is not a larger model. The payoff is a clearer
+mental model for what larger frameworks automate.

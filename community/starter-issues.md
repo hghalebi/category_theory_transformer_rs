@@ -8,14 +8,15 @@ contributors know exactly what help is useful.
 Title:
 
 ```text
-[good first feedback] Where does Chapter 1 become unclear?
+[good first feedback] Where does the book become unclear?
 ```
 
 Prompt:
 
 ```text
-Read book/src/01-domain-objects.md and quote the first sentence or code block
-where you slow down. Explain what you expected the chapter to say next.
+Read from START_HERE.md into the early book chapters. Quote the first sentence,
+section, code block, or command where the path slows down. Explain what you
+expected next.
 ```
 
 ## Diagram
@@ -23,14 +24,15 @@ where you slow down. Explain what you expected the chapter to say next.
 Title:
 
 ```text
-[needs diagram] Text -> Tokens -> TrainingPairs
+[needs diagram] Text → Tokens → TrainingPairs → ModelState pipeline
 ```
 
 Prompt:
 
 ```text
 Create a simple diagram for the first-run path in examples/01_token_sequence.rs.
-The diagram should show raw text, TokenSequence, and TrainingPairs.
+The diagram should show raw text, TokenSequence, TrainingPairs, ModelState,
+Prediction, Loss, and Updated ModelState.
 ```
 
 ## Rust Example
@@ -48,32 +50,32 @@ Add or improve a small example that shows why two transformations compose only
 when the output type of the first matches the input type of the second.
 ```
 
-## ML Intuition
+## Chapter Expansion
 
 Title:
 
 ```text
-[ML intuition] Explain loss without framework magic
+[chapter expansion] Turn bullet sections into full explanations
 ```
 
 Prompt:
 
 ```text
-Improve the loss explanation so a framework user can see how probabilities,
-target token, and cross entropy connect in the tiny Rust pipeline.
+Find one section that reads too much like an outline. Expand it into learner
+prose with one concrete Rust reference and one checkpoint question.
 ```
 
-## Category Theory Precision
+## FAQ
 
 Title:
 
 ```text
-[category theory precision] Review use of object and morphism
+[FAQ] What does this project unlock?
 ```
 
 Prompt:
 
 ```text
-Review the first three chapters for places where object, morphism, identity,
-or composition are used imprecisely. Suggest exact wording changes.
+Write a concise FAQ answer for readers asking what this project helps them do
+that a framework-only tutorial does not.
 ```

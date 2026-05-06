@@ -1,0 +1,21 @@
+name: FAQ
+description: Propose a public FAQ question or answer.
+title: "[FAQ] "
+labels:
+  - FAQ
+  - documentation
+body:
+  - type: input
+    id: question
+    attributes:
+      label: Question
+      placeholder: "What does this project unlock?"
+    validations:
+      required: true
+  - type: textarea
+    id: answer
+    attributes:
+      label: Proposed answer
+      description: Keep the answer useful for public readers.
+    validations:
+      required: true
