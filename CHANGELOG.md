@@ -4,6 +4,7 @@ All notable changes to the learning system are tracked here.
 
 ## Unreleased
 
+- Added the first public workshop registration link.
 - Added the `01_token_sequence` five-minute-win example.
 - Reworked README positioning around first-run clarity, audience, and contribution paths.
 - Added root project docs for start-here flow, roadmap, contribution, sponsorship, and governance.

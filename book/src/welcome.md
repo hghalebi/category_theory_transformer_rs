@@ -199,6 +199,9 @@ The source repository is public at
 [github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
 Use that page for issues, examples, and contribution work.
 
+The first public workshop for the project is available through
+[Luma registration](https://luma.com/event/evt-Pb1kYMQvzs8JrQq).
+
 ## What To Remember
 
 The central discipline is:

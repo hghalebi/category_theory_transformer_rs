@@ -59,6 +59,12 @@ The output shows raw text becoming token ids and next-token training pairs:
 Text -> TokenSequence -> TrainingPairs
 ```
 
+## First public workshop
+
+The first public workshop for this project is open for registration:
+
+[Register for the public workshop](https://luma.com/event/evt-Pb1kYMQvzs8JrQq)
+
 ## How to give feedback
 
 Open an issue for:

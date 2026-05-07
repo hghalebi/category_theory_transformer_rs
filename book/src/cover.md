@@ -39,6 +39,16 @@ code, and references may evolve as the work continues.
 The public source repository is available at
 [github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
 
+## Public Workshop
+
+The first public workshop for this book and Rust lab is hosted through AI
+Reading Club. It introduces the tiny ML pipeline as typed Rust structure and
+uses the working draft as the shared study material.
+
+<a href="https://luma.com/event/evt-Pb1kYMQvzs8JrQq" class="luma-checkout--button" data-luma-action="checkout" data-luma-event-id="evt-Pb1kYMQvzs8JrQq">Register for Event</a>
+
+<script id="luma-checkout" src="https://embed.lu.ma/checkout-button.js"></script>
+
 ## Coauthors
 
 ### Hamze Ghalebi

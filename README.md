@@ -127,6 +127,14 @@ The GitHub Pages version is published at:
 https://hghalebi.github.io/category_theory_transformer_rs/
 ```
 
+## Public Workshop
+
+The first public workshop for this project is hosted through AI Reading Club.
+It introduces the tiny ML pipeline as typed Rust structure and invites reader
+feedback while the public draft is still evolving.
+
+[Register for the public workshop](https://luma.com/event/evt-Pb1kYMQvzs8JrQq)
+
 ## What You Will Learn
 
 By the end, you should be able to explain and run:
@@ -159,7 +167,7 @@ The repository is organized as a learning product:
 - `book/src/`: book chapters
 - `docs/`: learning paths and project FAQ
 - `exercises/`: beginner, intermediate, and advanced practice tracks
-- `community/`: reading-club and contributor-growth materials
+- `community/`: workshops, reading-club, and contributor-growth materials
 - `.github/`: issue templates and workflow automation
 
 The current Rust modules are:

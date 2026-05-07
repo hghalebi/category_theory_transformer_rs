@@ -20,6 +20,12 @@ Use one session per chapter:
 3. Morphisms and Composition
 4. Tiny ML Pipeline
 
+## Public Workshop
+
+The first public workshop for this project is listed in
+[workshops.md](workshops.md). Use it as the shared kickoff session for readers
+who want a guided introduction before following the chapter path independently.
+
 ## Facilitation Rule
 
 Do not let the session become abstract debate too early. Every term should

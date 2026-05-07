@@ -50,7 +50,7 @@ FENCE_RE = re.compile(r"^\s*(```+|~~~+)")
 HEADING_RE = re.compile(r"^(#{1,6})\s+\S")
 LIST_RE = re.compile(r"^\s*(?:[-*+]\s+|\d+\.\s+)")
 TABLE_RE = re.compile(r"^\s*\|.+\|\s*$")
-HTML_BLOCK_RE = re.compile(r"^\s*</?(?:div|p|h1|a|br)\b", re.IGNORECASE)
+HTML_BLOCK_RE = re.compile(r"^\s*</?(?:div|p|h1|a|br|script)\b", re.IGNORECASE)
 WORD_RE = re.compile(r"[A-Za-z0-9_']+")
 
 
