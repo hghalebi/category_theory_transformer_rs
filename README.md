@@ -22,19 +22,33 @@ executable AI education in Rust.
 - Public book: <https://hghalebi.github.io/category_theory_transformer_rs/>
 - First-session guide: [START_HERE.md](START_HERE.md)
 - Feedback issues: <https://github.com/hghalebi/category_theory_transformer_rs/issues>
-- First public workshop: <https://luma.com/event/evt-Pb1kYMQvzs8JrQq>
+
+## Choose your path
+
+| If you have... | Start here | Goal |
+| --- | --- | --- |
+| 5 minutes | `cargo run --example 01_token_sequence` | See text become typed training structure |
+| 30 minutes | [START_HERE.md](START_HERE.md), then examples 01-03 | Learn the core path through the repo |
+| A chapter question | [Open a feedback issue](https://github.com/hghalebi/category_theory_transformer_rs/issues/1) | Point to the first unclear section |
+| A contribution idea | [CONTRIBUTING.md](CONTRIBUTING.md) | Choose a concrete issue or improvement |
 
 ```mermaid
 flowchart LR
-    A[TokenId] --> B[Vector]
-    B --> C[Logits]
-    C --> D[Distribution]
-    D --> E[Loss]
-    F[Parameters] --> G[Updated Parameters]
+    A[Text] --> B[TokenSequence]
+    B --> C[TrainingPairs]
+    C --> D[ModelState]
+    D --> E[Prediction]
+    E --> F[Loss]
+    F --> G[Updated ModelState]
 
     classDef obj fill:#eef6ff,stroke:#2563eb,color:#111827;
     class A,B,C,D,E,F,G obj;
 ```
+
+The project teaches this pipeline as typed transformations in Rust. The code
+uses concrete types such as `TokenId`, `TokenSequence`, `TrainingSet`,
+`Parameters`, `Distribution`, and `Loss` so the structure is visible and
+compile-checked.
 
 ## Who this is for
 
@@ -128,6 +142,10 @@ Then run the full local gate:
 bash scripts/check.sh
 ```
 
+The learning artifact is CI-verified: Rust formatting, clippy, tests, all
+examples, the main demo, prose checks, source-snapshot coverage, the book build,
+and chapter tests run together before publication.
+
 ## Read the book
 
 The public draft is available here:
@@ -156,6 +174,18 @@ The generated HTML is written to `book/html/`.
 
 If you want live reload while reading locally, run `mdbook serve` from the
 repository root and open the URL printed in your terminal.
+
+## The small promise
+
+After the first path, you should be able to explain:
+
+1. why `TokenId` is safer than a raw `usize`
+2. why a morphism is a typed transformation
+3. why composition means outputs and inputs connect safely
+4. why training can be seen as `Parameters -> Parameters`
+
+The full course then gives names to those ideas and connects them to runnable
+Rust code.
 
 ## What you will learn
 
@@ -340,18 +370,26 @@ The compiler is part of the teacher.
 
 ## Runnable examples
 
-```bash
-cargo run --example 01_token_sequence
-cargo run --example 01_domain_objects
-cargo run --example 02_morphism_composition
-cargo run --example 03_training_endomorphism
-cargo run --example 04_structure_and_calculus
-cargo run --example 05_seven_sketches
-```
+| Command | Concept | Learner win |
+| --- | --- | --- |
+| `cargo run --example 01_token_sequence` | Text to training pairs | See raw text become typed structure |
+| `cargo run --example 01_domain_objects` | Domain objects | See ML nouns as Rust types |
+| `cargo run --example 02_morphism_composition` | Morphisms and composition | See typed transformations compose |
+| `cargo run --example 03_training_endomorphism` | Training | See training as `Parameters -> Parameters` |
+| `cargo run --example 04_structure_and_calculus` | Structure and calculus | See functors, monoids, and chain-rule sketches |
+| `cargo run --example 05_seven_sketches` | Applied sketches | See category ideas beyond tiny ML |
 
 These examples are small by design.
 Each one is meant to isolate a concept before the book combines it with the
 next idea.
+
+## Learn live
+
+If you prefer a guided walkthrough, join the public workshop:
+
+```text
+https://luma.com/event/evt-Pb1kYMQvzs8JrQq
+```
 
 ## Current status
 
@@ -375,6 +413,17 @@ Status labels:
 | Draft | The section is readable but still evolving |
 | Sketch | The idea is present but needs clearer writing or examples |
 | Planned | The section is part of the roadmap |
+
+Chapter maturity:
+
+| Chapter | Status | Best feedback |
+| --- | --- | --- |
+| Domain Objects | Stable draft | Clarity and Rust idiom |
+| Morphism and Composition | Needs expansion | More examples |
+| Tiny ML Pipeline | Draft | Diagrams and ML intuition |
+| Training as an Endomorphism | Draft | Training-loop intuition |
+| Functors, Naturality, Monoids, and Chain Rule | Sketch | Terminology precision |
+| Seven Sketches Through Rust | Sketch | Which examples help or distract |
 
 ## Roadmap
 
@@ -493,12 +542,6 @@ ML engineers
 compiler/type-system people
 technical educators
 mathematically curious software builders
-```
-
-The first public workshop is open for registration:
-
-```text
-https://luma.com/event/evt-Pb1kYMQvzs8JrQq
 ```
 
 ## Design philosophy
