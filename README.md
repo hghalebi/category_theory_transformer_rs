@@ -1,57 +1,100 @@
+<p align="center">
+  <img src="logo.png" alt="Category Theory for Tiny ML in Rust logo" width="900">
+</p>
+
 # Category Theory for Tiny ML in Rust
 
-Frameworks made AI accessible.
-Tiny typed systems make parts of AI understandable.
+> Tiny ML, Rust types, and category theory — executable structure, not AI magic.
 
-This is a public book and Rust lab for rebuilding tiny ML systems from first
-principles using:
+Python made AI accessible.
+Rust can make parts of AI understandable.
 
-- Rust types
-- typed transformations
-- composition
-- training loops
-- category theory as an engineering tool
+This is a first-principles, compile-checked tutorial for engineers who want to
+understand the structure underneath machine-learning systems.
 
-Not abstraction cosplay.
-Executable structure.
-
-## Who This Is For
-
-This project is for engineers who:
-
-- can use AI frameworks but want to understand what they hide
-- know Rust and want a serious path into AI
-- are curious about category theory but want executable examples
-- prefer small systems they can inspect completely
-
-## What You Will Build
-
-A tiny ML pipeline:
-
-```text
-Text
--> Tokens
--> Training Pairs
--> Model State
--> Prediction
--> Loss
--> Updated Model State
+```bash
+cargo run
 ```
 
-The implementation is intentionally small. The point is not to compete with AI
-frameworks. The point is to make the structure that frameworks hide visible,
-typed, and runnable.
+Read the public draft, run the examples, and star the repo if you want more
+executable AI education in Rust.
 
-## Start Here
+- Public book: <https://hghalebi.github.io/category_theory_transformer_rs/>
+- First-session guide: [START_HERE.md](START_HERE.md)
+- Feedback issues: <https://github.com/hghalebi/category_theory_transformer_rs/issues>
+- First public workshop: <https://luma.com/event/evt-Pb1kYMQvzs8JrQq>
 
-1. Read [START_HERE.md](START_HERE.md).
-2. Run the first Rust example.
-3. Try one beginner exercise.
-4. Open a specific feedback issue.
+```mermaid
+flowchart LR
+    A[TokenId] --> B[Vector]
+    B --> C[Logits]
+    C --> D[Distribution]
+    D --> E[Loss]
+    F[Parameters] --> G[Updated Parameters]
 
-## Five-Minute Win
+    classDef obj fill:#eef6ff,stroke:#2563eb,color:#111827;
+    class A,B,C,D,E,F,G obj;
+```
 
-Run:
+## Who this is for
+
+This project is for:
+
+- Rust developers curious about machine learning
+- ML engineers who want stronger mental models
+- mathematically curious software engineers
+- technical founders who want to understand AI systems below the framework layer
+- readers who enjoy small, explicit, executable abstractions
+
+You do **not** need to be a category theorist.
+
+You should be comfortable with basic programming ideas and curious enough to
+follow small Rust examples.
+
+## Why this exists
+
+Most machine-learning education starts with frameworks.
+
+That is useful, but it often hides the structure.
+
+A tiny ML system already contains deep ideas:
+
+```text
+TokenId -> Vector -> Logits -> Distribution -> Loss
+```
+
+Prediction is a transformation.
+Evaluation is a transformation.
+Training is a transformation over parameters.
+
+Category theory gives names to some of these shapes.
+Rust makes the shapes explicit.
+
+This project connects:
+
+```text
+English intuition -> tiny math idea -> Rust type -> runnable example
+```
+
+The goal is not mathematical decoration.
+The goal is to make tiny ML systems easier to reason about.
+
+## Start in 60 seconds
+
+Clone the repository:
+
+```bash
+git clone https://github.com/hghalebi/category_theory_transformer_rs.git
+cd category_theory_transformer_rs
+```
+
+Run the main walkthrough:
+
+```bash
+cargo run --bin category_ml
+```
+
+Run the five-minute first example:
 
 ```bash
 cargo run --example 01_token_sequence
@@ -79,10 +122,223 @@ No framework magic.
 Just explicit structure.
 ```
 
-That is the whole project promise in one run: raw text becomes typed structure
-you can inspect.
+Then run the full local gate:
 
-## Quickstart
+```bash
+bash scripts/check.sh
+```
+
+## Read the book
+
+The public draft is available here:
+
+```text
+https://hghalebi.github.io/category_theory_transformer_rs/
+```
+
+Suggested starting path:
+
+```text
+Welcome
+-> Course Map
+-> Domain Objects
+-> Morphism and Composition
+-> Tiny ML Pipeline
+```
+
+To build the book locally:
+
+```bash
+bash scripts/build-mdbook.sh
+```
+
+The generated HTML is written to `book/html/`.
+
+If you want live reload while reading locally, run `mdbook serve` from the
+repository root and open the URL printed in your terminal.
+
+## What you will learn
+
+By following the project, you will learn how to see tiny ML systems as
+composable structures:
+
+| Concept | Plain-English idea | Rust intuition |
+| --- | --- | --- |
+| Domain object | A meaningful type of thing | `TokenId`, `Vector`, `Logits` |
+| Morphism | A typed transformation | `Morphism<Input, Output>` |
+| Composition | Connecting transformations safely | output type matches input type |
+| Pipeline | A chain of transformations | data flowing through typed stages |
+| Training | Updating parameters | state transition |
+| Endomorphism | A transformation from a thing to itself | `Parameters -> Parameters` |
+| Functor | Structure-preserving mapping | `VecFunctor`, `OptionFunctor` |
+| Monoid | Composable accumulation | `PipelineTrace` |
+| Chain rule | Local derivatives composed backward | `MulOp` forward and backward pass |
+
+This is not meant to replace full ML frameworks.
+It is meant to make their hidden structure easier to see.
+
+## Learning path
+
+### 1. Foundations
+
+Start here if category-theory language is new to you:
+
+```text
+1. Course Map
+2. Domain Objects
+3. Morphism and Composition
+4. The Tiny ML Pipeline
+```
+
+You will learn the basic language of objects, arrows, and composition through
+tiny Rust examples.
+
+### 2. Training
+
+```text
+5. Training as an Endomorphism
+```
+
+You will see training as a structured update:
+
+```text
+Parameters -> Parameters
+```
+
+Instead of treating training as magic, the book models it as a controlled state
+transition.
+
+### 3. Structure
+
+```text
+6. Functors, Naturality, Monoids, and Chain Rule
+7. Seven Sketches Through Rust
+```
+
+This section connects category-theory vocabulary to engineering patterns.
+
+The goal is not to memorize names.
+The goal is to recognize structure when it appears in code.
+
+### 4. Practice
+
+```text
+8. Exercises
+9. Glossary
+10. References
+11. Transformer Roadmap
+12. Repository Source Snapshots
+```
+
+Use this section to test your understanding, review terminology, and connect
+the tiny examples to larger AI systems.
+
+## A tiny example
+
+A machine-learning pipeline can be seen as a sequence of typed transformations:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+In Rust, the teaching goal is to make illegal connections harder to express.
+
+The runnable composition example lives in
+[examples/02_morphism_composition.rs](examples/02_morphism_composition.rs):
+
+```rust
+use category_theory_transformer_rs::{
+    Compose, CtResult, Embedding, LinearToLogits, Logits, ModelDimension, Morphism,
+    Parameters, Softmax, TokenId, Vector, VocabSize,
+};
+
+fn main() -> CtResult<()> {
+    let params = Parameters::init(VocabSize::new(5)?, ModelDimension::new(4)?);
+
+    let token_to_logits = Compose::<_, _, Vector>::new(
+        Embedding::from_parameters(&params),
+        LinearToLogits::from_parameters(&params),
+    );
+    let token_to_distribution = Compose::<_, _, Logits>::new(token_to_logits, Softmax);
+
+    let distribution = token_to_distribution.apply(TokenId::new(1))?;
+
+    println!("next-token probabilities: {:?}", distribution.as_slice());
+
+    Ok(())
+}
+```
+
+Run it:
+
+```bash
+cargo run --example 02_morphism_composition
+```
+
+This is intentionally tiny.
+The point is not performance yet.
+The point is structure:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+Once the structure is visible, we can ask better questions about correctness,
+composition, training, and eventually performance.
+
+## Project map
+
+```text
+.
+├── book/                  # public book source and generated HTML
+├── community/             # workshop, reading-club, and feedback material
+├── docs/                  # learning paths, glossary, and FAQ
+├── examples/              # runnable learning examples
+├── exercises/             # beginner, intermediate, and advanced practice
+├── lessons/               # compact lesson notes
+├── scripts/               # validation and book-build scripts
+├── src/                   # compile-checked Rust teaching modules
+├── START_HERE.md          # first-session path
+├── ROADMAP.md             # project milestones
+├── CONTRIBUTING.md        # concrete contribution paths
+├── SPONSORS.md            # sponsor rationale
+├── GOVERNANCE.md          # project decision rules
+├── CHANGELOG.md           # visible momentum
+└── README.md              # project entry point
+```
+
+The repository is designed to be read in two ways:
+
+```text
+Book-first:
+Read the chapter, then run the matching code.
+
+Code-first:
+Run the example, then read the explanation.
+```
+
+Both paths are valid.
+
+The best path is probably:
+
+```text
+Read a tiny idea -> run a tiny program -> change one line -> observe what breaks
+```
+
+The compiler is part of the teacher.
+
+## Rust module map
+
+- `src/domain.rs`: typed nouns used by the whole tutorial
+- `src/category.rs`: morphisms, identity, composition, and endomorphisms
+- `src/ml.rs`: token windowing, embedding, linear projection, softmax, cross entropy
+- `src/training.rs`: training as a repeated parameter endomorphism
+- `src/structure.rs`: functors, natural transformations, and monoids
+- `src/calculus.rs`: local derivative and chain-rule example
+- `src/sketches.rs`: Rust models for seven applied-category-theory sketches
+- `src/demo.rs`: the complete terminal walkthrough
+
+## Runnable examples
 
 ```bash
 cargo run --example 01_token_sequence
@@ -93,23 +349,13 @@ cargo run --example 04_structure_and_calculus
 cargo run --example 05_seven_sketches
 ```
 
-Run the full validation gate:
-
-```bash
-bash scripts/check.sh
-```
-
-Build the public book locally:
-
-```bash
-bash scripts/build-mdbook.sh
-```
-
-The generated HTML is written to `book/html/`.
+These examples are small by design.
+Each one is meant to isolate a concept before the book combines it with the
+next idea.
 
 ## Current status
 
-This is a working draft.
+This is a working public draft.
 
 Some chapters are stable.
 Some chapters are skeletal.
@@ -121,103 +367,166 @@ Rust implementations, with public feedback from readers.
 If something feels too compressed, unclear, or too bullet-point-like, please
 open an issue. That feedback is useful.
 
-The GitHub Pages version is published at:
+Status labels:
+
+| Label | Meaning |
+| --- | --- |
+| Stable | The explanation and code are unlikely to change heavily |
+| Draft | The section is readable but still evolving |
+| Sketch | The idea is present but needs clearer writing or examples |
+| Planned | The section is part of the roadmap |
+
+## Roadmap
+
+Near-term improvements:
+
+- clearer first-session path
+- more runnable Rust examples
+- better diagrams for the tiny ML pipeline
+- fewer dense bullet-style explanations
+- more prose before abstractions
+- chapter maturity labels
+- contributor-friendly issues
+- workshop-ready exercises
+- bridge from tiny ML toward transformer components
+
+Longer-term direction:
+
+- typed attention examples
+- tiny tokenizer examples
+- training-loop examples
+- category-theory glossary for engineers
+- mechanically sympathetic Rust versions after the pedagogical versions
+- performance notes where abstraction meets real systems constraints
+
+See [ROADMAP.md](ROADMAP.md) for the living project roadmap.
+
+## How to contribute
+
+The most valuable contributions are not only code.
+
+Good contributions include:
+
+- pointing out unclear explanations
+- opening issues where a chapter becomes hard to follow
+- suggesting smaller examples
+- improving diagrams
+- adding exercises
+- simplifying Rust code
+- fixing terminology
+- testing the book as a learner
+
+A great issue looks like this:
 
 ```text
-https://hghalebi.github.io/category_theory_transformer_rs/
+Chapter:
+Section:
+What I expected:
+Where I got confused:
+Suggestion:
 ```
 
-## Public Workshop
+Example:
 
-The first public workshop for this project is hosted through AI Reading Club.
-It introduces the tiny ML pipeline as typed Rust structure and invites reader
-feedback while the public draft is still evolving.
+```text
+Chapter: Morphism and Composition
+Section: Typed transformations
+What I expected: a concrete Rust function before the abstract explanation
+Where I got confused: the word "morphism" appeared before I had an intuition
+Suggestion: introduce it first as "a typed transformation"
+```
 
-[Register for the public workshop](https://luma.com/event/evt-Pb1kYMQvzs8JrQq)
+That kind of feedback is useful.
 
-## What You Will Learn
+Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
-By the end, you should be able to explain and run:
+## Good first issues
 
-- Object: domain types such as `TokenId`, `Vector`, `Distribution`, `Loss`, and `Parameters`
-- Morphism: a typed transformation using `Morphism<Input, Output>`
-- Identity: `Identity<T>`
-- Composition: `Compose<F, G, Middle>`
-- Product object: `Product<A, B>` and `TrainingExample`
-- Endomorphism: `TrainStep : Parameters -> Parameters`
-- Functor: `VecFunctor` and `OptionFunctor`
-- Natural transformation: `VecToFirstOption`
-- Monoid: `PipelineTrace`
-- Commutative diagram: composed prediction path equals direct prediction path
-- Chain rule: `MulOp` forward and backward local derivatives
-- Seven applied sketches: orders, resources, databases, co-design, signal flow, circuits, and behavior logic through `src/sketches.rs`
+Look for issues labeled:
 
-## Repository Map
+```text
+good first feedback
+needs Rust example
+needs diagram
+chapter expansion
+ML intuition
+category theory precision
+Rust idiom review
+exercise idea
+glossary needed
+reader confusion
+documentation
+```
 
-The repository is organized as a learning product:
+The initial public issue set gives readers concrete handles:
 
-- `START_HERE.md`: first-session path
-- `ROADMAP.md`: project milestones and sponsor-worthy work
-- `CONTRIBUTING.md`: specific ways to help
-- `SPONSORS.md`: why support matters
-- `GOVERNANCE.md`: project decision rules
-- `CHANGELOG.md`: visible momentum
-- `src/`: compile-checked teaching modules
-- `examples/`: runnable lesson examples
-- `book/src/`: book chapters
-- `docs/`: learning paths and project FAQ
-- `exercises/`: beginner, intermediate, and advanced practice tracks
-- `community/`: workshops, reading-club, and contributor-growth materials
-- `.github/`: issue templates and workflow automation
+- [[good first feedback] Where does the book become unclear?](https://github.com/hghalebi/category_theory_transformer_rs/issues/1)
+- [[needs diagram] Text -> Tokens -> TrainingPairs -> ModelState pipeline](https://github.com/hghalebi/category_theory_transformer_rs/issues/2)
+- [[needs Rust example] Morphism as typed transformation](https://github.com/hghalebi/category_theory_transformer_rs/issues/3)
+- [[chapter expansion] Turn bullet sections into full explanations](https://github.com/hghalebi/category_theory_transformer_rs/issues/4)
+- [[FAQ] What does this project unlock?](https://github.com/hghalebi/category_theory_transformer_rs/issues/5)
 
-The current Rust modules are:
+If you are new to the project, the best contribution is usually clarity
+feedback.
 
-- `src/domain.rs`: typed nouns used by the whole tutorial
-- `src/category.rs`: morphisms, identity, composition, endomorphisms
-- `src/ml.rs`: token windowing, embedding, linear projection, softmax, cross entropy
-- `src/training.rs`: training as a repeated parameter endomorphism
-- `src/structure.rs`: functors, natural transformations, and monoids
-- `src/calculus.rs`: local derivative and chain-rule example
-- `src/sketches.rs`: Rust companion models for the seven applied-category-theory sketches
-- `src/demo.rs`: the complete terminal walkthrough
+This project should be understandable before it becomes impressive.
 
-## Book Path
+## Community and feedback
 
-Use the generated course lessons in order:
+This project is connected to a broader learning effort around foundational AI
+systems, Rust, and first-principles technical education.
 
-1. [Cover](book/src/cover.md)
-2. [Welcome](book/src/welcome.md)
-3. [Map of the Course](book/src/00-map.md)
-4. [Domain Objects](book/src/01-domain-objects.md)
-5. [Morphism and Composition](book/src/02-morphisms-composition.md)
-6. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
-7. [Training as an Endomorphism](book/src/04-training-endomorphism.md)
-8. [Functors, Naturality, Monoids, and Chain Rule](book/src/05-structure-and-calculus.md)
-9. [Seven Sketches Through Rust](book/src/seven-sketches-rust.md)
-10. [Exercises](book/src/exercises.md)
-11. [Glossary](book/src/glossary.md)
-12. [References](book/src/references.md)
-13. [Transformer Roadmap](book/src/roadmap.md)
-14. [Repository Source Snapshots](book/src/source-snapshots.md)
+Useful ways to engage:
 
-## How To Help
+- star the repository
+- read the public draft
+- open an issue with feedback
+- suggest a tiny Rust example
+- share the project with a Rust or ML engineer
+- join a reading session or workshop when announced
 
-Do not send vague feedback if you can send specific feedback.
+The project is especially interested in feedback from:
 
-Useful first contributions:
+```text
+Rust engineers
+ML engineers
+compiler/type-system people
+technical educators
+mathematically curious software builders
+```
 
-- tell us where a chapter becomes unclear
-- add or improve a Rust example
-- propose a diagram for one pipeline step
-- review terminology for category-theory precision
-- review examples for Rust idiom
-- turn one outline into a fuller explanation
-- add an exercise idea with an expected answer
+The first public workshop is open for registration:
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), then choose an issue template
-that matches the help you want to give.
+```text
+https://luma.com/event/evt-Pb1kYMQvzs8JrQq
+```
 
-## Quality Gate
+## Design philosophy
+
+### 1. Small before large
+
+Tiny examples reveal structure better than giant frameworks.
+
+### 2. Runnable before impressive
+
+If an idea cannot survive a small program, it may not be understood yet.
+
+### 3. Types as explanations
+
+Rust types are not just implementation details.
+They can teach domain structure.
+
+### 4. Category theory as naming, not decoration
+
+The goal is to name useful patterns, not to intimidate the reader.
+
+### 5. Pedagogy before cleverness
+
+A clever abstraction that makes the reader feel lost has failed.
+
+A small example that makes the reader say "I see it now" is doing the work.
+
+## Quality gate
 
 Before trusting changes, run:
 
@@ -226,14 +535,24 @@ bash scripts/check.sh
 ```
 
 That checks formatting, clippy, unit tests, examples, the full demo,
-prose-style rules, course source snapshot coverage, the generated-book build,
-and chapter tests.
+prose-style rules, source snapshot coverage, the book build, and chapter tests.
+
+## Citation
+
+If you reference this project, you can cite it as:
+
+```text
+Hamze Ghalebi and contributors.
+Category Theory for Tiny ML in Rust.
+Public draft, GitHub.
+```
 
 ## License
 
-The repository does not declare a final license yet. Choosing the code and book
-licenses is a project-owner decision on the roadmap before broader community
-promotion.
+The repository does not declare a final license yet.
+
+Choosing the code and book licenses is a project-owner decision on the roadmap
+before broader community promotion.
 
 Until a license is added, do not assume reuse rights beyond the explicit
 reference guidance inside the book draft.
