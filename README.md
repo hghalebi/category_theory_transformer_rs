@@ -4,7 +4,7 @@
 
 # Category Theory for Tiny ML in Rust
 
-> Tiny ML, Rust types, and category theory — executable structure, not AI magic.
+> Tiny ML, Rust types, and category theory: executable structure, not AI magic.
 
 Python made AI accessible.
 Rust can make parts of AI understandable.
@@ -13,7 +13,7 @@ This is a first-principles, compile-checked tutorial for engineers who want to
 understand the structure underneath machine-learning systems.
 
 ```bash
-cargo run
+cargo run --bin category_ml
 ```
 
 Read the public draft, run the examples, and star the repo if you want more
@@ -21,7 +21,9 @@ executable AI education in Rust.
 
 - Public book: <https://hghalebi.github.io/category_theory_transformer_rs/>
 - First-session guide: [START_HERE.md](START_HERE.md)
-- Feedback issues: <https://github.com/hghalebi/category_theory_transformer_rs/issues>
+- Review guide: [docs/review-path.md](docs/review-path.md)
+- Project FAQ: [docs/faq.md](docs/faq.md)
+- Chapter clarity feedback: <https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml>
 
 ## Choose your path
 
@@ -29,9 +31,31 @@ executable AI education in Rust.
 | --- | --- | --- |
 | 5 minutes | `cargo run --example 01_token_sequence` | See text become typed training structure |
 | 30 minutes | [START_HERE.md](START_HERE.md), then examples 01-03 | Learn the core path through the repo |
-| A review session | [community/reader-review-packet.md](community/reader-review-packet.md) | Turn reader friction into a useful issue |
-| A chapter question | [Open the reader-confusion form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml) | Point to the first unclear section |
+| You are new to one piece | [docs/beginner-path.md](docs/beginner-path.md) | Get unstuck across Rust, ML, and category words |
+| You know Rust | [docs/rust-path.md](docs/rust-path.md) | Trace how types, traits, and tests protect ML meaning |
+| You know ML frameworks | [docs/ml-path.md](docs/ml-path.md) | Map framework habits to tiny explicit Rust objects |
+| You want to review | [docs/review-path.md](docs/review-path.md) | File one precise clarity report |
+| A chapter question | [Open the clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml) | Point to the first unclear section |
 | A contribution idea | [CONTRIBUTING.md](CONTRIBUTING.md) | Choose a concrete issue or improvement |
+| A teaching review | [docs/educator-path.md](docs/educator-path.md) | Check whether every stage has a clear next action |
+
+## Review in 20 minutes
+
+The most useful public review is one precise report: what you ran or read, the
+last idea that made sense, the first point that became unclear, and the
+smallest edit that would help.
+
+| Perspective | Public review path | First action |
+| --- | --- | --- |
+| Rust engineer | [Rust engineer first-run path](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | Run examples 01 and 02, then inspect the typed boundaries |
+| ML engineer or learner | [ML engineer training and attention path](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | Run the tiny training and training-state examples |
+| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Classify the arrows in the morphism and attention examples |
+| Technical educator | [Technical educator learning path](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | Check whether each entry point gives the learner a next action |
+| Beginner-adjacent learner | [Beginner-adjacent first confusion path](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | Run the first example or read the public start path |
+
+Use the [chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
+for the actual report. Broad praise is welcome, but the book improves fastest
+from one concrete confusion point.
 
 ```mermaid
 flowchart LR
@@ -137,16 +161,6 @@ No framework magic.
 Just explicit structure.
 ```
 
-Then run the full local gate:
-
-```bash
-bash scripts/check.sh
-```
-
-The learning artifact is CI-verified: Rust formatting, clippy, tests, all
-examples, the main demo, prose checks, source-snapshot coverage, the book build,
-and chapter tests run together before publication.
-
 ## Read the book
 
 The public draft is available here:
@@ -165,16 +179,13 @@ Welcome
 -> Tiny ML Pipeline
 ```
 
-To build the book locally:
+To build the public book locally:
 
 ```bash
-bash scripts/build-mdbook.sh
+mdbook build
 ```
 
-The generated HTML is written to `book/html/`.
-
-If you want live reload while reading locally, run `mdbook serve` from the
-repository root and open the URL printed in your terminal.
+The local build output is written to `book/html/`.
 
 ## The small promise
 
@@ -331,13 +342,12 @@ composition, training, and eventually performance.
 
 ```text
 .
-├── book/                  # public book source and generated HTML
-├── community/             # workshop, reading-club, and feedback material
+├── book/                  # public book source
+├── community/             # workshop and reading-club material
 ├── docs/                  # learning paths, glossary, and FAQ
 ├── examples/              # runnable learning examples
 ├── exercises/             # beginner, intermediate, and advanced practice
 ├── lessons/               # compact lesson notes
-├── scripts/               # validation and book-build scripts
 ├── src/                   # compile-checked Rust teaching modules
 ├── START_HERE.md          # first-session path
 ├── ROADMAP.md             # project milestones
@@ -376,7 +386,7 @@ The compiler is part of the teacher.
 - `src/training.rs`: training as a repeated parameter endomorphism
 - `src/structure.rs`: functors, natural transformations, and monoids
 - `src/calculus.rs`: local derivative and chain-rule example
-- `src/attention.rs`: typed query-key scoring, masks, attention weights, value mixing, head concatenation, output projection, residual addition, layer normalization, position-wise feed-forward structure, hidden projections, block sketches, sequence readout, structured Transformer state, readout-only training, local feed-forward training, and a composed block training step with query/key/value gradients
+- `src/attention.rs`: typed attention and transformer-state sketches
 - `src/sketches.rs`: Rust models for seven applied-category-theory sketches
 - `src/demo.rs`: the complete terminal walkthrough
 
@@ -390,7 +400,8 @@ The compiler is part of the teacher.
 | `cargo run --example 03_training_endomorphism` | Training | See training as `Parameters -> Parameters` |
 | `cargo run --example 04_structure_and_calculus` | Structure and calculus | See functors, monoids, and chain-rule sketches |
 | `cargo run --example 05_seven_sketches` | Applied sketches | See category ideas beyond tiny ML |
-| `cargo run --example 06_attention_scores` | Attention roadmap | See query-key scores get masked, normalized, mixed, concatenated, projected, passed through blocks, wrapped in structured state, and updated through readout, feed-forward, attention, and composed block training steps |
+| `cargo run --example 06_attention_scores` | Attention roadmap | See query-key scores, masks, weights, and value mixing |
+| `cargo run --example 07_transformer_training_state` | Transformer training state | See readout, feed-forward, attention, and block updates |
 
 These examples are small by design.
 Each one is meant to isolate a concept before the book combines it with the
@@ -409,8 +420,8 @@ https://luma.com/event/evt-Pb1kYMQvzs8JrQq
 This is a working public draft.
 
 Some chapters are stable.
-Some chapters are skeletal.
-Some sections are intentionally public before they are polished.
+Some chapters are still evolving.
+Some sections still need direct reader validation.
 
 The goal is to build the clearest possible path from tiny ML concepts to typed
 Rust implementations, with public feedback from readers.
@@ -440,32 +451,7 @@ Chapter maturity:
 | Functors, Naturality, Monoids, and Chain Rule | Draft | Law tracing and terminology precision |
 | Seven Sketches Through Rust | Draft | Transfer clarity across sketches |
 | Exercises | Draft | Evidence quality and transfer difficulty |
-| Transformer Roadmap | Sketch | Attention-shape clarity and training-state boundaries |
-
-## Roadmap
-
-Near-term improvements:
-
-- clearer first-session path
-- more runnable Rust examples
-- better diagrams for the tiny ML pipeline and training loop
-- fewer dense bullet-style explanations
-- more prose before abstractions
-- chapter maturity labels
-- contributor-friendly issues
-- workshop-ready exercises
-- bridge from tiny ML toward transformer components
-
-Longer-term direction:
-
-- learner-facing gradient-checking exercises over the current weight, bias, and normalization checks
-- tiny tokenizer examples
-- training-loop examples
-- category-theory glossary for engineers
-- mechanically sympathetic Rust versions after the pedagogical versions
-- performance notes where abstraction meets real systems constraints
-
-See [ROADMAP.md](ROADMAP.md) for the living project roadmap.
+| Transformer Roadmap | Draft | Category precision and attention-shape clarity |
 
 ## How to contribute
 
@@ -482,35 +468,22 @@ Good contributions include:
 - fixing terminology
 - testing the book as a learner
 
-A great issue looks like this:
+Useful clarity feedback has this shape:
 
 ```text
-Chapter:
-Section:
-Command or file I tried:
-What I understood:
-Where I got confused:
-What I expected next:
-Suggestion:
+Chapter or file:
+Friction lens:
+Command or page tried:
+First unclear sentence, output line, or exercise prompt:
+Last clear idea:
+What you expected:
+What happened instead:
+What would have helped:
 ```
 
-Example:
-
-```text
-Chapter: Morphism and Composition
-Section: Typed transformations
-Command or file I tried: cargo run --example 02_morphism_composition
-What I understood: a morphism is a typed transformation
-Where I got confused: the word "morphism" appeared before I had an intuition
-What I expected next: a concrete Rust function before the abstract explanation
-Suggestion: introduce it first as "a typed transformation"
-```
-
-That kind of feedback is useful.
-
-For structured reading feedback, use
-[community/reader-review-guide.md](community/reader-review-guide.md), then open
-the [reader-confusion issue form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml).
+For structured chapter clarity feedback, use the
+[chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml).
+A useful issue names a chapter, a command, and a revision target.
 For code or documentation changes, start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Good first issues
@@ -527,17 +500,8 @@ category theory precision
 Rust idiom review
 exercise idea
 glossary needed
-reader confusion
 documentation
 ```
-
-The initial public issue set gives readers concrete handles:
-
-- [[good first feedback] Where does the book become unclear?](https://github.com/hghalebi/category_theory_transformer_rs/issues/1)
-- [[needs diagram] Text -> Tokens -> TrainingPairs -> ModelState pipeline](https://github.com/hghalebi/category_theory_transformer_rs/issues/2)
-- [[needs Rust example] Morphism as typed transformation](https://github.com/hghalebi/category_theory_transformer_rs/issues/3)
-- [[chapter expansion] Turn bullet sections into full explanations](https://github.com/hghalebi/category_theory_transformer_rs/issues/4)
-- [[FAQ] What does this project unlock?](https://github.com/hghalebi/category_theory_transformer_rs/issues/5)
 
 If you are new to the project, the best contribution is usually clarity
 feedback.
@@ -593,16 +557,20 @@ A clever abstraction that makes the reader feel lost has failed.
 
 A small example that makes the reader say "I see it now" is doing the work.
 
-## Quality gate
+## Local validation
 
 Before trusting changes, run:
 
 ```bash
-bash scripts/check.sh
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-targets --all-features
+mdbook build
+mdbook test
 ```
 
-That checks formatting, clippy, unit tests, examples, the full demo,
-prose-style rules, source snapshot coverage, the book build, and chapter tests.
+The public CI runs the same core checks plus the runnable examples and terminal
+demo.
 
 ## Citation
 

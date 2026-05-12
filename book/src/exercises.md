@@ -89,11 +89,84 @@ Use this map when you finish a chapter and want the matching practice task.
 | [Training as an Endomorphism](04-training-endomorphism.md) | Explain repeated `Parameters -> Parameters` updates | Exercise 5 |
 | [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) | Explain mapping, laws, traces, and local gradients | Exercise 6 and Exercise 14 |
 | [Seven Sketches Through Rust](seven-sketches-rust.md) | Identify the law or boundary a structure protects | Exercise 10 |
-| [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12 and Advanced Exercise 5 |
+| [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12, Exercise 16, and Advanced Exercise 5 |
 
 The map is not a separate syllabus. It is a repair tool. If a chapter feels
 clear while reading but vague one hour later, use the matching exercise to make
 the idea active again.
+
+## Chapter Mastery Gates
+
+Use these gates before moving from a chapter into later material. A gate is not
+a grade. It is a quick test of whether the idea is active enough to reuse.
+
+| Chapter | Run evidence | Explain evidence | Transfer evidence |
+| --- | --- | --- | --- |
+| Welcome | `cargo run --example 01_token_sequence` | state the three-lens reading contract without looking back | explain one output line through Rust, ML, and category theory |
+| Course Map | `cargo run --bin category_ml` | name the file or module behind three printed sections | choose the next chapter and matching exercise from the output |
+| Domain Objects | `cargo run --example 01_domain_objects` | explain one constructor invariant and the bad state it rejects | replace one raw value in an explanation with its domain type |
+| Morphism and Composition | `cargo run --example 02_morphism_composition` | name every middle object in `TokenId -> Vector -> Logits -> Distribution` | explain one illegal skipped stage and the missing object |
+| The Tiny ML Pipeline | `cargo test ml::tests --lib` | separate logits, probabilities, target token, and loss | compute which prediction should have lower cross-entropy |
+| Training as an Endomorphism | `cargo run --example 03_training_endomorphism` | explain why one update has shape `Parameters -> Parameters` | predict what breaks if an update returns only a loose changed field |
+| Functors, Naturality, Monoids, and Chain Rule | `cargo run --example 04_structure_and_calculus` | explain one law by tracing both sides of the example | classify a new trace, option, vector, or derivative example |
+| Seven Sketches Through Rust | `cargo run --example 05_seven_sketches` | identify the relation, order, schema, circuit, or cover being protected | model one analogous boundary in a small software system |
+| Transformer Roadmap | `cargo run --example 06_attention_scores` and `cargo run --example 07_transformer_training_state` | classify attention boundaries by input count and output object | reject one illegal shortcut such as `HiddenSequence x MultiHeadOutput -> HiddenSequence` |
+
+If a gate fails, do not reread the whole chapter first. Start with the matching
+exercise, inspect the failure signal, and compare your reasoning with the
+answer-key rubric. The smallest useful repair is usually one missing object,
+one missing command, or one missing distinction.
+
+## Checkpoint Quiz
+
+Use this after the mastery gates. Answer from memory first, then check the
+answer key. The goal is not vocabulary recall alone. The goal is to notice
+whether you can connect a Rust boundary, an ML role, and a category-theory
+shape without the chapter open.
+
+### Questions
+
+Write one or two sentences for each question.
+
+1. A value has type `TokenId`. What mistake becomes harder than if the same
+   value crossed the boundary as `usize`?
+2. The path `TokenId -> Vector -> Logits -> Distribution` fails if the middle
+   `Logits` stage is skipped. What Rust evidence and ML evidence explain the
+   failure?
+3. A model gives the target token probability `0.9` in one case and `0.1` in
+   another. Which case should have lower cross-entropy, and why?
+4. A training update changes weights but returns only the changed readout
+   matrix. Which composition shape has been broken?
+5. `VecFunctor::fmap` maps every element and `OptionFunctor::fmap` maps only
+   when a value is present. What does that preserve?
+6. A naturality square has two paths from `Vec<A>` to `Option<B>`. What should
+   be true if the square commutes?
+7. `AttentionScores x AttentionMask -> AttentionScores` returns the score
+   object. Why is this still not a unary endomorphism?
+8. Why must the attention mask act before row-wise softmax?
+9. `HiddenSequence x MultiHeadOutput -> HiddenSequence` looks tempting after
+   concatenating heads. Which missing boundary makes it illegal?
+10. A finite-difference test agrees with the inferred gradient for one
+    parameter. What has it checked, and what has it not checked?
+
+### Coverage Map
+
+| Question | Chapter or section | Main objective |
+| --- | --- | --- |
+| 1 | Domain Objects | explain why a wrapper protects a domain role |
+| 2 | Morphism and Composition | identify a missing middle object |
+| 3 | Tiny ML Pipeline | connect target probability to loss |
+| 4 | Training as an Endomorphism | preserve state-update composition |
+| 5 | Structure and Laws | explain structure-preserving mapping |
+| 6 | Structure and Laws | trace both paths through a naturality square |
+| 7 | Transformer Roadmap | count inputs before naming an endomorphism |
+| 8 | Transformer Roadmap | separate masked scores from weights |
+| 9 | Transformer Roadmap | identify a missing projection boundary |
+| 10 | Exercises and Transformer Roadmap | state the scope of a local gradient check |
+
+Score the quiz by evidence, not points. A strong answer names the object or
+boundary, explains the ML or software role, and rejects one invalid shortcut.
+If an answer only repeats a term, return to the matching exercise.
 
 ## Failure Signals
 
@@ -133,6 +206,7 @@ evidence should exist when an exercise is complete.
 | Exercise 13 | `cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib` | lower loss is assigned to the higher target probability |
 | Exercise 14 | `cargo test structure::tests --lib` | naturality paths and monoid laws are both named |
 | Exercise 15 | mixed boundary diagnosis | each failure is classified as an invariant, composition, endomorphism, shape, or local-to-global boundary |
+| Exercise 16 | `cargo run --example 07_transformer_training_state` | three different updates preserve `TransformerTrainingState -> TransformerTrainingState` |
 
 This is not extra bureaucracy. Rustlings-style practice works because the
 learner gets a concrete feedback signal. This course uses the same idea:
@@ -201,7 +275,7 @@ Answer-key mismatch:
 Suggested rewrite:
 ```
 
-This report is useful because it ties reader confusion to a concrete exercise,
+This report is useful because it ties reader feedback to a concrete exercise,
 command, failure signal, and chapter location. It also keeps feedback public
 and impersonal: do not include private data, local secrets, or personal
 background details that are not needed to improve the exercise.
@@ -262,6 +336,17 @@ Learning explains the matching training shape from the other direction:
 backpropagation walks the computation in reverse order, stores intermediate
 values, and computes gradients for parameters. This project makes that idea
 small enough to inspect in Rust.
+
+PyTorch's `gradcheck` documentation gives the same engineering warning in
+framework form: the check compares small finite differences against analytical
+gradients and accepts agreement only within tolerance. It also calls out
+practical caveats such as precision, non-differentiable points, and overlapping
+memory. Translate that into this Rust lab as:
+
+```text
+finite-difference match = useful local debugging signal
+finite-difference match != proof of every gradient path
+```
 
 The code-level test has two paths.
 
@@ -333,6 +418,20 @@ conceptual explanation
 ```
 
 When all three agree, the code becomes easier to trust and easier to teach.
+If the two numbers disagree, do not immediately change the test tolerance. Ask
+which boundary failed first:
+
+```text
+wrong sign?
+missing path?
+wrong averaging scale?
+non-smooth point?
+parameter aliasing or shared storage?
+```
+
+That is why the exercise asks for a specific parameter family. A focused
+finite-difference check is a microscope, not a certificate for the whole
+training system.
 
 ## Partially Completed Example
 
@@ -521,12 +620,28 @@ Explain:
 Rust syntax:
 which type did the compiler reject?
 
+Composition diagnostic:
+first source:
+first target:
+second source:
+second target:
+which middle object should connect the stages?
+
 ML concept:
 which prediction stage was skipped?
 
 Category theory concept:
 which middle object failed to match?
 ```
+
+Pass condition:
+
+- You name `Embedding : TokenId -> Vector` and
+  `Softmax : Logits -> Distribution`.
+- You identify `Vector` versus `Logits` as the failed middle-object match.
+- You restore `LinearToLogits : Vector -> Logits` instead of weakening
+  `Softmax`.
+- You explain why the skipped ML stage is vocabulary scoring.
 
 Debugging hint:
 
@@ -568,6 +683,12 @@ Explain the result:
 Rust syntax:
 where is the count used?
 
+Training diagnostic:
+what object is updated?
+what object measures quality?
+what repeats?
+what controls update size?
+
 ML concept:
 what happens when training repeats more times?
 
@@ -585,6 +706,14 @@ training rule reaches its limit. The important category-theory point is not
 ```text
 Parameters -> Parameters
 ```
+
+Pass condition:
+
+- You distinguish `TrainStep : Parameters -> Parameters` from
+  `Parameters x TrainingSet -> Loss`.
+- You explain that loss is a measurement, not the updated model state.
+- You identify `StepCount` as repetition of the same update shape.
+- You avoid claiming that more steps always means better behavior.
 
 ## Exercise 6: Explain `Distribution<T>::map`
 
@@ -797,6 +926,81 @@ TransformerTrainingState -> TransformerTrainingState:
 HiddenSequence x MultiHeadOutput -> HiddenSequence:
 ```
 
+Then repeat the quick roadmap classification drill without looking at the
+answer table. For each boundary, count the inputs first, then name the safest
+category shape:
+
+```text
+HiddenSequence -> QuerySequence:
+AttentionScores x AttentionMask -> AttentionScores:
+LayerNormalization : HiddenSequence -> HiddenSequence:
+HiddenSequence x ProjectedAttentionOutput -> HiddenSequence:
+TransformerTrainingState -> TransformerTrainingState:
+```
+
+Finally, explain this trap in one sentence:
+
+```text
+A product input that returns its left-hand object is not automatically an
+endomorphism.
+```
+
+Then use the same-output classification rule from the roadmap. These three
+lines all end with `HiddenSequence`; explain why they do not have the same
+category shape:
+
+```text
+LayerNormalization : HiddenSequence -> HiddenSequence:
+HiddenSequence x ProjectedAttentionOutput -> HiddenSequence:
+HiddenSequence x MultiHeadOutput -> HiddenSequence:
+```
+
+Then answer the source-ownership diagnostic:
+
+```text
+Self-attention:
+which sequence owns the query side?
+which sequence owns the key side?
+which sequence owns the value side?
+
+Cross-attention:
+which sequence owns the query side?
+which sequence owns the key side?
+which sequence owns the value side?
+
+Shape check:
+which length counts score rows?
+which length counts score columns?
+```
+
+Then answer the linear-scope diagnostic:
+
+```text
+Which listed boundaries are the linear Q/K/V projections?
+Which boundary turns scores into nonlinear normalized weights?
+Which product-input boundaries must not be collapsed into one unary map?
+Which state endomorphism belongs to training rather than forward attention?
+```
+
+Then answer the source-scope diagnostic:
+
+```text
+Which source supports decomposing attention into recurring components?
+Which source supports comparing the linear Q/K/V part with advanced category theory?
+What does neither source license you to claim about the whole Rust roadmap block?
+What is the local Rust contract for every component in this book?
+```
+
+Then answer the stackability diagnostic:
+
+```text
+Which listed boundaries can stack directly as HiddenSequence -> HiddenSequence?
+Why is MaskedMultiHeadTransformerBlock not an endomorphism while the mask is
+still an open input?
+What are the two precise ways to repeat a masked block?
+When is a fixed-mask view allowed to be named HiddenSequence -> HiddenSequence?
+```
+
 Before naming each boundary, write the answer to the first diagnostic question:
 
 ```text
@@ -809,10 +1013,24 @@ Pass condition:
 - You distinguish raw attention scores from normalized attention weights.
 - You explain why residual addition must return to `HiddenSequence`.
 - You connect one terminal output line to one typed boundary.
+- You explain why self-attention shares a source before projection without
+  collapsing query, key, and value into one role.
+- You keep claims about linear Q/K/V projections separate from softmax,
+  masking, residual addition, normalization, and training state.
+- You classify the quick roadmap drill by counting inputs before naming
+  endomorphisms.
+- You explain that anatomy-of-attention research supports decomposition, while
+  parametric-endofunctor research supports a narrower linear self-attention
+  comparison.
+- You do not claim the tiny Rust roadmap implements either full formalism.
+- You distinguish an open masked-block product input from a fixed-mask induced
+  endomorphism.
 - You classify at least one product-input morphism, one endomorphism, and one
   illegal boundary.
 - You do not call a product-input boundary an endomorphism only because its
   output matches the left input object.
+- You explain why two lines that return `HiddenSequence` can still have
+  different category shapes.
 
 ## Exercise 13: Compute Cross-Entropy From Target Probability
 
@@ -973,6 +1191,67 @@ Do not answer every case with "the compiler rejects it." Some failures are
 constructor errors, some are returned `CtError::ShapeMismatch`, some are
 conceptual category-shape failures, and some are law-check failures. The skill
 is choosing the right explanation for the right boundary.
+
+## Exercise 16: Trace Transformer Training State
+
+Use [Transformer Roadmap](roadmap.md), `src/attention.rs`, and
+`examples/07_transformer_training_state.rs`.
+
+Run:
+
+```bash
+cargo run --example 07_transformer_training_state
+```
+
+Write down the output lines for:
+
+```text
+initial state:
+forward shape:
+readout update:
+feed-forward update:
+composed block update:
+```
+
+Then classify each update:
+
+```text
+TransformerReadoutTrainStep:
+TransformerFeedForwardTrainStep:
+TransformerBlockTrainStep:
+```
+
+For each update, answer with the three lenses:
+
+```text
+Rust syntax:
+which named type performs the update, and what state does it return?
+
+ML concept:
+which parameters or sublayer does this update train?
+
+Category theory concept:
+why is the outside shape an endomorphism?
+```
+
+Finally, explain why this shortcut would be weaker:
+
+```text
+readout update returns readout weights
+feed-forward update returns feed-forward weights
+block update returns a bag of changed matrices
+```
+
+Pass condition:
+
+- You name `TransformerTrainingState`, `TinyTransformerParameters`, and all
+  three training-step types.
+- You explain that the state owns parameters, learning rate, and step count.
+- You distinguish readout-only, local feed-forward, and composed block updates.
+- You connect each printed step increment to
+  `TransformerTrainingState -> TransformerTrainingState`.
+- You explain why returning loose weights would make the next update rebuild
+  context by hand.
 
 ## Retrieval Practice
 

@@ -39,6 +39,21 @@ The goal is executable structure.
 
 ## Best reading path
 
+If Rust, ML, or category theory is new for you, start with
+[docs/beginner-path.md](docs/beginner-path.md). It gives a slower first-session
+route with stop signs for the first confusing terms.
+
+If you already know one side of the project, use a focused route:
+
+- [docs/rust-path.md](docs/rust-path.md) for Rust engineers who want to see how
+  types, traits, constructors, and tests carry ML meaning
+- [docs/ml-path.md](docs/ml-path.md) for ML engineers who want to map framework
+  habits to tiny explicit objects and transformations
+- [docs/category-theory-path.md](docs/category-theory-path.md) for readers who
+  want category-theory vocabulary anchored to runnable Rust boundaries
+- [docs/review-path.md](docs/review-path.md) if you want to help by filing one
+  precise clarity report
+
 1. [Domain Objects](book/src/01-domain-objects.md)
 2. [Morphism and Composition](book/src/02-morphisms-composition.md)
 3. [The Tiny ML Pipeline](book/src/03-ml-pipeline.md)
@@ -67,7 +82,7 @@ The first public workshop for this project is open for registration:
 
 ## How to give feedback
 
-Open the [reader-confusion issue form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml)
+Open the [chapter clarity feedback form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
 for:
 
 - unclear explanations
@@ -76,3 +91,16 @@ for:
 - overloaded math terms
 - Rust idiom improvements
 - ML intuition gaps
+
+The most useful feedback names:
+
+```text
+Chapter or file:
+Friction lens:
+Command or page tried:
+First unclear sentence, output line, or exercise prompt:
+Last clear idea:
+What you expected:
+What happened instead:
+What would have helped:
+```

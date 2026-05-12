@@ -34,7 +34,7 @@ For each lesson:
 Run the full check:
 
 ```bash
-bash scripts/check.sh
+cargo test --all-targets --all-features
 ```
 
 Run one lesson example:

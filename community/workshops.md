@@ -22,3 +22,19 @@ Register through Luma:
 Plain link:
 
 [Register for the public workshop](https://luma.com/event/evt-Pb1kYMQvzs8JrQq)
+
+## After The Workshop
+
+The most useful follow-up is one precise chapter clarity report:
+
+<https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml>
+
+Report the first place where the session or public book became unclear.
+
+Useful reports include:
+
+- the command or public page you tried
+- the first unclear sentence, output line, table row, example, or exercise
+- the last idea that still made sense
+- what you expected the next explanation to do
+- the smallest fix that would help the next reader

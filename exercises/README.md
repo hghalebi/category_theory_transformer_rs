@@ -27,5 +27,5 @@ that matches the tiny Transformer training tests in `src/attention.rs`.
 Run the full validation gate before submitting exercise changes:
 
 ```bash
-bash scripts/check.sh
+cargo test --all-targets --all-features
 ```

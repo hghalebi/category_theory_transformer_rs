@@ -94,6 +94,26 @@ ML or software concept
 Category theory concept
 ```
 
+## Source Scope Contract
+
+This chapter is a study companion, not a replacement for the source text. Each
+Rust model preserves one inspectable idea and deliberately leaves the larger
+mathematical development outside the tiny example.
+
+| Paper area | What the Rust sketch preserves | What it does not claim |
+| --- | --- | --- |
+| Generative effects | order laws and one Galois-style capacity law | a complete treatment of generative effects |
+| Resources | componentwise resource composition plus monotonicity | full enriched category theory |
+| Databases | schema-like reference integrity through typed IDs | a general database semantics framework |
+| Co-design | feasibility as a relation between requirements and offers | full profunctor theory |
+| Signal flow | matrix composition and middle-dimension checks | a complete syntax-and-semantics account for signal-flow graphs |
+| Circuits | open interfaces and serial boundary matching | a full circuit algebra |
+| Logic of behavior | local interval truth combined into a global claim | sheaf theory or a full temporal logic |
+
+Use the table as a precision guard. When the Rust code checks one law, say
+which law it checks. When the source paper develops a larger theory, do not
+pretend the small Rust model has implemented all of it.
+
 ## Choose A Sketch Without Losing The Tiny ML Thread
 
 The source paper deliberately tours many application areas. This companion
@@ -1072,7 +1092,7 @@ system composition, and local-to-global truth.
 For the full validation gate:
 
 ```bash
-bash scripts/check.sh
+cargo test --all-targets --all-features
 ```
 
 ## Core Mental Model

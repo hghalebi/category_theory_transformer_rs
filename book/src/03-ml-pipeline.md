@@ -233,6 +233,40 @@ Logits -> Distribution
 Distribution x TokenId -> Loss
 ```
 
+## Framework Shortcut, Teaching Boundary
+
+PyTorch's `CrossEntropyLoss` accepts unnormalized logits and a target class
+index or target probabilities. That production API is efficient and ergonomic:
+the framework can combine normalization, target selection, reduction, and
+gradient behavior behind one call.
+
+This book splits the same idea into smaller objects:
+
+```text
+Logits -> Distribution -> Product<Distribution, TokenId> -> Loss
+```
+
+Read that as the book's smaller
+`Logits -> Distribution -> Product<Distribution, TokenId> -> Loss` path.
+
+That split is not a claim that production frameworks are wrong. It is a
+teaching boundary. It makes two questions visible before the code becomes
+compact:
+
+```text
+which boundary turns scores into probabilities?
+which target index selects the probability used by loss?
+```
+
+| Production API habit | Tiny Rust teaching boundary |
+| --- | --- |
+| `CrossEntropyLoss(logits, target_index)` | `Logits -> Distribution`, then `Distribution x TokenId -> Loss` |
+| logits and target passed together | probability invariant and target selection are separate |
+| optimized fused behavior may hide the intermediate probability object | reader can inspect the `Distribution` constructor and the target probability |
+
+When moving back to frameworks, remember that the compact API still owns both
+roles: score normalization and target-conditioned loss.
+
 The tests in `src/ml.rs` protect those claims: softmax normalizes logits into a
 distribution, and cross entropy is lower when the target token receives higher
 probability.

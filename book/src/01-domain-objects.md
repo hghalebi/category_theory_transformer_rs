@@ -853,6 +853,66 @@ positive.
 These checks keep bad configuration from becoming strange matrix behavior
 later.
 
+### Worked Example: Configuration Values Are Not Interchangeable
+
+The raw representation for all three values is small:
+
+```text
+VocabSize       -> usize
+ModelDimension  -> usize
+LearningRate    -> f32
+```
+
+That can make them look like ordinary numbers. They are not ordinary once they
+cross the model boundary.
+
+`Parameters::init` in `src/domain.rs` makes the distinction concrete:
+
+```rust,ignore
+let parameters = Parameters::init(
+    VocabSize::new(5)?,
+    ModelDimension::new(2)?,
+);
+```
+
+The first argument chooses how many vocabulary rows and output scores exist.
+The second argument chooses how wide each hidden vector is. Swapping those
+meanings would create a different model shape, even though both values are
+stored as `usize` underneath.
+
+The same rule applies to `LearningRate`. It is not a loss value, probability,
+or model dimension. It controls how far one update moves the parameters:
+
+```text
+new parameter = old parameter - learning_rate * gradient
+```
+
+If the learning rate were zero, negative, infinite, or not-a-number, the update
+would stop being the small controlled movement the training chapter needs.
+That is why construction fails early.
+
+ML reading:
+
+```text
+VocabSize      -> how many token classes the model can score
+ModelDimension -> how much hidden capacity each token receives
+LearningRate   -> how large each optimizer step is
+```
+
+Category-theory reading:
+
+`VocabSize` helps choose the finite token object, `ModelDimension` helps choose
+the intermediate representation object, and `LearningRate` selects one update
+from a family of possible training endomorphisms. The values are configuration
+for different parts of the typed system, not interchangeable numbers.
+
+Checkpoint question:
+
+```text
+If you see the raw value 5, what extra information tells you whether it is a
+vocabulary size, model dimension, token id, or step count?
+```
+
 ### ML Concept
 
 `VocabSize` controls:

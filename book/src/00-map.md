@@ -112,7 +112,56 @@ and compiler-checked boundaries.
 
 ## The Whole Pipeline
 
-The central pipeline is:
+The first mental model is:
+
+```text
+Text -> Tokens -> TrainingPairs -> ModelState -> Prediction -> Loss -> Updated ModelState
+```
+
+Read it as one question:
+
+> What object do we have now, and what typed transformation moves us to the next object?
+
+The same diagram with the first concrete Rust names is:
+
+```text
+Text
+  |
+  | tokenize
+  v
+TokenSequence
+  |
+  | adjacent pairs
+  v
+TrainingSet
+  |
+  | train with current Parameters
+  v
+Parameters
+  |
+  | predict
+  v
+Distribution
+  |
+  | compare with target token
+  v
+Loss
+  |
+  | optimizer step
+  v
+Parameters
+```
+
+The public names and Rust names are close, but not identical:
+
+| Reader-facing name | Rust name in this project | Why the distinction matters |
+| --- | --- | --- |
+| `Tokens` | `TokenSequence` | the code preserves order, not only a bag of token IDs |
+| `TrainingPairs` | `TrainingSet` of `Product<TokenId, TokenId>` | each example has an input token and the next-token target |
+| `ModelState` | `Parameters` | this tiny model's trainable state is its embedding and projection parameters |
+| `Updated ModelState` | updated `Parameters` | training is a state update, not a new kind of object |
+
+The central book pipeline is:
 
 ```text
 Text

@@ -17,6 +17,16 @@ Useful first contributions include:
 - add an exercise idea with an expected answer
 - improve glossary coverage for one confusing term
 
+For chapter clarity feedback, use the focused issue form:
+
+<https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml>
+
+If you want a guided review route first, use [docs/review-path.md](docs/review-path.md).
+
+Good clarity feedback includes the chapter or file, friction lens, command or
+page tried, first unclear sentence or output line, last clear idea, what you
+expected, what happened instead, and what would have helped.
+
 ## Issue Labels
 
 The project uses these labels to keep contribution work specific:
@@ -30,7 +40,6 @@ The project uses these labels to keep contribution work specific:
 - `Rust idiom review`
 - `exercise idea`
 - `glossary needed`
-- `reader confusion`
 - `bug`
 - `documentation`
 - `sponsor-worthy milestone`
@@ -48,15 +57,18 @@ Good starter issues are concrete. Examples:
 - `[chapter expansion] Turn bullet sections into full explanations`
 - `[FAQ] What does this project unlock?`
 
-See [community/starter-issues.md](community/starter-issues.md) for ready-to-open
-issue drafts.
+Use the labels above to keep new issues focused and actionable.
 
 ## Local Validation
 
 Run the full gate before submitting code or book changes:
 
 ```bash
-bash scripts/check.sh
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test --all-targets --all-features
+mdbook build
+mdbook test
 ```
 
 For a smaller loop:
@@ -64,7 +76,7 @@ For a smaller loop:
 ```bash
 cargo run --example 01_token_sequence
 cargo test --all-targets --all-features
-bash scripts/check-mdbook-coverage.sh
+mdbook test
 ```
 
 ## Contribution Rules
@@ -88,8 +100,11 @@ For book material:
 For issues:
 
 - quote the confusing sentence or command
+- name the command or public page you tried
 - say what you expected
 - say what actually happened
+- say what would have helped: a smaller example, diagram, glossary entry,
+  rewritten paragraph, or expected output
 - link the file or chapter when possible
 
 ## Pull Request Shape

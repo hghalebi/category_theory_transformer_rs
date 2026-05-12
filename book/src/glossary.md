@@ -76,6 +76,7 @@ Use this table to keep them separate.
 | self-attention head | `SelfAttentionHead` | "one query/key/value projection triple" for intuition, `SelfAttentionHead` when one head's role dimensions must be validated |
 | multi-head block | `MultiHeadTransformerBlock` | "several heads as one block" for intuition, `MultiHeadTransformerBlock` when head count and output-projection shape must be validated |
 | masked multi-head block | `MaskedMultiHeadTransformerBlock` | "block with allowed attention positions" for intuition, `MaskedMultiHeadTransformerBlock` when the mask joins hidden state at the block boundary |
+| fixed mask context | `AttentionMask` selected before a block call | "same mask reused for this run" for intuition, fixed context when an open masked block is viewed as `HiddenSequence -> HiddenSequence` |
 | sequence logits | `SequenceLogits` | "vocabulary scores at each sequence position" for intuition, `SequenceLogits` when sequence length and vocabulary width must be explicit |
 | Transformer readout | `TransformerReadout` | "sequence language-model head" for intuition, `TransformerReadout` when hidden width and vocabulary width must be validated |
 | tiny Transformer parameters | `TinyTransformerParameters` | "position plus block plus readout" for intuition, `TinyTransformerParameters` when named model roles should move together |
@@ -94,6 +95,36 @@ This alignment prevents two common confusions. First, not every prose phrase is
 a Rust type. Second, not every Rust type is a new mathematical concept. The book
 uses plain phrases for intuition, Rust names for exact code, and
 category-theory words only when the shape is visible.
+
+## Common Misreadings Index
+
+Use this as a small contrast drill. Each row starts with a sentence that sounds
+plausible, then puts the corrected boundary next to it. The point is not to
+memorize the table. The point is to notice which Rust object, ML role, or
+category-theory shape the misreading erased.
+
+| Plausible misreading | Corrected boundary | Rust evidence | What to say instead |
+| --- | --- | --- | --- |
+| `TokenId` is just a `usize`. | `TokenId` is a domain object for vocabulary positions. | `TokenId` is a named type consumed by token and embedding stages. | The raw number is local machinery; the boundary value says "vocabulary item." |
+| `Logits` are probabilities. | `Logits -> Distribution` is a required stage. | `Softmax` consumes `Logits` and produces `Distribution`. | Scores become probabilities only after row or vocabulary normalization. |
+| Loss only needs the prediction. | `Distribution x TokenId -> Loss` is a product-input boundary. | `CrossEntropy` consumes prediction and target together. | The target token tells the loss which probability to judge. |
+| A training step can return changed weights only. | `Parameters -> Parameters` or `TransformerTrainingState -> TransformerTrainingState` preserves the next update shape. | `TrainStep` and Transformer train steps return complete state objects. | The updated object must be ready for the next step without reconstruction. |
+| `fmap` means any function call. | `fmap` changes inside values while preserving wrapper shape. | `VecFunctor::fmap` returns `Vec<B>` and `OptionFunctor::fmap` returns `Option<B>`. | The operation maps the contents and keeps the outer structure. |
+| Returning the left object makes a boundary an endomorphism. | Count inputs first: `A x B -> A` is still product-input. | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` needs two inputs. | A unary endomorphism has shape `A -> A`; product input must stay visible. |
+| Self-attention makes Q, K, and V the same role. | Self-attention shares source ownership before projection. | `HiddenToQuery`, `HiddenToKey`, and `HiddenToValue` produce separate role objects. | The same hidden sequence may feed all three projections, but the roles remain distinct. |
+| Masking after softmax is equivalent. | `AttentionScores x AttentionMask -> AttentionScores -> AttentionWeights`. | The mask is applied before `AttentionSoftmax`. | Illegal positions should not receive probability mass. |
+| A masked block is automatically an endomorphism because it returns `HiddenSequence`. | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` while the mask is open. | The block consumes `AttentionMask` at the boundary. | Keep the mask visible, or explicitly say a fixed mask induces a `HiddenSequence -> HiddenSequence` view for that run. |
+| `MultiHeadOutput` can be added directly to `HiddenSequence`. | `MultiHeadOutput -> ProjectedAttentionOutput` must happen first. | `ResidualConnection` expects projected model-width rows. | Concatenated heads must return to model width before residual addition. |
+| One finite-difference match proves training is correct. | A finite-difference check is local evidence for one selected parameter path. | Tests compare one inferred update gradient with one numerical slope. | The check supports the local implementation; it does not prove every parameter, dataset, or optimizer. |
+
+When one of these misreadings appears in your own answer, repair it with three
+questions:
+
+```text
+Which object did I erase?
+Which ML or software role did that object protect?
+Which category-theory shape did I name too early or too loosely?
+```
 
 ## Category-Theory Terms
 
@@ -1476,6 +1507,42 @@ First-principles reading:
 
 The mask is not a side channel. It is an explicit input to the block. The mask
 shape must match the query-by-key score table produced inside each head.
+
+## Fixed Mask View
+
+Rust syntax:
+
+```text
+AttentionMask
+MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence
+```
+
+ML concept:
+
+A fixed mask view means a particular mask has already been chosen for this run.
+For example, one training example may reuse the same allowed-position pattern
+every time the block is applied to its hidden sequence.
+
+Category theory concept:
+
+The open boundary is product-input:
+
+```text
+HiddenSequence x AttentionMask -> HiddenSequence
+```
+
+After choosing one concrete mask as context, that specific run can induce a
+unary map:
+
+```text
+HiddenSequence -> HiddenSequence
+```
+
+First-principles reading:
+
+Do not erase the mask to get a cleaner category name. Either keep the open
+product-input boundary visible, or say exactly which `AttentionMask` was fixed
+before calling the result a `HiddenSequence -> HiddenSequence` view.
 
 ## Sequence Logits
 

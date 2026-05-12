@@ -1,4 +1,32 @@
+# Build output
 /target/
 /book/html/
+
+# Local private workspace for maintainer-only material.
+.book-internal/
+
+# Legacy local-only paths. These should not return to the public repository.
+scripts/
+REVIEW_THIS_BOOK.md
+github-issue-bodies/
+book/*AUDIT*.md
+book/*CONTRACT*.md
+book/*QUALITY_SCORECARD*.md
+book/*REWRITE_LOG*.md
+book/CHAPTER_*.md
+book/EDITORIAL_RESEARCH_NOTES.md
+book/STYLE_GUIDE.md
+book/TEXTBOOK_COMPLETION_AUDIT.md
+community/*feedback-synthesis*.md
+community/external-feedback-synthesis.md
+community/feedback-wall.md
+community/reader-feedback-*.md
+community/reader-review-*.md
+community/reader-review-guide.md
+community/reviewer-*.md
+community/starter-issues.md
+.github/ISSUE_TEMPLATE/reader-confusion.yml
+
+# Local editor and OS files
 .idea/
 .DS_Store

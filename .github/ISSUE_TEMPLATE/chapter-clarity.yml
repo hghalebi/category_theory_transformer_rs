@@ -1,0 +1,99 @@
+name: Chapter clarity feedback
+description: Report the exact point where a chapter, example, or exercise becomes unclear.
+title: "[good first feedback] "
+labels:
+  - good first feedback
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report one exact unclear point after reading a chapter, running an example, or attempting an exercise.
+        Precise friction is more useful than a broad review.
+        Do not include email addresses, private messages, personal notes, or contact details.
+
+        If you are not sure where to start, choose one public review path:
+        - Rust engineer first-run path: https://github.com/hghalebi/category_theory_transformer_rs/issues/8
+        - ML engineer training and attention path: https://github.com/hghalebi/category_theory_transformer_rs/issues/9
+        - Category-theory precision path: https://github.com/hghalebi/category_theory_transformer_rs/issues/10
+        - Technical educator learning path: https://github.com/hghalebi/category_theory_transformer_rs/issues/11
+        - Beginner-adjacent first confusion path: https://github.com/hghalebi/category_theory_transformer_rs/issues/12
+  - type: dropdown
+    id: perspective
+    attributes:
+      label: Your perspective
+      description: Choose the closest fit. This helps route the feedback without making assumptions about you.
+      options:
+        - Rust engineer
+        - ML engineer or learner
+        - category-theory reader
+        - technical educator
+        - beginner-adjacent learner
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: friction_lens
+    attributes:
+      label: Friction lens
+      description: Choose the main kind of confusion. This helps route the report to the right rewrite pass.
+      options:
+        - Rust syntax or idiom
+        - ML intuition
+        - category-theory precision
+        - exercise or command evidence
+        - source or reference connection
+        - learner path or next action
+        - other
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Chapter, section, or file
+      placeholder: "book/src/02-morphisms-composition.md"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or page you tried
+      description: Paste the command, example, test, or public book page you used.
+      placeholder: "cargo run --example 02_morphism_composition"
+    validations:
+      required: true
+  - type: textarea
+    id: unclear_point
+    attributes:
+      label: First unclear point
+      description: Quote the first sentence, code line, output line, or exercise prompt where the path became unclear.
+    validations:
+      required: true
+  - type: textarea
+    id: last_clear_idea
+    attributes:
+      label: Last clear idea
+      description: Name the last idea, output line, or code boundary that still made sense before the confusion.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected to understand
+      description: Say what you thought the chapter or example was about to explain.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Describe the confusion, failed command, missing bridge, or overloaded term.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested_fix
+    attributes:
+      label: What would have helped?
+      description: A smaller example, diagram, glossary entry, rewritten paragraph, or expected output is enough.
+    validations:
+      required: true

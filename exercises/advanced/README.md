@@ -91,16 +91,16 @@ Your answer should name:
 - the readout-only update protected by `TransformerReadoutTrainStep`,
 - the local feed-forward update protected by `TransformerFeedForwardTrainStep`,
 - the composed token-loss update protected by `TransformerBlockTrainStep`,
-- the richer reader-facing diagrams and direct reader feedback that still
-  remain planned.
+- the richer reader-facing diagrams and worked examples that still remain
+  planned.
 
 Pass condition:
 
 The answer separates the implemented attention, residual, normalization,
 feed-forward, positional-encoding, single-head, multi-head, masked-block,
 structured-state, readout-only training, local feed-forward training, and
-composed block-training boundaries from future reader-driven diagram and
-worked-example refinements.
+composed block-training boundaries from future diagram and worked-example
+refinements.
 
 ## Exercise 5: Explain A Finite-Difference Gradient Check
 

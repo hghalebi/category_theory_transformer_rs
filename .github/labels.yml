@@ -1,6 +1,6 @@
 - name: good first feedback
   color: "2ea44f"
-  description: First-time reader feedback with one clear confusion point.
+  description: First-time reader feedback with one specific unclear point.
 - name: needs Rust example
   color: "f97316"
   description: Needs a runnable Rust example or clearer code path.
@@ -25,9 +25,6 @@
 - name: glossary needed
   color: "06b6d4"
   description: Needs a glossary entry or clearer definition.
-- name: reader confusion
-  color: "ef4444"
-  description: Reports a specific confusing place in the material.
 - name: bug
   color: "d73a4a"
   description: Something is broken or incorrect.

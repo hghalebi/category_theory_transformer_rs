@@ -38,6 +38,11 @@ fn main() -> CtResult<()> {
     println!("Middle objects kept visible:");
     println!("Vector");
     println!("Logits");
+    println!();
+    println!("Composition rule:");
+    println!("first target must equal second source");
+    println!("Embedding then LinearToLogits is legal because Vector == Vector");
+    println!("Embedding then Softmax is illegal because Vector != Logits");
 
     Ok(())
 }

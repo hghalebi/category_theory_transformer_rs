@@ -108,6 +108,13 @@ Feedback is easiest to act on when it is opened in the
 [GitHub repository](https://github.com/hghalebi/category_theory_transformer_rs)
 with a specific chapter, command, or source file.
 
+Use the public
+[review path](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-path.md)
+if you want a short route for reviewing the book. Use the
+[chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
+when you can name the first unclear sentence, output line, table row, code
+block, or exercise.
+
 This edition is intentionally public before it is final.
 
 ## Use With Reference

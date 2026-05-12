@@ -24,7 +24,7 @@ The strongest sponsor targets are:
 - facilitator notes for engineering teams
 - advanced modules for attention and Transformer blocks
 - CI-verified examples that stay runnable over time
-- a public issue queue for reader confusion and terminology review
+- a public issue queue for clarity feedback and terminology review
 
 ## What Sponsorship Improves
 

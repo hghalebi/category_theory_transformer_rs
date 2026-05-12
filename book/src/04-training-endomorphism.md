@@ -96,6 +96,49 @@ examples in the `TrainingSet`, averages their gradients with `batch_scale`, and
 returns a new `Parameters` value. The tests repeat that one endomorphism with
 `apply_endomorphism_n_times`.
 
+## Training Debugging Checklist
+
+When training output looks surprising, separate four questions before changing
+the update rule:
+
+| Question | Safe answer in this chapter | Common mistake |
+| --- | --- | --- |
+| What object is updated? | `Parameters` | treating `Loss` as the updated object |
+| What object measures quality? | `Loss` from `Parameters x TrainingSet` | returning loss instead of new parameters |
+| What repeats? | the same `TrainStep : Parameters -> Parameters` | inventing a new arrow for every step count |
+| What controls update size? | `LearningRate` and the averaged gradient | assuming more steps always means better behavior |
+
+The example prints both roles:
+
+```text
+TrainStep : Parameters -> Parameters
+Parameters x TrainingSet -> Loss
+```
+
+Those lines are deliberately different. `Loss` tells you how the current
+parameters perform on the dataset. It is evidence, not the next model state.
+`TrainStep` returns the next model state. That is what makes repetition legal:
+
+```text
+Parameters0 -> Parameters1 -> ... -> Parameters80
+```
+
+Use this diagnostic when changing `StepCount`:
+
+| If you change | You are testing | You are not proving |
+| --- | --- | --- |
+| `StepCount::new(1)` | one update preserves state shape | that one update is enough training |
+| `StepCount::new(10)` | repeated updates can improve the tiny dataset | that all datasets behave the same |
+| `StepCount::new(200)` | the same endomorphism can be iterated many times | that more steps can never overshoot or plateau |
+
+The category-theory lesson is stable even when the numeric loss changes in
+different ways:
+
+```text
+the update remains Parameters -> Parameters
+the measurement remains Parameters x TrainingSet -> Loss
+```
+
 ## Source Snapshot
 
 This file implements one full-batch optimizer update.
@@ -124,6 +167,91 @@ The whole file is about one idea:
 
 ```text
 training is a repeatable typed transformation of model state
+```
+
+## Source Reading Bridge: One Step Has Four Responsibilities
+
+The short list above names the file's pieces, but it does not yet tell you how
+to read the main function. The central method is `TrainStep::apply` in
+`src/training.rs`. Read it as four responsibilities in order:
+
+```text
+validate the current Parameters
+run the current model on each training example
+accumulate gradients for embedding, output weights, and bias
+subtract a learning-rate-scaled average gradient to create new Parameters
+```
+
+The ML intuition is gradient descent. A loss signal does not replace the model.
+It tells each parameter which direction would reduce the current error on the
+training set. The code makes that visible by separating the diagnostic value
+from the state update:
+
+```text
+average_loss(&params, &dataset) -> Loss
+TrainStep::apply(params)       -> Parameters
+```
+
+That difference matters. If `TrainStep::apply` returned `Loss`, it could tell
+you how bad the current model is, but it could not be composed with itself for
+the next update.
+
+The category-theory connection is the same boundary in a shorter form:
+
+```text
+TrainStep(dataset, learning_rate) : Parameters -> Parameters
+```
+
+The dataset and learning rate configure which update arrow you have. The
+gradient buffers are internal machinery used while building the output object;
+they are not the object being returned by the morphism.
+
+Checkpoint:
+
+```text
+If `TrainStep::apply` returned `Loss` instead of `Parameters`, what ability
+would `apply_endomorphism_n_times` lose?
+```
+
+## Production Optimizer Boundary
+
+Production frameworks usually split the training loop across model parameters,
+stored gradients, an optimizer object, and an optimizer step. PyTorch's
+`torch.optim` documentation describes optimizers as objects that hold current
+state and update parameters from computed gradients. The common loop shape is:
+
+```text
+optimizer.zero_grad()
+output = model(input)
+loss = loss_fn(output, target)
+loss.backward()
+optimizer.step()
+```
+
+This book compresses the same teaching shape into one explicit Rust morphism:
+
+```text
+TrainStep(dataset, learning_rate) : Parameters -> Parameters
+```
+
+The tiny Rust boundary is smaller than a production optimizer. It does not
+model momentum, parameter groups, optimizer state dictionaries, closures,
+schedulers, mixed precision, or distributed training. It keeps one full-batch
+gradient update inspectable.
+
+| Production training responsibility | Tiny Rust teaching boundary |
+| --- | --- |
+| optimizer owns parameter groups and update state | `TrainStep` owns `TrainingSet` and `LearningRate` |
+| `loss.backward()` computes gradients | `TrainStep::apply` accumulates local gradients directly |
+| `optimizer.step()` updates parameters | `TrainStep::apply` returns a new `Parameters` value |
+| `zero_grad()` manages stored gradient buffers | gradient buffers are local variables inside one update |
+| schedulers may change learning rates across epochs | one `LearningRate` configures one repeated endomorphism |
+
+When you return to a framework, the useful transfer question is:
+
+```text
+which object owns the update state, and which call turns current parameters
+into next parameters?
 ```
 
 ## Worked Example: Repeating One Update

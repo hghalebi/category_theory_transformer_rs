@@ -27,6 +27,182 @@ into one of these edit decisions:
 - clarify the answer-key reasoning,
 - move the exercise later in the ladder.
 
+## Mastery Gate Rubric
+
+Use the chapter mastery gates in `book/src/exercises.md` as a lightweight
+oral or written check. A strong response does not need polished wording, but it
+must contain all three pieces of evidence:
+
+```text
+Run evidence:
+the learner ran or can point to the exact command, test, or output.
+
+Explain evidence:
+the learner can name the protected value, ML role, or category shape without
+copying the chapter sentence.
+
+Transfer evidence:
+the learner can apply the same distinction to one nearby case, especially an
+invalid shortcut or a changed input.
+```
+
+Facilitator rule:
+
+```text
+If the learner can run but cannot explain, assign the matching exercise.
+If the learner can explain but cannot transfer, assign the failure signal.
+If the learner can transfer, move on and keep the answer short.
+```
+
+Examples:
+
+- A Domain Objects answer passes only if it names both the constructor
+  invariant and the bad state rejected by that invariant.
+- A Morphism and Composition answer passes only if it names the missing middle
+  object in an illegal composition.
+- A Transformer Roadmap answer passes only if it counts inputs before naming a
+  boundary as ordinary morphism, product-input morphism, endomorphism, or
+  illegal composition.
+
+## Checkpoint Quiz Answer Rationales
+
+Use these rationales after attempting the quiz in `book/src/exercises.md`.
+Short answers are fine, but each answer should identify the boundary being
+protected.
+
+### Question 1
+
+Expected answer:
+
+`TokenId` makes it harder to confuse a vocabulary position with an arbitrary
+count, array index, model dimension, or step count.
+
+Rationale:
+
+The Rust type carries the domain role. The ML meaning is "which vocabulary
+item." The category-theory reading is that `TokenId` is an object consumed by
+specific morphisms such as embedding, not a generic number.
+
+### Question 2
+
+Expected answer:
+
+The Rust evidence is that `Softmax` consumes `Logits`, not `Vector`. The ML
+evidence is that probabilities are computed from vocabulary scores, not
+directly from the embedding vector.
+
+Rationale:
+
+The missing middle object is `Logits`. Legal composition requires the output
+type of one stage to match the input type of the next stage.
+
+### Question 3
+
+Expected answer:
+
+The `0.9` target-probability case should have lower cross-entropy than the
+`0.1` case.
+
+Rationale:
+
+Cross-entropy penalizes the model according to the probability it assigned to
+the correct target. Higher target probability means lower surprise and lower
+loss.
+
+### Question 4
+
+Expected answer:
+
+The update no longer has the reusable shape
+`TransformerTrainingState -> TransformerTrainingState` or
+`Parameters -> Parameters`.
+
+Rationale:
+
+A training loop must be able to feed the updated object into the next update.
+Returning one loose matrix forces callers to reconstruct the rest of the state
+and breaks the endomorphism-shaped loop.
+
+### Question 5
+
+Expected answer:
+
+They preserve the wrapper shape while changing the inside value when a value is
+available.
+
+Rationale:
+
+For `Vec`, every element is transformed and the result is still a `Vec`. For
+`Option`, `Some` is transformed and `None` stays absent. That is the local
+meaning of structure-preserving mapping in these examples.
+
+### Question 6
+
+Expected answer:
+
+Both paths should return the same `Option<B>`.
+
+Rationale:
+
+One path maps inside the vector first and then selects the first element. The
+other path selects the first element first and then maps inside the option.
+Commutativity means the order of these two structure-respecting operations
+does not change the final result.
+
+### Question 7
+
+Expected answer:
+
+It has a product input. The mask is extra evidence, so the whole input object
+is not just `AttentionScores`.
+
+Rationale:
+
+An endomorphism in this book has shape `A -> A`. A boundary with shape
+`A x B -> A` may return the left object, but it is still a product-input
+morphism because it needs both inputs.
+
+### Question 8
+
+Expected answer:
+
+The mask must remove illegal source positions before probability mass is
+assigned.
+
+Rationale:
+
+Softmax normalizes a row into weights. If the illegal position is still present
+during softmax, it competes for probability mass. Masking first means the
+weights answer "among legal source positions, how much should each one
+contribute?"
+
+### Question 9
+
+Expected answer:
+
+The missing boundary is
+`MultiHeadOutput -> ProjectedAttentionOutput`.
+
+Rationale:
+
+Concatenated heads may have width `head_count * head_dimension`. Residual
+addition needs the projected output to match the hidden sequence model
+dimension before it can return `HiddenSequence`.
+
+### Question 10
+
+Expected answer:
+
+It checks the local sign and scale of the implemented gradient for one selected
+parameter. It does not prove every parameter, every dataset, every optimizer,
+or every future training loop is correct.
+
+Rationale:
+
+Finite differences give an independent local slope estimate. Agreement with
+the inferred update gradient is strong evidence for that parameter path, but
+the scope remains local.
+
 ## Book Chapter Exercises
 
 ### Exercise 1: Explain One Domain Type
@@ -100,12 +276,26 @@ Embedding : TokenId -> Vector
 Softmax   : Logits -> Distribution
 ```
 
-The missing middle stage is `LinearToLogits`.
+The composition diagnostic is:
+
+| Question | Answer |
+| --- | --- |
+| first source | `TokenId` |
+| first target | `Vector` |
+| second source | `Logits` |
+| second target | `Distribution` |
+| failed middle-object match | `Vector` is not `Logits` |
+| missing morphism | `LinearToLogits : Vector -> Logits` |
+
+The missing middle stage is `LinearToLogits`. In ML terms, the skipped stage is
+vocabulary scoring: the model needs logits before `Softmax` can produce a
+probability distribution.
 
 Facilitator note:
 
 Do not let learners solve this by weakening types. The lesson is that the type
-boundary correctly rejects the skipped prediction stage.
+boundary correctly rejects the skipped prediction stage. A strong answer
+debugs source, target, and middle objects before changing code.
 
 ### Exercise 5: Change The Training Repetition Count
 
@@ -116,6 +306,25 @@ Expected reasoning:
 - More steps usually reduce loss on this tiny dataset until the simple update
   rule reaches its limit.
 - Repetition is legal because the shape is `Parameters -> Parameters`.
+
+Expected training diagnostic:
+
+| Question | Expected answer |
+| --- | --- |
+| what object is updated? | `Parameters` |
+| what object measures quality? | `Loss`, computed from `Parameters x TrainingSet` |
+| what repeats? | the same `TrainStep : Parameters -> Parameters` |
+| what controls update size? | `LearningRate` and averaged gradients |
+
+Loss is evidence about the current parameters. It is not the object returned by
+the update. The update returns another `Parameters` value, which is why the next
+step can run without reconstructing the model state.
+
+Facilitator note:
+
+Reject answers that say only "more steps make loss go down." A strong answer
+separates the measurement arrow from the update arrow and notes that this tiny
+dataset can improve while still not proving that more steps are always better.
 
 ### Exercise 6: Explain `Distribution<T>::map`
 
@@ -279,6 +488,95 @@ Expected category-shape classifications:
 | `TransformerTrainingState -> TransformerTrainingState` | state endomorphism |
 | `HiddenSequence x MultiHeadOutput -> HiddenSequence` | illegal boundary; projection is missing |
 
+Expected quick roadmap classification drill:
+
+| Boundary | Classification | Reason |
+| --- | --- | --- |
+| `HiddenSequence -> QuerySequence` | ordinary morphism | one hidden-state object is projected into the query role object |
+| `AttentionScores x AttentionMask -> AttentionScores` | product-input morphism returning the score object | the mask is extra context, so the whole input is not only `AttentionScores` |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | endomorphism | one input object returns the same public object |
+| `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | product-input morphism returning hidden state | residual addition needs both the old hidden stream and the projected sublayer output |
+| `TransformerTrainingState -> TransformerTrainingState` | state endomorphism | the whole training state returns as the same object for the next update |
+
+Trap explanation:
+
+```text
+`A x B -> A` is not an endomorphism on `A`; it is a product-input morphism
+unless `B` has been fixed as context or the product `A x B` is the object being
+studied.
+```
+
+Expected same-output classification:
+
+| Boundary | Classification | Reason |
+| --- | --- | --- |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | endomorphism | one input object and the same output object |
+| `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | product-input morphism returning hidden state | residual addition needs the old hidden stream and the projected sublayer output |
+| `HiddenSequence x MultiHeadOutput -> HiddenSequence` | illegal boundary before category naming | the output projection is missing, so raw concatenated heads cannot rejoin the residual stream |
+
+The shared output name is not enough. The answer must count inputs before
+naming the category shape.
+
+Expected source-ownership diagnostic:
+
+| Case | Query owner | Key owner | Value owner | Score rows | Score columns |
+| --- | --- | --- | --- | --- | --- |
+| Self-attention | the same hidden sequence before projection | the same hidden sequence before projection | the same hidden sequence before projection | target/query positions | source/key-value positions, equal to the query length in the simple self-attention case |
+| Cross-attention | target hidden sequence | source hidden sequence | source hidden sequence | target/query positions | source/key-value positions |
+
+Self-attention shares source ownership before projection. It does not erase the
+role split after projection. A strong answer should still name
+`QuerySequence`, `KeySequence`, and `ValueSequence` separately, then say that
+the simple self-attention case feeds all three projections from the same
+`HiddenSequence`.
+
+Expected linear-scope diagnostic:
+
+| Question | Expected answer |
+| --- | --- |
+| Which listed boundaries are the linear Q/K/V projections? | `HiddenSequence -> QuerySequence`, `HiddenSequence -> KeySequence`, and `HiddenSequence -> ValueSequence` |
+| Which boundary turns scores into nonlinear normalized weights? | `AttentionScores -> AttentionWeights` |
+| Which product-input boundaries must not be collapsed into one unary map? | query-key scoring, mask application, value mixing, and residual addition |
+| Which state endomorphism belongs to training rather than forward attention? | `TransformerTrainingState -> TransformerTrainingState` |
+
+Use this to reject an overextended answer such as "the whole attention block is
+an endofunctor." A strong answer can say that linear Q/K/V projections are a
+safe place to compare with advanced categorical work, while softmax, masking,
+residual addition, normalization, feed-forward refinement, and training state
+each need their own typed boundary in this book.
+
+Expected source-scope diagnostic:
+
+| Question | Expected answer |
+| --- | --- |
+| Which source supports decomposing attention into recurring components? | `On the Anatomy of Attention` |
+| Which source supports comparing the linear Q/K/V part with advanced category theory? | `Self-Attention as a Parametric Endofunctor` |
+| What does neither source license you to claim about the whole Rust roadmap block? | Neither source means the tiny roadmap block is one undifferentiated endofunctor or that the Rust code implements the full paper formalism. |
+| What is the local Rust contract for every component in this book? | Each component needs a named type, a boundary shape, and a failure it prevents. |
+
+Use this to keep source roles separate. The anatomy source supports decomposition before comparison. The parametric-endofunctor source supports a narrower comparison around linear self-attention structure. The local teaching claim is smaller than both papers: the Rust roadmap names each component so a reader can inspect the boundary and the invalid connection it blocks.
+
+Expected stackability diagnostic:
+
+| Boundary | Can stack directly as `HiddenSequence -> HiddenSequence`? | Reason |
+| --- | --- | --- |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | yes | it has one input and returns the same public object |
+| `MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence` | yes | the block owns its internal attention, residual, normalization, and feed-forward path behind one unary boundary |
+| `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` | no, not while the mask is open | the full input object is a product, so the mask context is still required |
+| fixed-mask view of `MaskedMultiHeadTransformerBlock` | yes, for that named mask context | selecting the mask first induces a unary map over `HiddenSequence` for that run |
+| `TransformerTrainingState -> TransformerTrainingState` | yes | the complete training object carries the parameter and update context |
+
+The precise ways to repeat a masked block are:
+
+```text
+1. keep the mask visible and supply HiddenSequence x AttentionMask each time
+2. explicitly fix a mask first, then name the induced HiddenSequence -> HiddenSequence view
+```
+
+Do not accept "it returns `HiddenSequence`" as enough evidence. A strong answer
+counts the full input object, names the mask context, and says whether the
+context is open or fixed.
+
 Naming rule:
 
 ```text
@@ -302,7 +600,10 @@ answer must separate scores, masks, weights, value rows, projection, residual
 shape, and the final return to `HiddenSequence`. Also reject answers that call
 every returning-to-same-object line an endomorphism. A binary boundary such as
 `AttentionScores x AttentionMask -> AttentionScores` still depends on a product
-input.
+input. Also reject answers that say self-attention makes query, key, and value
+"the same thing." The same source sequence can produce three distinct role
+objects. Also reject answers that import an advanced categorical label for the
+whole block when the answer only identified the linear projections.
 
 ### Exercise 13: Compute Cross-Entropy From Target Probability
 
@@ -433,6 +734,50 @@ says only "use the right type." A strong answer must say that logits are
 unnormalized scores, that `Softmax` must produce a validated `Distribution`,
 and that `CrossEntropy` also needs the target token through the product shape
 `Distribution x TokenId -> Loss`.
+
+### Exercise 16: Trace Transformer Training State
+
+Expected output evidence:
+
+```text
+initial state: step=0, learning_rate=0.100, model_dimension=2, vocab_size=3
+forward shape: 2 positions x vocabulary size 3
+readout update: step 0 -> 1
+feed-forward update: step 1 -> 2
+composed block update: step 2 -> 3
+```
+
+Expected classification:
+
+| Update | What it trains | Public shape |
+| --- | --- | --- |
+| `TransformerReadoutTrainStep` | sequence readout from hidden states to token logits | `TransformerTrainingState -> TransformerTrainingState` |
+| `TransformerFeedForwardTrainStep` | local position-wise feed-forward sublayer against hidden targets | `TransformerTrainingState -> TransformerTrainingState` |
+| `TransformerBlockTrainStep` | readout, feed-forward, attention output projection, query/key/value projections, and layer-normalization parameters from token targets | `TransformerTrainingState -> TransformerTrainingState` |
+
+Expected reasoning:
+
+```text
+Rust syntax:
+Each training-step type implements a morphism that consumes one
+TransformerTrainingState and returns another TransformerTrainingState.
+
+ML concept:
+The state keeps model parameters, learning rate, and step count together. The
+three updates train different parameter subsets, but each one still advances
+the same training object.
+
+Category theory concept:
+Each update is an endomorphism because its input and output object are the same
+state type. The internal gradient path can change without changing the outside
+loop shape.
+```
+
+Reject answers that say only "the loss goes down." A strong answer names the
+state invariant: after every update the next step still has parameters,
+learning rate, and step count. Returning only readout weights, only
+feed-forward weights, or a bag of changed matrices would make the next update
+reconstruct missing context by hand.
 
 ## Beginner Exercises
 
@@ -701,6 +1046,14 @@ between the loss morphism and the parameter update morphism.
 What failure would this test catch?
 A wrong sign, a missing bias gradient, a dropped projection path, or a scaling
 mistake where averaged loss and summed gradients disagree.
+
+Official framework practice says the same thing more generally. PyTorch's
+`gradcheck` documentation compares small finite differences against analytical
+gradients and treats agreement as tolerance-based local evidence. It also warns
+about precision, non-differentiable points, and overlapping memory. In this
+book, the matching Rust claim is intentionally smaller: a finite-difference
+match supports one selected parameter path, not the correctness of every
+gradient, dataset, or optimizer setting.
 ```
 
 Facilitator note:

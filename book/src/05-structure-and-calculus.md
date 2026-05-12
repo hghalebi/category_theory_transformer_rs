@@ -1805,6 +1805,48 @@ The chain rule is composition of local derivative maps.
 A big neural network is many small maps composed forward, then many local
 gradient rules composed backward.
 
+## Production Autograd Boundary
+
+Production frameworks do not ask the user to manually call one `backward`
+method for every operation. PyTorch's autograd documentation describes a
+reverse automatic-differentiation system: the forward pass records the
+operations that produced tensors, and the backward pass traces that recorded
+graph with the chain rule.
+
+The tiny Rust example keeps only one local rule:
+
+```text
+MulOp::forward  : Scalar x Scalar -> Scalar
+MulOp::backward : Scalar x Scalar x LocalGradient -> (LocalGradient, LocalGradient)
+```
+
+Read those as `MulOp::forward  : Scalar x Scalar -> Scalar` and
+`MulOp::backward : Scalar x Scalar x LocalGradient -> (LocalGradient, LocalGradient)`.
+
+That is not a replacement for autograd. It is a microscope for one boundary.
+It answers three questions before the full graph machinery appears:
+
+```text
+which forward value must be remembered?
+which local derivative is used?
+which upstream gradient is being carried backward?
+```
+
+| Production autograd responsibility | Tiny Rust teaching boundary |
+| --- | --- |
+| record a dynamic graph during the forward pass | inspect one explicit `MulOp::forward` call |
+| save intermediate tensors needed for backward rules | pass `x` and `y` back into `MulOp::backward` |
+| traverse the graph backward using the chain rule | compute `dL/dx` and `dL/dy` from `dL/dz` |
+| control when operations are tracked | make the local derivative boundary explicit in the type signature |
+
+When you return to a framework, the useful question is not "where did the
+chain rule go?" It is:
+
+```text
+which graph edges and saved values let the framework compose the same local
+rules automatically?
+```
+
 ## Run The Example
 
 <details>

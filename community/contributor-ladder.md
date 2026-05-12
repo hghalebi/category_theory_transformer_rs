@@ -5,7 +5,12 @@ learning path clearer.
 
 ## Level 1: Reader Feedback
 
-Open an issue that points to one confusing sentence, command, or example.
+Open a chapter clarity report that points to one confusing sentence, command,
+or example:
+
+<https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml>
+
+The strongest first contribution names the command or page tried, the last clear idea, the first unclear point, and the smallest fix that would help.
 
 ## Level 2: Documentation Clarifier
 
@@ -14,8 +19,8 @@ checkpoint.
 
 ## Level 3: Example Contributor
 
-Add or improve one runnable Rust example and make sure `bash scripts/check.sh`
-passes.
+Add or improve one runnable Rust example and make sure `cargo test
+--all-targets --all-features` passes.
 
 ## Level 4: Reviewer
 
@@ -29,4 +34,4 @@ Review pull requests for one lens:
 ## Level 5: Maintainer-Level Contributor
 
 Own a roadmap milestone, keep the validation gate green, and help convert
-reader confusion into structured work.
+reader questions into structured work.

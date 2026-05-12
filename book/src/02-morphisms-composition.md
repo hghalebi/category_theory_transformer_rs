@@ -190,6 +190,151 @@ In this chapter, the word "morphism" gives that rule a handle. A morphism has a
 source object and a target object. Two morphisms compose only when the first
 target object is the second source object.
 
+## Runnable Example: The Middle Type Is The Contract
+
+Run the example for this chapter:
+
+```bash
+cargo run --example 02_morphism_composition
+```
+
+The example builds the legal path in two composed steps:
+
+```rust,ignore
+let token_to_logits = Compose::<_, _, Vector>::new(embedding.clone(), linear.clone());
+let token_to_distribution = Compose::<_, _, Logits>::new(token_to_logits, Softmax);
+```
+
+Read the third type argument as the middle object being checked:
+
+```text
+Embedding then LinearToLogits:
+TokenId -> Vector -> Logits
+middle object: Vector
+
+token_to_logits then Softmax:
+TokenId -> Logits -> Distribution
+middle object: Logits
+```
+
+The example output ends with the composition rule:
+
+```text
+first target must equal second source
+Embedding then LinearToLogits is legal because Vector == Vector
+Embedding then Softmax is illegal because Vector != Logits
+```
+
+This is the concrete Rust reason a morphism is more than a metaphor. The type
+signature tells you which object an arrow produces and which object the next
+arrow expects. If those do not match, the composed pipeline is not a valid
+pipeline.
+
+## Composition Debugging Checklist
+
+When a composition fails, do not start by changing type signatures. Name the
+three objects first:
+
+```text
+first source  -> first target
+second source -> second target
+```
+
+Then ask whether the middle objects match:
+
+```text
+first target == second source ?
+```
+
+For the legal path:
+
+| Stage | Source object | Target object |
+| --- | --- | --- |
+| `Embedding` | `TokenId` | `Vector` |
+| `LinearToLogits` | `Vector` | `Logits` |
+| `Softmax` | `Logits` | `Distribution` |
+
+The legal middle objects are:
+
+```text
+Vector
+Logits
+```
+
+For the broken shortcut:
+
+| Attempted composition | First target | Second source | Result |
+| --- | --- | --- | --- |
+| `Embedding` then `Softmax` | `Vector` | `Logits` | illegal composition |
+
+The fix is not to make `Softmax` accept `Vector`. That would erase the model
+stage that turns hidden features into vocabulary scores. The fix is to restore
+the missing morphism:
+
+```text
+Vector -> Logits
+```
+
+This checklist is useful beyond this chapter. Most pipeline bugs can be read
+as one of three failures:
+
+| Failure | Diagnostic question | Repair |
+| --- | --- | --- |
+| missing stage | Which middle object should exist but does not? | restore the morphism that produces it |
+| wrong stage order | Which target object arrives too early or too late? | reorder the arrows so targets meet sources |
+| wrong object name | Which two values have the same raw representation but different roles? | introduce or restore the domain type |
+
+The category-theory word "composition" is doing practical engineering work
+here. It tells you to debug the boundary, not the individual matrix
+multiplication, softmax formula, or display output first.
+
+## Compiler Error As Evidence
+
+The example does not include a broken composition because examples in this
+repository are expected to run. But the failed shape is still worth naming.
+
+If you try to compose `Embedding` directly with `Softmax`, the intended shape
+would be:
+
+```text
+Embedding : TokenId -> Vector
+Softmax   : Logits -> Distribution
+```
+
+For `Compose<F, G, Middle>` to implement `Morphism<Input, Output>`, Rust needs
+these two facts:
+
+```text
+F: Morphism<Input, Middle>
+G: Morphism<Middle, Output>
+```
+
+With `Embedding` followed by `Softmax`, choosing `Middle = Vector` asks Rust
+for:
+
+```text
+Embedding : Morphism<TokenId, Vector>
+Softmax   : Morphism<Vector, Distribution>
+```
+
+The first fact is true. The second fact is false. `Softmax` is implemented for
+`Logits -> Distribution`, not `Vector -> Distribution`.
+
+That failed trait bound is not noise. It says the missing middle object is:
+
+```text
+Logits
+```
+
+and the missing morphism is:
+
+```text
+LinearToLogits : Vector -> Logits
+```
+
+So the repair is not to make `Softmax` accept `Vector`. The repair is to
+restore the stage that turns hidden features into vocabulary scores.
+
 ## From Function To Morphism
 
 An ordinary Rust function already has the outline:

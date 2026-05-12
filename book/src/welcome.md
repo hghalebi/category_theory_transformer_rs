@@ -57,6 +57,25 @@ The repository is public at
 [github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
 Use it for source files, runnable examples, issues, and contribution work.
 
+## Help Improve This Book
+
+If you want to help as a reader, use the public
+[review path](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-path.md).
+
+The most useful report is small:
+
+```text
+Command or page tried:
+Last clear idea:
+First unclear sentence, output line, table row, code block, or exercise:
+What would have helped:
+```
+
+Open the
+[chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
+when the learning path breaks. One exact blocked step is more useful than a
+broad review.
+
 ## What This Book Is About
 
 Most machine-learning education starts with frameworks.

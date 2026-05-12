@@ -55,8 +55,32 @@ jobs:
           fi
           mdbook --version
 
-      - name: Run full validation gate
-        run: bash scripts/check.sh
+      - name: Check Rust formatting
+        run: cargo fmt --check
+
+      - name: Lint Rust
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Test Rust
+        run: cargo test --all-targets --all-features
+
+      - name: Run examples and demo
+        run: |
+          cargo run --example 01_token_sequence
+          cargo run --example 01_domain_objects
+          cargo run --example 02_morphism_composition
+          cargo run --example 03_training_endomorphism
+          cargo run --example 04_structure_and_calculus
+          cargo run --example 05_seven_sketches
+          cargo run --example 06_attention_scores
+          cargo run --example 07_transformer_training_state
+          cargo run --bin category_ml
+
+      - name: Build book
+        run: mdbook build
+
+      - name: Test book
+        run: mdbook test
 
       - name: Upload GitHub Pages artifact
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

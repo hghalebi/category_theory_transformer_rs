@@ -192,6 +192,12 @@ than the implementation alone.
 {{#include ../../examples/06_attention_scores.rs}}
 ```
 
+### `examples/07_transformer_training_state.rs`
+
+```rust,ignore
+{{#include ../../examples/07_transformer_training_state.rs}}
+```
+
 ## Project Configuration
 
 ### `Cargo.toml`
