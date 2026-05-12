@@ -115,7 +115,7 @@ impl Morphism<Parameters, Parameters> for TrainStep {
 mod tests {
     use super::*;
     use crate::category::{StepCount, apply_endomorphism_n_times};
-    use crate::domain::{ModelDimension, TokenSequence, VocabSize};
+    use crate::domain::{ModelDimension, Product, TokenId, TokenSequence, TrainingSet, VocabSize};
     use crate::ml::{DatasetWindowing, average_loss};
 
     #[test]
@@ -129,6 +129,38 @@ mod tests {
         let after = average_loss(&trained, &dataset)?;
 
         assert!(after.value() < before.value());
+        Ok(())
+    }
+
+    #[test]
+    fn one_training_step_preserves_parameter_shape() -> CtResult<()> {
+        let tokens = TokenSequence::from_indices([1, 2, 3, 4])?;
+        let dataset = DatasetWindowing.apply(tokens)?;
+        let params = Parameters::init(VocabSize::new(5)?, ModelDimension::new(4)?);
+        let train_step = TrainStep::new(dataset, LearningRate::new(0.1)?);
+
+        let trained = train_step.apply(params.clone())?;
+
+        assert_eq!(trained.vocab_size(), params.vocab_size());
+        assert_eq!(trained.d_model(), params.d_model());
+        Ok(())
+    }
+
+    #[test]
+    fn training_rejects_target_outside_vocabulary() -> CtResult<()> {
+        let dataset = TrainingSet::new([Product::new(TokenId::new(0), TokenId::new(9))])?;
+        let params = Parameters::init(VocabSize::new(2)?, ModelDimension::new(2)?);
+        let train_step = TrainStep::new(dataset, LearningRate::new(0.1)?);
+
+        assert!(matches!(
+            train_step.apply(params),
+            Err(CtError::OutOfRange {
+                kind: "target token",
+                index: 9,
+                limit: 2,
+            })
+        ));
+
         Ok(())
     }
 }

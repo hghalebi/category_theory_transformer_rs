@@ -28,6 +28,22 @@ The point is not to write long answers.
 
 The point is to connect the same block of code across all three meanings.
 
+The exercise method is:
+
+```text
+read one small idea
+run the matching command
+break one boundary on purpose
+explain the failure
+restore the working version
+```
+
+This matters because the Rust compiler and the test suite are part of the
+lesson. The official Rust testing material treats tests as executable checks
+for expected behavior. This book uses the same habit for learning: a failed
+test, rejected constructor, or compiler error is not only a problem to remove.
+It is evidence about which boundary the code protects.
+
 Before starting, make sure the basic Rust feedback loop works:
 
 ```bash
@@ -37,6 +53,162 @@ cargo test --all-targets --all-features
 That command is part of the learning method. It proves that the examples in the
 book are not only explanatory text; they are tied to code that the compiler can
 check.
+
+After attempting an exercise, compare your reasoning with the public answer key
+in `exercises/ANSWER_KEY.md`. Use it to check the shape of the explanation, not
+to memorize wording.
+
+## Exercise Ladder
+
+Use the exercises in this order:
+
+| Stage | File or chapter | What you practice |
+| --- | --- | --- |
+| Beginner | `exercises/beginner/README.md` | Change inputs, observe output, name one invariant |
+| Core | this chapter | Explain each concept through Rust, ML, and category theory |
+| Intermediate | `exercises/intermediate/README.md` | Add one morphism and explain one composition failure |
+| Advanced | `exercises/advanced/README.md` | Extend a chapter, diagram, law, or sketch test |
+
+Do not skip the small exercises. How People Learn II emphasizes that learners
+need to retrieve and use knowledge in new situations. In this course, transfer
+means taking the same explanation method from `TokenId` to `Distribution`, then
+from `Distribution` to training, and then from training to the seven applied
+sketches.
+
+## Core Chapter Practice Map
+
+Use this map when you finish a chapter and want the matching practice task.
+
+| Chapter | Practice target | Best exercise |
+| --- | --- | --- |
+| [Welcome](welcome.md) | Explain the three-lens reading contract | Beginner Exercise 3 |
+| [Course Map](00-map.md) | Connect terminal output to pipeline stages | Exercise 2 and Exercise 8 |
+| [Domain Objects](01-domain-objects.md) | Explain wrappers, invariants, and typed objects | Exercise 1 and Exercise 7 |
+| [Morphism and Composition](02-morphisms-composition.md) | Explain legal and illegal composition | Exercise 4 |
+| [The Tiny ML Pipeline](03-ml-pipeline.md) | Trace adjacent pairs, prediction, and loss | Exercise 3, Exercise 9, and Exercise 13 |
+| [Training as an Endomorphism](04-training-endomorphism.md) | Explain repeated `Parameters -> Parameters` updates | Exercise 5 |
+| [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) | Explain mapping, laws, traces, and local gradients | Exercise 6 and Exercise 14 |
+| [Seven Sketches Through Rust](seven-sketches-rust.md) | Identify the law or boundary a structure protects | Exercise 10 |
+| [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12 and Advanced Exercise 5 |
+
+The map is not a separate syllabus. It is a repair tool. If a chapter feels
+clear while reading but vague one hour later, use the matching exercise to make
+the idea active again.
+
+## Failure Signals
+
+A good exercise often fails before it works. Use the failure signal as part of
+the answer.
+
+| Signal | Usually means | What to explain |
+| --- | --- | --- |
+| Compiler type error | two stages do not connect | the missing middle object |
+| Constructor returns `Err(...)` | a value violates an invariant | the bad state rejected at the boundary |
+| Test assertion fails | the behavior no longer matches the law | which example stopped preserving the intended structure |
+| Command output changes | the data path changed | which typed value moved differently through the pipeline |
+
+When an exercise asks you to break something, do it in a small local edit and
+then restore the working version. The final repository should still pass the
+validation commands.
+
+## Exercise Evidence Map
+
+Use this table before checking the answer key. It tells you what kind of
+evidence should exist when an exercise is complete.
+
+| Exercise | Progress evidence | Failure or output to inspect |
+| --- | --- | --- |
+| Exercise 1 | written three-lens explanation | raw representation, invariant, and pipeline stage are all named |
+| Exercise 2 | `cargo run --bin category_ml` | terminal output includes the new adjacent transition |
+| Exercise 3 | handwritten adjacent pairs | three overlapping `TokenId` pairs are present |
+| Exercise 4 | temporary broken composition | compiler reports a missing trait bound or middle object |
+| Exercise 5 | `cargo run --example 03_training_endomorphism` | loss output changes as `StepCount` changes |
+| Exercise 6 | rewritten output distribution | probabilities stay attached to transformed outcomes |
+| Exercise 7 | constructor boundary explanation | `Err(...)` is connected to the invalid value |
+| Exercise 8 | five-sentence file summary | one command is named as the proof that the file still works |
+| Exercise 9 | source-backed comparison | one external resource is connected to one local source file |
+| Exercise 10 | `cargo run --example 05_seven_sketches` or a negative test | one law still holds, or one invalid structure is rejected |
+| Exercise 11 | block explanation | a beginner-facing Rust explanation and a shape name are both present |
+| Exercise 12 | `cargo run --example 06_attention_scores` | first output line and category shape for each attention boundary are recorded |
+| Exercise 13 | `cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib` | lower loss is assigned to the higher target probability |
+| Exercise 14 | `cargo test structure::tests --lib` | naturality paths and monoid laws are both named |
+| Exercise 15 | mixed boundary diagnosis | each failure is classified as an invariant, composition, endomorphism, shape, or local-to-global boundary |
+
+This is not extra bureaucracy. Rustlings-style practice works because the
+learner gets a concrete feedback signal. This course uses the same idea:
+command output, a constructor error, a compiler error, or a named test should
+tell you whether the concept is becoming executable.
+
+## Worked Example: Mixed Boundary Diagnosis
+
+Before solving Exercise 15, study one complete diagnosis. The case is:
+
+```text
+CrossEntropy receives Logits instead of Product<Distribution, TokenId>.
+```
+
+A weak answer says:
+
+```text
+The types are wrong.
+```
+
+That is true, but it is not precise enough. A useful diagnosis names the Rust
+boundary, the ML mistake, and the category-theory shape.
+
+```text
+Boundary type:
+composition boundary plus product-input boundary
+
+Rust syntax:
+CrossEntropy implements Morphism<Product<Distribution, TokenId>, Loss>. The
+input must therefore be a product containing a validated Distribution and the
+target TokenId. Logits alone have the wrong type.
+
+ML concept:
+Logits are unnormalized vocabulary scores. Cross-entropy needs the probability
+assigned to the correct target token. The missing work is Softmax followed by
+pairing the resulting Distribution with the target TokenId.
+
+Category theory concept:
+The legal route is Logits -> Distribution and then
+Distribution x TokenId -> Loss. Skipping the product object hides the supervised
+part of the loss calculation.
+
+Smallest useful fix:
+Run Softmax first, then call CrossEntropy on
+Product::new(distribution, target_token).
+```
+
+Use this as the standard for Exercise 15. Do not stop at "wrong type." Explain
+which object was missing, which morphism should have produced it, and which
+shortcut the boundary rejected.
+
+## Exercise Attempt Record
+
+When an exercise feels unclear, record the attempt in this shape before opening
+an issue or comparing with the answer key:
+
+```text
+Exercise:
+Chapter:
+Command run:
+First failure signal:
+Line or concept that caused confusion:
+What I expected:
+What happened instead:
+Answer-key mismatch:
+Suggested rewrite:
+```
+
+This report is useful because it ties reader confusion to a concrete exercise,
+command, failure signal, and chapter location. It also keeps feedback public
+and impersonal: do not include private data, local secrets, or personal
+background details that are not needed to improve the exercise.
+
+Use the answer key after the attempt record. If the answer key explains the
+concept but not the failure you saw, that is evidence that the exercise needs a
+better hint, pass condition, or worked example.
 
 ## Worked Example
 
@@ -63,6 +235,104 @@ such as Embedding can start from it.
 
 Notice the order: name the syntax, connect it to the ML role, then name only the
 categorical shape the code supports.
+
+## Worked Example: Gradient Checking
+
+This worked example supports Advanced Exercise 5 in
+`exercises/advanced/README.md`.
+
+The exercise asks why a finite-difference test compares:
+
+```text
+inferred gradient from one training update
+central finite difference of average loss
+```
+
+The reason is that these are two independent ways to ask the same local
+question:
+
+```text
+If I nudge this parameter, how does the loss move?
+```
+
+CS231n presents this as the difference between numerical gradients and analytic
+gradients: the numerical version is slower and approximate, but useful for
+checking whether the analytic implementation is correct. Dive into Deep
+Learning explains the matching training shape from the other direction:
+backpropagation walks the computation in reverse order, stores intermediate
+values, and computes gradients for parameters. This project makes that idea
+small enough to inspect in Rust.
+
+The code-level test has two paths.
+
+The first path performs one training step:
+
+```text
+before parameter
+-> TransformerBlockTrainStep
+-> after parameter
+```
+
+From that update, the test infers the gradient:
+
+```text
+inferred_gradient = (before_value - after_value) / learning_rate
+```
+
+That matches gradient descent:
+
+```text
+parameter <- parameter - learning_rate * gradient
+```
+
+The second path does not trust the training step. It clones the same state,
+changes one parameter in two directions, and measures the loss:
+
+```text
+loss_plus  = loss(parameter + epsilon)
+loss_minus = loss(parameter - epsilon)
+```
+
+Then it estimates the local slope:
+
+```text
+finite_difference = (loss_plus - loss_minus) / (2 * epsilon)
+```
+
+A strong answer for one parameter family looks like this:
+
+```text
+Rust syntax:
+The test selects one feed-forward bias entry, clones the training state twice,
+adds epsilon to the entry in one clone, subtracts epsilon in the other clone,
+and calls transformer_block_average_loss on both states.
+
+ML concept:
+The bias is a trainable parameter. The central finite difference estimates how
+the average loss changes around the current bias value. The one-step update
+infers the gradient that backpropagation used. If both slopes match, the
+implemented update has the right local sign and scale for that parameter.
+
+Category theory concept:
+The training step is an endomorphism on TransformerTrainingState. The check
+asks whether this state update agrees locally with the loss morphism that it is
+supposed to reduce.
+
+What failure would this test catch?
+It would catch a missing bias gradient, a reversed update sign, a dropped path
+through the feed-forward block, or a mismatch between averaged loss and summed
+gradients.
+```
+
+The important habit is not the formula by itself. The habit is triangulation:
+
+```text
+implementation path
+numerical measurement
+conceptual explanation
+```
+
+When all three agree, the code becomes easier to trust and easier to teach.
 
 ## Partially Completed Example
 
@@ -98,9 +368,20 @@ Now solve the same kind of exercise without the filled answer. Pick `Loss`,
 
 ## Transfer Exercise
 
-Design a new wrapper type for a future Transformer chapter, such as
-`SequenceLength`, `HeadCount`, or `AttentionScore`. State the raw representation,
-the invariant, and one function that should consume or produce it.
+Design a wrapper type for the attention roadmap or a future Transformer chapter,
+such as `SequenceLength`, `HeadCount`, or `AttentionScores`. State the raw
+representation, the invariant, and one function that should consume or produce
+it.
+
+Expected failure to consider:
+
+```text
+What should the constructor reject?
+```
+
+If the answer is "nothing," the type may be only a semantic wrapper. If the
+answer is "zero heads," "empty sequence," or "probability outside the allowed
+range," the type needs a validating constructor.
 
 ## Exercise 1: Explain One Domain Type
 
@@ -174,6 +455,13 @@ Pass condition:
 - the dataset windowing output includes your new transition
 - you can explain why a longer `TokenSequence` creates more training examples
 
+Debugging hint:
+
+If the output does not include the new transition, check whether you changed
+both the vocabulary and the token sequence. A vocabulary entry alone does not
+create a training pair. The pair appears only when two token ids are adjacent in
+the sequence.
+
 ## Exercise 3: Trace `DatasetWindowing`
 
 Use [The Tiny ML Pipeline](03-ml-pipeline.md).
@@ -198,6 +486,19 @@ why does next-token training need adjacent pairs?
 Category theory concept:
 why is each example a product object?
 ```
+
+Check yourself before reading onward:
+
+```text
+(TokenId(4), TokenId(8))
+(TokenId(8), TokenId(15))
+(TokenId(15), TokenId(16))
+```
+
+The syntax creates overlapping adjacent windows. The ML idea is next-token
+supervision: each input token is paired with the token that follows it. The
+category-theory shape is a product object because each training example carries
+two typed values together.
 
 ## Exercise 4: Break A Composition
 
@@ -225,6 +526,15 @@ which prediction stage was skipped?
 
 Category theory concept:
 which middle object failed to match?
+```
+
+Debugging hint:
+
+Do not fix this by changing the type signatures. Restore the missing stage
+instead. The intended path is:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
 ```
 
 ## Exercise 5: Change The Training Repetition Count
@@ -263,6 +573,17 @@ what happens when training repeats more times?
 
 Category theory concept:
 why can the update be repeated?
+```
+
+Expected observation:
+
+One step should preserve the shape of the parameters but may not reduce loss
+much. More steps usually make the tiny example improve until the hand-written
+training rule reaches its limit. The important category-theory point is not
+"more is always better"; it is that the same update has the shape:
+
+```text
+Parameters -> Parameters
 ```
 
 ## Exercise 6: Explain `Distribution<T>::map`
@@ -386,6 +707,18 @@ Pass condition:
 - you can explain which constructor or method prevents invalid structure
 - your explanation uses Rust syntax, ML or software concept, and category theory concept
 
+Negative test option:
+
+Instead of changing the runnable example, inspect one of the negative tests in
+`src/sketches.rs`:
+
+- missing database reference
+- mismatched signal-matrix middle dimension
+- open-circuit serial boundary mismatch
+
+Explain what invalid structure the test rejects. This is often the fastest way
+to understand what a law or constructor is protecting.
+
 ## Exercise 11: Write A New Block Explanation
 
 Choose any block from the source snapshots that the chapter did not explain in
@@ -412,6 +745,263 @@ Pass condition:
 - A beginner can understand the Rust syntax.
 - An ML learner can understand why the block exists.
 - A category-theory learner can name the shape.
+
+## Exercise 12: Trace Attention Shape Flow
+
+Use [Transformer Roadmap](roadmap.md), `src/attention.rs`, and
+`examples/06_attention_scores.rs`.
+
+Run:
+
+```bash
+cargo run --example 06_attention_scores
+```
+
+Write down the first time the output mentions each shape:
+
+```text
+AttentionScores:
+AttentionWeights:
+AttentionOutput:
+MultiHeadOutput:
+ProjectedAttentionOutput:
+HiddenSequence after residual:
+HiddenSequence after normalization:
+HiddenSequence after feed-forward:
+```
+
+Then explain:
+
+```text
+Rust syntax:
+which named type or boundary protects each shape?
+
+ML concept:
+what changes between scores, weights, value mixing, projection, residual,
+normalization, and feed-forward?
+
+Category theory concept:
+where does the path use a product input, and where does it return to the same
+HiddenSequence object?
+```
+
+Then classify these boundaries:
+
+```text
+QuerySequence x KeySequence -> AttentionScores:
+AttentionScores x AttentionMask -> AttentionScores:
+AttentionScores -> AttentionWeights:
+AttentionWeights x ValueSequence -> AttentionOutput:
+LayerNormalization : HiddenSequence -> HiddenSequence:
+TransformerTrainingState -> TransformerTrainingState:
+HiddenSequence x MultiHeadOutput -> HiddenSequence:
+```
+
+Before naming each boundary, write the answer to the first diagnostic question:
+
+```text
+How many inputs does this boundary require?
+```
+
+Pass condition:
+
+- You name at least four concrete Rust types from `src/attention.rs`.
+- You distinguish raw attention scores from normalized attention weights.
+- You explain why residual addition must return to `HiddenSequence`.
+- You connect one terminal output line to one typed boundary.
+- You classify at least one product-input morphism, one endomorphism, and one
+  illegal boundary.
+- You do not call a product-input boundary an endomorphism only because its
+  output matches the left input object.
+
+## Exercise 13: Compute Cross-Entropy From Target Probability
+
+Use [The Tiny ML Pipeline](03-ml-pipeline.md) and `src/ml.rs`.
+
+The `CrossEntropy` morphism uses:
+
+```text
+loss = -ln(probability assigned to the target token)
+```
+
+For target token `TokenId(0)`, compare these two distributions:
+
+```text
+confident = [0.90, 0.10]
+surprised = [0.10, 0.90]
+```
+
+Compute:
+
+```text
+confident loss:
+surprised loss:
+which one is lower:
+```
+
+Then run:
+
+```bash
+cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib
+```
+
+Explain:
+
+```text
+Rust syntax:
+which code reads the target probability, and which constructor validates the
+loss?
+
+ML concept:
+why does the same target token produce different losses under the two
+distributions?
+
+Category theory concept:
+why is CrossEntropy a morphism from Distribution x TokenId to Loss?
+```
+
+Pass condition:
+
+- You compute approximate losses for `0.90` and `0.10`.
+- You explain why the target index is `0` in both cases.
+- You connect the test name to the learning claim.
+
+## Exercise 14: Trace Naturality And Monoid Laws
+
+Use [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md)
+and `src/structure.rs`.
+
+Run:
+
+```bash
+cargo test structure::tests --lib
+```
+
+For the naturality square, write the two paths:
+
+```text
+top then right:
+left then bottom:
+why they should match:
+```
+
+For the monoid law check, write the three laws:
+
+```text
+left identity:
+right identity:
+associativity:
+```
+
+Then explain:
+
+```text
+Rust syntax:
+which functions or methods implement each path or law?
+
+ML or software concept:
+why do consistent wrapper conversion and trace grouping matter in a pipeline?
+
+Category theory concept:
+what does commutativity mean for the square, and what does associativity mean
+for the trace monoid?
+```
+
+Pass condition:
+
+- You name `naturality_square_holds_for_first_option`.
+- You name `monoid_laws_hold_for_pipeline_trace`.
+- You explain why both naturality paths return the same `Option` value.
+- You explain why changing parentheses in trace combination should not change
+  the final trace.
+
+## Exercise 15: Mixed Boundary Diagnosis
+
+Use this exercise after finishing the core chapters. The goal is interleaved
+transfer: diagnose which kind of boundary is being protected without being told
+which chapter the failure came from.
+
+For each case, classify the boundary:
+
+```text
+invariant boundary
+composition boundary
+endomorphism boundary
+shape boundary
+local-to-global boundary
+```
+
+Then answer with the usual three lenses.
+
+### Cases
+
+```text
+1. A raw usize is used where the code expects TokenId.
+2. Embedding is followed directly by Softmax.
+3. CrossEntropy receives Logits instead of Product<Distribution, TokenId>.
+4. A training step returns Loss instead of Parameters.
+5. SignalMatrix::compose_after sees mismatched middle dimensions.
+6. SafetyCover reports a global claim even though one interval is false.
+7. A residual connection tries to add rows with different model dimensions.
+```
+
+For each case, write:
+
+```text
+Boundary type:
+
+Rust syntax:
+
+ML or software concept:
+
+Category theory concept:
+
+Smallest useful fix:
+```
+
+Pass condition:
+
+- You classify all seven cases.
+- You name at least five concrete Rust types or functions.
+- You explain the smallest useful fix without weakening the type boundary.
+- You identify which cases are about invalid values, which are about invalid
+  composition, and which are about invalid global claims.
+
+Debugging hint:
+
+Do not answer every case with "the compiler rejects it." Some failures are
+constructor errors, some are returned `CtError::ShapeMismatch`, some are
+conceptual category-shape failures, and some are law-check failures. The skill
+is choosing the right explanation for the right boundary.
+
+## Retrieval Practice
+
+Close the source file before answering these prompts.
+
+### Recall
+
+Name three kinds of feedback this course uses:
+
+```text
+compiler error
+constructor error
+test failure
+```
+
+### Explain
+
+Explain why a failed composition is useful evidence, not only an obstacle.
+
+### Apply
+
+Pick one exercise you solved and rewrite it for a different type or module.
+Keep the same answer shape:
+
+```text
+Rust syntax:
+ML or software concept:
+Category theory concept:
+```
 
 ## Where This Leaves Us
 

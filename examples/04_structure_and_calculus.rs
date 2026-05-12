@@ -33,6 +33,18 @@ fn main() -> CtResult<()> {
 
     println!("dL/dx: {}", dl_dx.value());
     println!("dL/dy: {}", dl_dy.value());
+    println!();
+    println!("Typed transformation:");
+    println!("VecFunctor::fmap : Vec<A> x (A -> B) -> Vec<B>");
+    println!("OptionFunctor::fmap : Option<A> x (A -> B) -> Option<B>");
+    println!("Naturality square:");
+    println!("Vec<A> -> Vec<B> -> Option<B>");
+    println!("Vec<A> -> Option<A> -> Option<B>");
+    println!("Monoid:");
+    println!("PipelineTrace x PipelineTrace -> PipelineTrace");
+    println!("Chain rule:");
+    println!("Scalar x Scalar -> Scalar");
+    println!("dL/dz -> (dL/dx, dL/dy)");
 
     Ok(())
 }

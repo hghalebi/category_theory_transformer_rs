@@ -15,7 +15,7 @@ The project already has:
 - GitHub Pages deployment
 
 The next phase is about adoption: clearer first-run experience, contributor
-onboarding, diagrams, issue structure, and sponsor-worthy milestones.
+onboarding, diagram refinement, issue structure, and sponsor-worthy milestones.
 
 ## Milestone 1: First Visitor Clarity
 
@@ -40,7 +40,7 @@ Status: in progress.
 
 Tasks:
 
-- add diagrams for the text-to-training-pairs flow
+- refine diagrams for the text-to-training-pairs and training-loop flows
 - expand exercises by difficulty
 - add glossary entries when readers report confusion
 - keep category-theory terminology precise
@@ -71,7 +71,7 @@ Sponsor-worthy tracks:
 - diagrams and visual explanations
 - workshop-ready exercises
 - CI-verified learning examples
-- advanced modules for attention and Transformer blocks
+- advanced modules that turn the current finite-difference checks into richer learner-facing gradient-checking exercises over structured Transformer state
 - facilitator notes for teams using the material internally
 
 ## Milestone 5: License Decision

@@ -75,4 +75,17 @@ mod tests {
         assert_eq!(dl_dy.value(), 2.0);
         Ok(())
     }
+
+    #[test]
+    fn multiply_backward_scales_with_upstream_gradient() -> CtResult<()> {
+        let mul = MulOp;
+        let x = Scalar::new(2.0)?;
+        let y = Scalar::new(3.0)?;
+        let upstream = LocalGradient::new(4.0)?;
+        let (dl_dx, dl_dy) = mul.backward(x, y, upstream)?;
+
+        assert_eq!(dl_dx.value(), 12.0);
+        assert_eq!(dl_dy.value(), 8.0);
+        Ok(())
+    }
 }

@@ -112,6 +112,16 @@ fn main() -> CtResult<()> {
         ),
     ])?;
     println!("global behavior truth: {:?}", safety.global_truth());
+    println!();
+    println!("Typed transformation:");
+    println!("InformationLevel <= InformationLevel checks preorder");
+    println!("FeatureCount <-> LayerBudget checks Galois law");
+    println!("ResourceBundle x ResourceBundle -> ResourceBundle");
+    println!("EmployeeRecord -> DepartmentId must resolve in CompanyInstance");
+    println!("DesignRequirement x ImplementationOffer -> bool");
+    println!("SignalMatrix x SignalMatrix -> SignalMatrix when dimensions match");
+    println!("OpenCircuit x OpenCircuit -> OpenCircuit when ports match");
+    println!("SafetyCover -> TruthValue");
 
     Ok(())
 }

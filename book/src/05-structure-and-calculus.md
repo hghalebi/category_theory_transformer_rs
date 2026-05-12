@@ -43,6 +43,77 @@ the chain rule in calculus, you already know informal versions of this chapter.
 The new work is to name those repeated shapes and connect them to the same
 typed pipeline discipline used earlier.
 
+## Trace Both Paths Before The Names
+
+Before reading `src/structure.rs` or `src/calculus.rs`, trace the paths first.
+The formal names in this chapter should arrive after the reader can see what
+has to agree.
+
+The first two-path check is about converting a vector into an optional first
+item.
+
+```text
+Path 1:
+Vec<A> --map f--> Vec<B> --first--> Option<B>
+
+Path 2:
+Vec<A> --first--> Option<A> --map f--> Option<B>
+```
+
+Both paths should return the same `Option<B>`. The code names that agreement
+with `naturality_square_holds_for_first_option`.
+
+The second two-path check is about grouping a trace.
+
+```text
+Path 1:
+(embedding <> linear) <> softmax
+
+Path 2:
+embedding <> (linear <> softmax)
+```
+
+Both paths should produce the same `PipelineTrace`. The empty trace should also
+leave any real trace unchanged.
+
+The chain-rule check has a different shape: one path goes forward through the
+computation, and one path carries derivative information backward.
+
+```text
+Forward:
+x, y -> z = x * y -> L
+
+Backward:
+dL/dz -> dL/dx and dL/dy
+```
+
+For `z = x * y`, the local derivatives are:
+
+```text
+dz/dx = y
+dz/dy = x
+```
+
+So the backward path scales those local derivatives by the upstream gradient:
+
+```text
+dL/dx = dL/dz * y
+dL/dy = dL/dz * x
+```
+
+That is the useful mental model before any abstraction:
+
+```text
+same result by two structural paths
+or
+same gradient signal carried through local paths
+```
+
+Now the names can be useful. A functor preserves wrapper shape while mapping
+inside it. A natural transformation makes the two wrapper-conversion paths
+agree. A monoid lets trace grouping stop mattering. The chain rule composes
+local derivative information.
+
 ## Source Snapshots
 
 `src/structure.rs` covers functors, natural transformations, and monoids.
@@ -105,6 +176,53 @@ the code changes the contents while preserving the surrounding container.
 
 Before reading the `Functor` trait, explain what stayed the same and what
 changed in the `Vec` mapping example.
+
+## Four Patterns, Four Questions
+
+This chapter is easier if you do not try to memorize four category-theory words
+at once. Treat each word as an answer to one engineering question.
+
+| Pattern | Engineering question | Course example |
+| --- | --- | --- |
+| Functor | Can I transform values inside a wrapper without changing the wrapper shape? | `VecFunctor::fmap`, `OptionFunctor::fmap` |
+| Natural transformation | Can I convert one wrapper shape to another consistently? | `Vec<A> -> Option<A>` |
+| Monoid | Can I combine many values with an empty value that changes nothing? | `PipelineTrace` |
+| Chain rule | Can I compose local derivative signals through a computation? | `MulOp::backward` |
+
+The chapter's tests mirror that progression. They check small functor-law
+examples, a naturality square, monoid laws for traces, and the local chain-rule
+gradient for multiplication. The tests are not a full mathematical proof of all
+possible cases. They are executable anchors for the patterns the book is
+teaching.
+
+The law and boundary map is:
+
+| Pattern | Law or boundary | What the code checks |
+| --- | --- | --- |
+| Functor | identity and composition should be preserved | `VecFunctor` examples map identity and composed functions |
+| Natural transformation | mapping before conversion should match conversion before mapping | `naturality_square_commutes` |
+| Monoid | empty value and grouping should not change the combined trace | `pipeline_trace_obeys_monoid_laws` |
+| Chain rule | upstream gradient should scale local derivatives | `multiply_backward_scales_with_upstream_gradient` |
+
+Use this table as the chapter's visual index. If a later section feels
+abstract, return to the row and ask which Rust test makes the law visible.
+
+## What Is A Law, A Test, Or An Analogy?
+
+This chapter uses mathematical names, executable tests, and engineering
+analogies. Those are related, but they are not the same kind of evidence.
+
+| Claim in this chapter | Evidence in this repository | How to read it |
+| --- | --- | --- |
+| Functor identity and composition are laws | `VecFunctor` tests with concrete values | The tests are examples of the laws, not a proof for every possible type |
+| `Vec<A> -> Option<A>` is structure-preserving | `naturality_square_commutes` | The test checks one concrete naturality square for the first-item conversion |
+| `PipelineTrace` behaves like a monoid | `pipeline_trace_obeys_monoid_laws` | The code checks empty-trace and grouping behavior for this trace type |
+| `MulOp::backward` follows the chain rule | `multiply_backward_scales_with_upstream_gradient` | The test checks one local derivative rule for multiplication |
+| Larger ML systems can use the same patterns | chapter prose and exercises | This is a transfer analogy until a larger typed implementation exists |
+
+The rule for this book is conservative: a law word should point to a concrete
+Rust test, and an analogy should be named as an analogy. That keeps the chapter
+useful without pretending that a few tests prove all of category theory.
 
 ## `Functor<A, B>`
 
@@ -246,6 +364,10 @@ while preserving identity and composition.
 
 This tutorial's trait is deliberately small. It focuses on the practical
 `fmap` operation.
+
+The tests in `src/structure.rs` check the two law-shaped habits this chapter
+uses: mapping identity leaves values unchanged, and mapping two functions in
+sequence matches mapping their composition.
 
 ## `VecFunctor`
 
@@ -1171,6 +1293,28 @@ Option<A> --fmap f--> Option<B>
 
 The square commutes when both paths agree.
 
+The same square as a data-flow diagram:
+
+```mermaid
+flowchart LR
+    VA["Vec<i32>"] -->|VecFunctor::fmap x10| VB["Vec<i32>"]
+    VA -->|VecToFirstOption::transform| OA["Option<i32>"]
+    VB -->|VecToFirstOption::transform| OB["Option<i32>"]
+    OA -->|OptionFunctor::fmap x10| OB
+```
+
+Read it as two executable paths:
+
+```text
+top then right:
+Vec<i32> -> Vec<i32> -> Option<i32>
+
+left then bottom:
+Vec<i32> -> Option<i32> -> Option<i32>
+```
+
+The test passes only when both paths produce the same optional value.
+
 ## `Monoid`
 
 The problem this block solves is:
@@ -1417,6 +1561,24 @@ identity
 associativity
 ```
 
+The associativity check can be read as a grouping diagram:
+
+```mermaid
+flowchart LR
+    A["embedding"] --> AB["embedding + linear"]
+    B["linear"] --> AB
+    AB --> ABC1["(embedding + linear) + softmax"]
+    C["softmax"] --> ABC1
+    B --> BC["linear + softmax"]
+    C --> BC
+    A --> ABC2["embedding + (linear + softmax)"]
+    BC --> ABC2
+```
+
+The two final traces should contain the same step names in the same order. The
+law is not about performance or formatting. It says grouping nested trace
+combinations should not change what the trace means.
+
 ## The Calculus File
 
 The problem `src/calculus.rs` solves is:
@@ -1632,6 +1794,10 @@ dL/dx = dL/dz * dz/dx = dL/dz * y
 dL/dy = dL/dz * dz/dy = dL/dz * x
 ```
 
+The companion tests use two upstream gradients. With `dL/dz = 1`, the gradients
+are `3` and `2`. With `dL/dz = 4`, the same local rule scales them to `12` and
+`8`.
+
 ## Category-Theory Concept
 
 The chain rule is composition of local derivative maps.
@@ -1658,6 +1824,46 @@ cargo run --example 04_structure_and_calculus
 
 You should see mapping over `Vec`, mapping over `Option`, a naturality check, a
 combined trace, a monoid law check, and local gradients for multiplication.
+The example also prints the typed boundaries behind those values:
+
+```text
+Typed transformation:
+VecFunctor::fmap : Vec<A> x (A -> B) -> Vec<B>
+OptionFunctor::fmap : Option<A> x (A -> B) -> Option<B>
+Naturality square:
+Vec<A> -> Vec<B> -> Option<B>
+Vec<A> -> Option<A> -> Option<B>
+Monoid:
+PipelineTrace x PipelineTrace -> PipelineTrace
+Chain rule:
+Scalar x Scalar -> Scalar
+dL/dz -> (dL/dx, dL/dy)
+```
+
+## Example Output Transfer Checklist
+
+This example is a compact law lab. Each printed line should make one
+consistency condition visible.
+
+Use the output this way:
+
+| Example output | Boundary to own | Shortcut to reject |
+| --- | --- | --- |
+| `Vec fmap square: [1, 4, 9]` | a function is mapped over each item while vector order and length stay meaningful | treating `fmap` as an arbitrary rewrite of the wrapper |
+| `Option fmap +1: Some(8)` | a present value can be transformed without changing the optional context | inventing a value when the option is `None` |
+| `naturality square holds: true` | both paths from `Vec<A>` to `Option<B>` agree | calling any wrapper conversion natural without checking mapping compatibility |
+| `trace: ["embedding", "linear", "softmax"]` | traces combine into another trace | mixing raw strings with typed trace steps at the boundary |
+| `monoid laws hold: true` | empty trace and grouping do not change the trace meaning | claiming a combine operation is monoidal when empty adds a visible step |
+| `dL/dx: 3` and `dL/dy: 2` | one local derivative rule sends upstream gradient backward | treating backpropagation as one giant derivative with no local rules |
+| `VecFunctor::fmap : Vec<A> x (A -> B) -> Vec<B>` | the item function is lifted into the vector context | confusing item-level `A -> B` with wrapper-level `Vec<A> -> Vec<B>` |
+| `Vec<A> -> Vec<B> -> Option<B>` and `Vec<A> -> Option<A> -> Option<B>` | the naturality square has two executable paths | proving only one side of a square |
+| `PipelineTrace x PipelineTrace -> PipelineTrace` | the combine operation stays inside the same trace type | returning raw lists, strings, or unrelated diagnostics |
+| `dL/dz -> (dL/dx, dL/dy)` | upstream gradient is distributed through local partial derivatives | dropping the upstream gradient when computing local gradients |
+
+The four pattern names are useful only if they protect these boundaries. A
+functor protects wrapper-preserving mapping. A natural transformation protects
+agreement between two paths. A monoid protects repeated combination. The chain
+rule protects local-to-global gradient composition.
 
 ## Core Mental Model
 
@@ -1711,19 +1917,86 @@ relations, signal flow, circuits, and local-to-global behavior.
 These pages reinforce the structure vocabulary used here:
 
 - [Glossary](glossary.md): functor, natural transformation, monoid, chain rule
-- [References](references.md): applied category theory, deep learning math, and attention
+- [References](references.md): Backprop as Functor, computational graphs, applied category theory, and programming-oriented category theory
+- [Exercises](exercises.md#exercise-14-trace-naturality-and-monoid-laws):
+  trace the naturality square and monoid laws back to the exact tests
 
 ## Retrieval Practice
 
 ### Recall
 
-What does a functor do to values inside a wrapper?
+Recover the four reusable structures before using their names.
+
+First, state what a functor does to values inside a wrapper.
+
+Then name the two paths that must agree in the `Vec<A> -> Option<A>`
+naturality square.
+
+Next, name the two laws that make `PipelineTrace` a monoid-like trace type in
+this chapter.
+
+Finally, for `MulOp::backward`, name the local derivatives used for
+`z = x * y`.
 
 ### Explain
 
-Why is a pipeline trace a good example of a monoid?
+Separate the law, the test, and the analogy.
+
+Explain why `OptionFunctor::fmap(None::<i32>, |value| value * 10)` is expected
+to return `None`.
+
+Explain why `VecToFirstOption::transform` does not need a bound such as
+`A: Clone` or `A: Debug`.
+
+Explain why a pipeline trace is a good example of a monoid.
+
+Then explain why the functor, naturality, and monoid tests are executable
+anchors rather than full mathematical proofs.
 
 ### Apply
 
-Write a small example of a value in your own codebase that has an empty value
-and a combine operation. State the identity law it should satisfy.
+Use the runnable example and the law checks.
+
+1. For `xs = vec![1, 2, 3]` and `f = |x| x * 10`, compute both naturality paths:
+
+   ```text
+   Vec<i32> --fmap f--> Vec<i32> --first--> Option<i32>
+   Vec<i32> --first--> Option<i32> --fmap f--> Option<i32>
+   ```
+
+2. For trace steps `embedding`, `linear`, and `softmax`, write both groupings
+   checked by associativity:
+
+   ```text
+   (embedding <> linear) <> softmax
+   embedding <> (linear <> softmax)
+   ```
+
+   What list of names should both produce?
+3. For `x = 2`, `y = 3`, and upstream gradient `dL/dz = 4`, what should
+   `MulOp::backward` return for `dL/dx` and `dL/dy`?
+4. Write a small example of a value in your own codebase that has an empty value
+   and a combine operation. State the identity law it should satisfy.
+
+### Debug
+
+For each broken explanation, name the missing law or wrong boundary:
+
+```text
+mapping a Vec and changing its length without saying why
+transforming Vec<A> to Option<A> by inspecting special details of A
+combining traces where empty <> trace adds a visible step
+claiming backpropagation is one giant derivative instead of composed local rules
+```
+
+A strong answer should point back to the concrete Rust checks:
+
+```text
+VecFunctor identity and composition tests
+naturality_square_commutes
+pipeline_trace_obeys_monoid_laws
+multiply_backward_scales_with_upstream_gradient
+```
+
+The goal is not to recite category-theory vocabulary. The goal is to recognize
+which consistency condition the code is protecting.

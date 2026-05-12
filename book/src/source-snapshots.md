@@ -29,6 +29,51 @@ The appendix is intentionally less narrative than the chapters. It keeps the
 full source available in one place so you can verify every explanation against
 the code itself.
 
+## How To Navigate The Snapshots
+
+Use the snapshots in two directions.
+
+When reading chapter-first, start with the explanation, then open the matching
+snapshot to verify the exact code. When reading code-first, start with the file
+that interests you, then return to the chapter that teaches its role.
+
+| If you want to inspect | Start with | Then read |
+| --- | --- | --- |
+| public crate surface | `src/lib.rs` | [Course Map](00-map.md) |
+| typed values and invariants | `src/domain.rs` | [Domain Objects](01-domain-objects.md) |
+| arrows and composition | `src/category.rs` | [Morphism and Composition](02-morphisms-composition.md) |
+| prediction pipeline | `src/ml.rs` | [The Tiny ML Pipeline](03-ml-pipeline.md) |
+| parameter updates | `src/training.rs` | [Training as an Endomorphism](04-training-endomorphism.md) |
+| reusable structure | `src/structure.rs` | [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) |
+| local derivative flow | `src/calculus.rs` | [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) |
+| typed masked attention, value-mixing, head-concatenation, output-projection, residual, normalization, feed-forward, positional, hidden-projection, single-head block, multi-head block, masked-block, readout, parameter-object, training-state, readout-training, local feed-forward training, and composed block-training boundaries with query/key/value gradients | `src/attention.rs` | [Transformer Roadmap](roadmap.md) |
+| applied category-theory sketches | `src/sketches.rs` | [Seven Sketches Through Rust](seven-sketches-rust.md) |
+| runnable end-to-end walkthrough | `src/demo.rs` | [Course Map](00-map.md) |
+| command-line entrypoint | `src/bin/category_ml.rs` | [Course Map](00-map.md) |
+
+The useful question is:
+
+```text
+Which explanation in the book would become false if this source file changed?
+```
+
+That question is why the source snapshots exist. They make drift visible.
+
+## Reading Order By Goal
+
+For a five-minute run, inspect `examples/01_token_sequence.rs`, then compare it
+with the beginning of [Course Map](00-map.md).
+
+For the core book path, read `src/domain.rs`, `src/category.rs`, `src/ml.rs`,
+and `src/training.rs` in that order.
+
+For the structure path, read `src/structure.rs`, `src/calculus.rs`,
+`src/attention.rs`, and `src/sketches.rs` after the tiny ML pipeline is clear.
+
+For contribution work, read the chapter first, then the source file, then the
+tests in the same module. The tests often explain the contract more clearly
+than the implementation alone.
+
 ## Rust Library Surface
 
 ### `src/lib.rs`
@@ -77,6 +122,12 @@ the code itself.
 
 ```rust,ignore
 {{#include ../../src/calculus.rs}}
+```
+
+### `src/attention.rs`
+
+```rust,ignore
+{{#include ../../src/attention.rs}}
 ```
 
 ### `src/sketches.rs`
@@ -135,6 +186,12 @@ the code itself.
 {{#include ../../examples/05_seven_sketches.rs}}
 ```
 
+### `examples/06_attention_scores.rs`
+
+```rust,ignore
+{{#include ../../examples/06_attention_scores.rs}}
+```
+
 ## Project Configuration
 
 ### `Cargo.toml`
@@ -187,4 +244,10 @@ These are the shorter markdown notes kept under `lessons/`.
 
 ````md
 {{#include ../../lessons/05-structure-and-calculus.md}}
+````
+
+### `lessons/06-seven-sketches.md`
+
+````md
+{{#include ../../lessons/06-seven-sketches.md}}
 ````

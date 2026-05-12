@@ -67,7 +67,8 @@ The first public workshop for this project is open for registration:
 
 ## How to give feedback
 
-Open an issue for:
+Open the [reader-confusion issue form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml)
+for:
 
 - unclear explanations
 - missing Rust examples

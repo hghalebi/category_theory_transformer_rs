@@ -20,7 +20,7 @@ This chapter explains the arrows that connect them.
 
 The central category-theory sentence is:
 
-> A morphism is a typed arrow from one object to another.
+> A morphism is a typed transformation from one object to another.
 
 The central Rust sentence is:
 
@@ -38,6 +38,27 @@ If you know Rust functions, you already know that computation moves from an
 input type to an output type. If you know ML pipelines, you already know that a
 prediction path is built from stages. This chapter gives that familiar movement
 a shared interface: `Morphism<Input, Output>`.
+
+## Category Terms As Rust Shapes
+
+Before reading the generic source file, pin each category-theory word to a
+Rust shape and one tiny ML example.
+
+| Category term | Rust shape in this repository | Tiny ML example |
+| --- | --- | --- |
+| Object | A named type that can appear as an input or output | `TokenId`, `Vector`, `Logits`, `Distribution` |
+| Morphism | `impl Morphism<Input, Output> for SomeStage` | `impl Morphism<TokenId, Vector> for Embedding` |
+| Source object | The `Input` type parameter | `TokenId` in `Morphism<TokenId, Vector>` |
+| Target object | The `Output` type parameter | `Vector` in `Morphism<TokenId, Vector>` |
+| Identity morphism | `Identity<T>` implementing `Morphism<T, T>` | `Identity::<Vector>::new()` |
+| Composition | `Compose<F, G, Middle>` | `Embedding` followed by `LinearToLogits` |
+| Middle object | The type produced by `F` and consumed by `G` | `Vector` between embedding and projection |
+| Endomorphism | `Endomorphism<T>` where input and output are the same type | `TrainStep : Parameters -> Parameters` |
+| Repeated endomorphism | `apply_endomorphism_n_times` | repeated training updates |
+
+Use the table as a translation layer. When a formal word appears later, ask
+which Rust trait, type parameter, or implementation makes it concrete. If no
+Rust shape is nearby, the explanation is probably moving too fast.
 
 ## Source Snapshot
 
@@ -117,6 +138,79 @@ be transformed safely.
 
 Before reading the trait, explain why `i32 -> i32` and `TokenId -> Vector` have
 the same arrow shape even though they mean very different things.
+
+## Worked Example: Where Composition Breaks
+
+Now look at a tiny ML path:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+Each arrow has a job:
+
+```text
+Embedding       : TokenId -> Vector
+LinearToLogits  : Vector -> Logits
+Softmax         : Logits -> Distribution
+```
+
+A legal composition connects the target of one arrow to the source of the next
+arrow:
+
+```text
+TokenId --Embedding--> Vector --LinearToLogits--> Logits --Softmax--> Distribution
+```
+
+The middle object is not decoration. It is the reason the pipeline is legal.
+`Embedding` produces a `Vector`, and `LinearToLogits` consumes a `Vector`.
+`LinearToLogits` produces `Logits`, and `Softmax` consumes `Logits`.
+
+Now remove the middle step:
+
+```text
+TokenId --Embedding--> Vector --Softmax--> Distribution
+```
+
+This looks tempting if you only think in English: "turn the token into
+probabilities." But the types say something more precise. `Softmax` does not
+consume a `Vector`. It consumes `Logits`. The missing arrow is:
+
+```text
+Vector -> Logits
+```
+
+That is why composition is not just "run functions in order." Composition means:
+
+```text
+the previous output type equals the next input type
+```
+
+In this chapter, the word "morphism" gives that rule a handle. A morphism has a
+source object and a target object. Two morphisms compose only when the first
+target object is the second source object.
+
+## From Function To Morphism
+
+An ordinary Rust function already has the outline:
+
+```text
+Input -> Output
+```
+
+The course's `Morphism<Input, Output>` trait adds three things to that outline.
+It gives the transformation a stable name, makes failure explicit with
+`CtResult<Output>`, and lets different transformation structs share one
+composition API.
+
+That is why this chapter uses the word "morphism" carefully. In this codebase,
+read it first as:
+
+```text
+a named, fallible, typed transformation
+```
+
+Only after that concrete reading should you attach the category-theory word.
 
 ## `Morphism<Input, Output>`
 
@@ -342,6 +436,10 @@ f after id = f
 This code does not prove those laws generally, but it gives the object you need
 to talk about them in Rust.
 
+The tests in `src/category.rs` check the executable version of this idea:
+composing identity on either side of a simple morphism leaves the behavior
+unchanged.
+
 ## `Compose<F, G, Middle>`
 
 The problem this block solves is:
@@ -386,6 +484,9 @@ where:
 
 The middle type is explicit because Rust needs to know what connects the two
 arrows.
+
+This is the most important learner habit in the chapter: when composition feels
+abstract, look for the middle type.
 
 ### Rust Syntax: Fields
 
@@ -466,6 +567,10 @@ So composition preserves failure.
 
 It does not hide invalid states.
 
+The category tests also check this behavior directly. A composed morphism that
+fails in its first step returns that error immediately instead of pretending the
+second step ran.
+
 ### ML Concept
 
 Prediction uses composition:
@@ -488,6 +593,27 @@ Vector
 Logits
 ```
 
+The legal diagram is:
+
+```text
+TokenId
+   |
+   | Embedding
+   v
+Vector
+   |
+   | LinearToLogits
+   v
+Logits
+   |
+   | Softmax
+   v
+Distribution
+```
+
+The important detail is not the vertical layout. The important detail is that
+every arrow's output object is exactly the next arrow's input object.
+
 If you try to compose `Embedding` directly with `Softmax`, the middle type does
 not match:
 
@@ -498,6 +624,9 @@ Softmax   : Logits -> Distribution
 
 `Vector` is not `Logits`, so Rust rejects the composition.
 
+This is the practical win. A diagram that skips `LinearToLogits` is not only
+conceptually wrong; it has the wrong type boundary.
+
 ### Category Theory Concept
 
 `Compose` is function composition with types made explicit.
@@ -507,6 +636,10 @@ It is the course's main example of:
 ```text
 small legal arrows -> larger legal arrow
 ```
+
+The code is deliberately modest. It models enough composition to make the
+pipeline inspectable and testable; it is not claiming to encode every
+categorical law in Rust's type system.
 
 ## `Endomorphism<T>`
 
@@ -724,6 +857,75 @@ Run:
 cargo run --example 02_morphism_composition
 ```
 
+Expected shape:
+
+```text
+Input object:
+TokenId(1)
+
+Stage outputs:
+Embedding : TokenId -> Vector
+Vector(dim=4, values=[...])
+LinearToLogits : Vector -> Logits
+Logits(vocab=5, values=[...])
+Softmax : Logits -> Distribution
+Distribution(vocab=5, sum=1.000000, values=[...])
+
+Composed morphism:
+TokenId -> Distribution
+next-token probabilities: [...]
+
+Middle objects kept visible:
+Vector
+Logits
+```
+
+## Example Output Transfer Checklist
+
+The example prints stage outputs and then prints the composed arrow. Read that
+output as a composition report, not only as a numeric demo.
+
+| Example output or code evidence | Rust reading | ML reading | Category-theory reading | Shortcut to reject |
+| --- | --- | --- | --- | --- |
+| `TokenId(1)` | the input is a named object, not a bare index | choose one context token | source object | passing an unnamed row number through the pipeline |
+| `Embedding : TokenId -> Vector` | `Embedding` implements `Morphism<TokenId, Vector>` | look up the token's hidden feature row | arrow from source object to middle object | passing a token directly to projection |
+| `Vector(dim=4, values=[...])` | a `Vector` value exists before projection | hidden representation, not vocabulary scores | first middle object | treating features as logits |
+| `LinearToLogits : Vector -> Logits` | `LinearToLogits` implements `Morphism<Vector, Logits>` | project hidden features into vocabulary scores | arrow between middle objects | sending a vector directly to `Softmax` |
+| `Logits(vocab=5, values=[...])` | unnormalized scores have their own type | one score per vocabulary item | second middle object | treating scores as probabilities |
+| `Softmax : Logits -> Distribution` | `Softmax` implements `Morphism<Logits, Distribution>` | normalize scores into probabilities | arrow into the target object | computing loss before a probability object exists |
+| `Distribution(vocab=5, sum=1.000000, values=[...])` | constructor validation produced a distribution | next-token probabilities sum to one | target object | treating arbitrary floats as a probability distribution |
+| `Compose::<_, _, Vector>` | `Vector` is the first bridge type | embedding must happen before projection | legal composition through a middle object | hiding the bridge type and guessing that stages fit |
+| `Compose::<_, _, Logits>` | `Logits` is the second bridge type | projection must happen before softmax | legal composition through a middle object | forgetting that `Softmax` needs logits |
+| `TokenId -> Distribution` | the composed value is a larger morphism | the prediction path is now one callable stage | composite arrow | thinking composition erases intermediate obligations |
+
+This is the chapter's most important transfer move. The user-facing output is
+compact:
+
+```text
+next-token probabilities: [...]
+```
+
+The typed explanation is larger:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+A strong reader can connect both views. The numeric output tells you what the
+pipeline produced. The typed path tells you why the pipeline was legal.
+
+The stage outputs also explain the ML meaning of the middle objects:
+
+```text
+Vector       = hidden features
+Logits       = vocabulary scores
+Distribution = normalized next-token probabilities
+```
+
+The category-theory discipline is to keep those middle objects visible. A
+composite arrow can be named `TokenId -> Distribution`, but the legal route is
+still built from the two bridge objects `Vector` and `Logits`.
+
 ## Why This API Is Good Design
 
 The code does not make composition a loose runtime convention.
@@ -804,19 +1006,58 @@ windowing, embedding lookup, linear projection, softmax, and cross entropy.
 These pages give the supporting vocabulary for the arrow layer:
 
 - [Glossary](glossary.md): morphism, identity morphism, composition, endomorphism
-- [References](references.md): applied category theory and Rust module structure
+- [References](references.md): Rust traits, Rust generics, applied category theory, and programming-oriented category theory
+
+## Practice After This Chapter
+
+Use [Exercise 4](exercises.md#exercise-4-break-a-composition) to intentionally
+break a composition and explain the missing middle type. This is the chapter's
+most important transfer check: a type error should become evidence about the
+pipeline boundary.
 
 ## Retrieval Practice
 
 ### Recall
 
-What does `Morphism<Input, Output>` require an implementation to provide?
+Recover the shape of the API before explaining the pipeline.
+
+1. What two methods must `Morphism<Input, Output>` provide?
+2. Which type in `Compose<F, G, Middle>` records the bridge between two arrows?
+3. What shape makes a morphism an endomorphism?
 
 ### Explain
 
-Why does `Compose<F, G, Middle>` need the middle type to match?
+Use the middle object to explain why composition is legal or illegal.
+
+1. Why does `Compose<F, G, Middle>` require `F: Morphism<Input, Middle>` and
+   `G: Morphism<Middle, Output>`?
+2. Why is `TokenId -> Vector -> Distribution` not a legal version of the
+   prediction path?
+3. Why does composition return the first error instead of trying to run the
+   second arrow?
 
 ### Apply
 
-Write a diagram for the legal path from `TokenId` to `Distribution`, naming the
-middle objects.
+Use the output from `cargo run --example 02_morphism_composition` as the
+working path.
+
+1. Write the legal path from `TokenId` to `Distribution`, naming both middle
+   objects.
+2. If you insert `Identity<Vector>` between `Embedding` and `LinearToLogits`,
+   why should the behavior stay the same?
+3. If you try to repeat `Embedding` with `apply_endomorphism_n_times`, which
+   shape rule blocks the attempt?
+
+### Debug
+
+For each invalid shortcut, name the missing or mismatched middle type:
+
+```text
+Embedding followed directly by Softmax
+Embedding followed by Identity<TokenId>
+repeating Embedding as an endomorphism
+```
+
+A strong answer should identify the source and target object of each arrow,
+then state which object fails to line up. Do not answer only with "the compiler
+rejects it"; explain the typed boundary the compiler is protecting.

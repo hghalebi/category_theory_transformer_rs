@@ -2,39 +2,128 @@
 
 The problem this chapter solves is:
 
-> Before reading individual Rust files, you need one map of how the whole
-> machine-learning pipeline, Rust type system, and category-theory vocabulary
-> fit together.
+> Before reading individual source files, you need one map that connects the
+> tiny ML pipeline, the Rust modules, and the category-theory vocabulary.
 
-The repository is small, but it contains several layers:
+The repository is intentionally small, but it still has layers. One layer names
+the values. Another layer names transformations between values. A third layer
+uses those transformations to make predictions, measure loss, and update model
+parameters.
+
+This chapter gives you the whole map before the book zooms in.
+
+## Choose Your Path
+
+Use the book-first path if you want the concepts introduced in order:
 
 ```text
-domain objects
-  -> typed morphisms
-  -> concrete ML morphisms
-  -> training endomorphism
-  -> reusable structure patterns
-  -> applied category-theory sketches
+Welcome
+  -> Course Map
+  -> Domain Objects
+  -> Morphism and Composition
+  -> Tiny ML Pipeline
+  -> Training as an Endomorphism
 ```
 
-This chapter is the index of those layers.
+Use the code-first path if you learn faster by running something first:
 
-> Reader orientation:
-> The map is not a list of things to memorize. It is a promise about how the
-> book will move: first name the values, then name the arrows, then compose the
-> arrows into a tiny learning system.
+```bash
+cargo run --example 01_token_sequence
+cargo run --bin category_ml
+```
+
+Then come back to this map and place each printed line in one of three
+locations:
+
+```text
+domain value
+typed transformation
+training update
+```
+
+Both paths are valid. The book-first path reduces surprise. The code-first path
+reduces abstraction anxiety. The important thing is not to open every file at
+once. Start with one path, run one command, and attach each new word to one
+visible Rust shape.
 
 ## What You Already Know
 
-If you already read programs from top to bottom, you know how to follow a flow.
-If you know Rust function signatures, you know that each step has an input type
-and an output type. If you know ML pipelines, you know that raw data becomes
-features, predictions, loss, and updates. This chapter puts those familiar
-habits on one map.
+If you read a program from top to bottom, you already know how to follow a
+flow. If you read a Rust function signature, you already know that a step has
+an input type and an output type. If you have seen any ML pipeline, you already
+know that raw data eventually becomes predictions, loss, and updates.
+
+The map in this chapter puts those familiar habits together:
+
+```text
+value
+  -> transformation
+  -> composed transformations
+  -> measured error
+  -> repeated update
+```
+
+The category-theory vocabulary is not a separate layer pasted on top. It names
+shapes that are already present in the Rust and ML readings.
+
+## Worked Example: From One Function To A Pipeline
+
+Start with one ordinary function:
+
+```rust
+fn token_to_vector_id(token_id: usize) -> usize {
+    token_id + 100
+}
+
+assert_eq!(token_to_vector_id(7), 107);
+```
+
+This has the shape:
+
+```text
+usize -> usize
+```
+
+That is a transformation, but it is not yet a good teaching boundary. Both
+sides use the same raw type, so the signature does not tell us whether the
+number is a token, a vector row, a dimension, or something else.
+
+The book replaces that vague movement with named stages:
+
+```text
+TokenId -> Vector
+```
+
+Then it composes more stages:
+
+```text
+TokenId -> Vector -> Logits -> Distribution
+```
+
+That is the basic move for the whole book. Start with a familiar function,
+give the meaningful values names, then ask which typed transformations can
+compose safely.
+
+## Self-check
+
+Before continuing, explain why `TokenId -> Vector` carries more information
+than `usize -> Vec<f32>`. A strong answer should mention both reader clarity
+and compiler-checked boundaries.
 
 ## The Whole Pipeline
 
 The central pipeline is:
+
+```text
+Text
+  -> TokenSequence
+  -> TrainingSet
+  -> Prediction
+  -> Loss
+  -> Updated Parameters
+```
+
+The concrete Rust shape is slightly more detailed:
 
 ```text
 TokenSequence -> TrainingSet
@@ -45,100 +134,93 @@ Distribution x TokenId -> Loss
 Parameters    -> Parameters
 ```
 
-Read this as three stories at once.
-
-In ML terms:
+The same map can be drawn as a learner-facing flow:
 
 ```text
-tokenized text
-  -> prediction examples
-  -> embeddings
-  -> vocabulary scores
-  -> probabilities
-  -> error measurement
-  -> updated weights
+raw text
+   |
+   v
+TokenSequence --DatasetWindowing--> TrainingSet
+   |
+   v
+TokenId --Embedding--> Vector --LinearToLogits--> Logits --Softmax--> Distribution
+                                                                        |
+                                                                        v
+                                                       Product<Distribution, TokenId>
+                                                                        |
+                                                                        v
+                                                               CrossEntropy -> Loss
+
+Parameters --TrainStep--> Updated Parameters
 ```
 
-In Rust terms:
+Read the top path as prediction and evaluation. Read the bottom path as
+training state. The two meet because `TrainStep` uses the training set, current
+parameters, prediction path, and loss to produce updated parameters.
+
+Read that map in three ways.
+
+The Rust reading is about named types, trait implementations, constructors,
+fallible boundaries, and tests. The ML reading is about data preparation,
+embeddings, scores, probabilities, error measurement, and parameter updates.
+The category-theory reading is about objects, morphisms, products,
+composition, endomorphisms, and laws.
+
+These are not three different books. They are three readings of the same small
+program.
+
+## Module Map
+
+The source tree follows the learning path. Each file owns one part of the
+conceptual load, so the reader does not have to learn every abstraction at the
+same time.
+
+| File | What it teaches | Main shape |
+| --- | --- | --- |
+| `src/domain.rs` | Meaningful values | `TokenId`, `Vector`, `Distribution`, `Parameters` |
+| `src/category.rs` | Typed arrows | `Morphism<Input, Output>` |
+| `src/ml.rs` | Concrete ML transformations | `TokenId -> Vector -> Logits -> Distribution` |
+| `src/training.rs` | Repeated updates | `Parameters -> Parameters` |
+| `src/structure.rs` | Reusable structure | functor, natural transformation, monoid |
+| `src/calculus.rs` | Local derivative flow | chain rule for `z = x * y` |
+| `src/sketches.rs` | Applied category-theory sketches | typed models plus law checks |
+| `src/demo.rs` | Full guided walkthrough | executable course outline |
+
+This table is not something to memorize. Use it as a navigation tool. When a
+later chapter names a concept, you should be able to place it in one file and
+one row of the pipeline.
+
+## The Library Surface
+
+The library root collects the modules and re-exports the teaching types. That
+is why the examples can import clear names instead of reaching through deep
+paths.
+
+The important design is:
 
 ```text
-validated input types
-  -> trait implementations
-  -> explicit error handling
-  -> private fields
-  -> read-only accessors
-  -> tests
+domain nouns
+category arrows
+ML arrows
+training update
+structure patterns
+calculus rule
+applied sketches
+demo
 ```
 
-In category-theory terms:
+That order is also the reading path. The book first asks "what are the values?"
+Then it asks "what transformations are allowed?" Only after those two questions
+does it build prediction, loss, and training.
 
-```text
-objects
-  -> morphisms
-  -> products
-  -> composition
-  -> endomorphisms
-  -> laws
-```
+## How The Files Fit Together
 
-The course is about learning to see the same pipeline through all three views.
+`src/domain.rs` defines the nouns. A `TokenId` is not a `VocabSize`, a
+`Distribution` is not a raw vector, and a `LearningRate` is not any other
+floating-point number. This file protects meaning at the boundary where raw
+machine values enter the tutorial.
 
-## Worked Example: A Tiny Typed Movement
-
-Here is the smallest Rust idea behind that map. A function has an input type and
-an output type:
-
-```rust
-fn token_to_vector_id(token_id: usize) -> usize {
-    token_id + 100
-}
-
-assert_eq!(token_to_vector_id(7), 107);
-```
-
-The real code does not leave those values as raw `usize` forever. It gives each
-pipeline stage a domain type, then uses morphisms to make the connections
-explicit.
-
-## Self-Check
-
-Before moving into the file map, explain why `TokenId -> Vector` is easier to
-reason about than `usize -> Vec<f32>`.
-
-## Code Map
-
-Each Rust file owns one part of the idea.
-
-### `src/domain.rs`
-
-This file defines the nouns.
-
-The main examples are `TokenId`, `TokenSequence`, `Vector`, `Logits`,
-`Distribution`, `Loss`, `TrainingSet`, and `Parameters`.
-
-The problem this file solves is:
-
-> Raw numbers are too ambiguous for a training pipeline.
-
-For example, these are all machine numbers:
-
-```text
-token index
-vocabulary size
-model dimension
-loss value
-learning rate
-```
-
-But they are not the same concept.
-
-`src/domain.rs` gives each concept a separate type.
-
-### `src/category.rs`
-
-This file defines the arrows.
-
-The central trait is:
+`src/category.rs` defines the arrows. The central trait is:
 
 ```rust,ignore
 pub trait Morphism<Input, Output> {
@@ -147,64 +229,37 @@ pub trait Morphism<Input, Output> {
 }
 ```
 
-This says:
+That trait says: a morphism is something that transforms an `Input` into an
+`Output`, and the transformation may fail with a typed course error.
 
-> A morphism is something that knows how to transform an `Input` into an
-> `Output`, possibly failing with `CtError`.
+`src/ml.rs` makes the arrows concrete. It implements dataset windowing,
+embedding lookup, linear projection, softmax, and cross entropy. This is where
+the abstract phrase "typed transformation" becomes a tiny learning pipeline.
 
-The rest of the file defines identity, composition, endomorphism, and repeated
-application.
-
-### `src/ml.rs`
-
-This file defines concrete ML arrows.
-
-The main transformations are:
-
-```text
-DatasetWindowing : TokenSequence -> TrainingSet
-Embedding        : TokenId -> Vector
-LinearToLogits   : Vector -> Logits
-Softmax          : Logits -> Distribution
-CrossEntropy     : Distribution x TokenId -> Loss
-```
-
-This file is where the abstract `Morphism` trait becomes a tiny learning
-system.
-
-### `src/training.rs`
-
-This file defines:
+`src/training.rs` defines the update step:
 
 ```text
 TrainStep : Parameters -> Parameters
 ```
 
-That shape is important.
-
-Because the output type is the same as the input type, training can be repeated:
+Because the output type is the same as the input type, the update can be
+repeated:
 
 ```text
 Parameters0 -> Parameters1 -> Parameters2 -> ... -> ParametersN
 ```
 
-That is why training is taught as an endomorphism.
+That is why the training chapter teaches one optimizer step as an
+endomorphism. It is a transformation from a type back to itself.
 
-### `src/structure.rs`
+`src/structure.rs` gives names to reusable patterns that appear after the
+pipeline works: mapping inside a container, converting one wrapper shape to
+another, and combining traces with an identity value. These ideas are useful
+because real systems accumulate logs, batches, optional results, gradients, and
+workflow traces.
 
-This file teaches reusable structure:
-
-- functor: map inside a wrapper
-- natural transformation: convert wrapper shape consistently
-- monoid: combine values with an empty value
-
-These are not extra theory for decoration. They name patterns that appear in
-ordinary ML systems: batches, optional values, traces, logs, and composed
-workflows.
-
-### `src/calculus.rs`
-
-This file shows the smallest useful backpropagation idea:
+`src/calculus.rs` keeps backpropagation deliberately small. It shows the local
+rule for:
 
 ```text
 z = x * y
@@ -212,24 +267,18 @@ dL/dx = dL/dz * y
 dL/dy = dL/dz * x
 ```
 
-The code does not implement a full automatic differentiation engine. It gives
-you the local rule that larger systems compose.
+This is not a full automatic-differentiation engine. It is the smallest local
+chain-rule shape the later training story can point at.
 
-### `src/sketches.rs`
-
-This file connects the course to seven applied category-theory themes: orders,
-resources, databases, co-design, signal flow, circuits, and behavior logic.
-
-Each theme is represented as typed Rust values plus law-checking tests.
+`src/sketches.rs` connects the tutorial to applied category theory beyond the
+tiny ML pipeline. It models orders, resources, databases, co-design, signal
+flow, circuits, and behavior logic as typed Rust values with law-checking
+tests.
 
 ## Guided Walkthrough Snapshot
 
-The terminal demo is the spine of the course.
-
-The problem this block solves is:
-
-> A learner should be able to run one command and see every major concept used
-> once in a concrete order.
+The terminal demo is the spine of the book. It gives a learner one command that
+uses every major idea in a concrete order.
 
 <details>
 <summary>Source snapshot: src/demo.rs</summary>
@@ -242,55 +291,65 @@ The problem this block solves is:
 
 ## How To Read The Demo
 
-The demo is not random output. It is a staged proof that the pieces connect.
+The demo output is a miniature course outline.
 
-Section 1 introduces an object:
+It starts with an object:
 
 ```text
 TokenId(1)
 ```
 
-Section 2 applies a data-preparation morphism:
+Then it applies a data-preparation morphism:
 
 ```text
 TokenSequence -> TrainingSet
 ```
 
-Section 3 applies identity:
+Then it shows identity and composition:
 
 ```text
 Vector -> Vector
-```
-
-Section 4 composes prediction:
-
-```text
 TokenId -> Vector -> Logits -> Distribution
 ```
 
-Section 5 uses a product object:
+Then it uses a product object to measure loss:
 
 ```text
 Distribution x TokenId -> Loss
 ```
 
-Section 6 repeats an endomorphism:
+Then it repeats an endomorphism:
 
 ```text
 Parameters -> Parameters
 ```
 
-Sections 7 through 11 add the structural patterns:
+The later demo sections add functors, naturality, monoids, a commutative
+diagram check, and a local chain-rule example. By the time you finish the
+demo, you have seen each major term at least once in executable form.
 
-```text
-Functor
-NaturalTransformation
-Monoid
-Commutative diagram check
-Chain rule
-```
+## Demo Output Wayfinding Checklist
 
-So the demo is a miniature course outline in executable form.
+After running `cargo run --bin category_ml`, use the numbered output as a map
+instead of reading it as one long printout.
+
+| Demo section | Source file to inspect next | Rust reading | ML reading | Category-theory reading |
+| --- | --- | --- | --- | --- |
+| `1. Object examples` | `src/domain.rs` | `TokenId` gives a raw index a domain name | tokens are data, not model state | object |
+| `2. Dataset morphism` | `src/ml.rs` | `DatasetWindowing` turns a sequence into pairs | text becomes supervised examples | morphism |
+| `3. Identity morphism` | `src/category.rs` | `Identity<Vector>` returns the same value | a neutral transformation should not change features | identity law |
+| `4. Composition` | `src/ml.rs` and `src/category.rs` | `Compose` connects matching output and input types | embedding, logits, and softmax form prediction | composition |
+| `5. Product object` | `src/domain.rs` and `src/ml.rs` | `Product<Distribution, TokenId>` pairs prediction with target | loss needs both prediction and correct next token | product object |
+| `6. Endomorphism` | `src/training.rs` | `TrainStep` returns `Parameters` | training updates model state | endomorphism |
+| `7-9. Structure patterns` | `src/structure.rs` | traits and tests name reusable operations | batches, options, and traces recur in ML systems | functor, naturality, monoid |
+| `10. Commutative diagram check` | `src/ml.rs` | two code paths are compared | direct and composed prediction should agree | commutative diagram |
+| `11. Chain rule` | `src/calculus.rs` | `MulOp::backward` returns local gradients | backprop starts from local derivative rules | chain rule |
+
+This table gives you a safe next action. If the output line is clear, continue
+reading. If it is not clear, open the source file in the second column and look
+for the type or function named by the line. The goal is not to memorize the
+demo. The goal is to use it as a routing table from terminal output to chapter,
+source file, ML role, and category-theory shape.
 
 ## Binary Entrypoint
 
@@ -305,31 +364,17 @@ The binary entrypoint is deliberately tiny:
 
 </details>
 
-The whole file is:
+The whole file delegates to the library walkthrough:
 
 ```rust,ignore
-use category_theory_transformer_rs::run_demo;
-
-fn main() {
-    run_demo().unwrap();
+fn main() -> category_theory_transformer_rs::CtResult<()> {
+    category_theory_transformer_rs::run_demo()
 }
 ```
 
-Line by line:
-
-`use category_theory_transformer_rs::run_demo;`
-
-This imports the library function that owns the walkthrough.
-
-`fn main()`
-
-This is the process entrypoint. When you run the binary, Rust starts here.
-
-`run_demo().unwrap();`
-
-This runs the walkthrough and panics if it fails. In the library code, fallible
-work uses `CtResult`. The binary keeps the entrypoint short because the course
-focus is the library, not command-line error reporting.
+The binary returns `CtResult`, so fallible work can propagate through Rust's
+ordinary `Result` path. The binary stays short because this book is teaching
+the typed pipeline, not command-line interface design.
 
 ## First Run
 
@@ -339,8 +384,8 @@ Start with the smallest visible pipeline:
 cargo run --example 01_token_sequence
 ```
 
-It turns text into token ids and next-token training pairs before any model
-weights appear.
+That command turns text into token IDs and next-token training pairs before any
+model weights appear.
 
 Then run the full guided demo:
 
@@ -348,34 +393,25 @@ Then run the full guided demo:
 cargo run --bin category_ml
 ```
 
-You should see a tiny language-model pipeline and the loss decreasing after
-training.
-
-The important part is not the exact floating-point numbers.
-
-The important part is the shape:
-
-```text
-before training: higher loss
-after training:  lower loss
-```
-
-That means repeated `TrainStep` applications moved the parameters in a useful
-direction on the tiny dataset.
+The exact floating-point values are less important than the shape. You should
+see a loss before training, a lower loss after repeated training, and the same
+typed pipeline used throughout the walkthrough.
 
 ## Core Mental Model
 
 Every chapter after this one zooms into one row of the map.
 
-Remember:
+An object is a typed thing the program can talk about precisely.
 
-```text
-object = typed thing
-morphism = typed transformation
-composition = legal connection of transformations
-endomorphism = transformation from a type back to itself
-law = property the code checks so composition remains trustworthy
-```
+A morphism is a typed transformation from one object to another.
+
+Composition is a legal connection between transformations, where the output
+type of one step matches the input type of the next.
+
+An endomorphism is a transformation from a type back to itself.
+
+A law is a property the code checks so the reader can trust the shape, not only
+the example output.
 
 ## Checkpoint
 
@@ -407,15 +443,23 @@ These pages are the best next stops after the map:
 - [References](references.md): Rust modules and applied category theory
 - [Seven Sketches Through Rust](seven-sketches-rust.md): a paper-length concept map made executable
 
+## Practice After This Chapter
+
+Use [Exercise 2](exercises.md#exercise-2-add-a-token) to change the demo input
+and [Exercise 8](exercises.md#exercise-8-trace-a-full-source-file) to connect
+one source file back to the course map. Use the demo-output wayfinding
+checklist above to decide which file to inspect. Those exercises check whether
+the map is active knowledge rather than only a diagram you read once.
+
 ## Retrieval Practice
 
 ### Recall
 
-Name the three readings used throughout the course.
+Name the three readings used throughout the book.
 
 ### Explain
 
-Why does the course start with a whole-pipeline map before reading individual
+Why does the book start with a whole-pipeline map before reading individual
 source files?
 
 ### Apply

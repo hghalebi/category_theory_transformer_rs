@@ -127,6 +127,32 @@ mod tests {
     use super::*;
 
     #[test]
+    fn vec_functor_preserves_identity_for_values() {
+        let values = vec![1, 2, 3];
+
+        assert_eq!(VecFunctor::fmap(values.clone(), |value| value), values);
+    }
+
+    #[test]
+    fn vec_functor_preserves_composition_for_values() {
+        let values = vec![1, 2, 3];
+        let add_one = |value| value + 1;
+        let double = |value| value * 2;
+
+        let map_then_map = VecFunctor::fmap(VecFunctor::fmap(values.clone(), add_one), double);
+        let map_composed = VecFunctor::fmap(values, |value| double(add_one(value)));
+
+        assert_eq!(map_then_map, map_composed);
+    }
+
+    #[test]
+    fn option_functor_preserves_absence() {
+        let missing = OptionFunctor::fmap(None::<i32>, |value| value * 10);
+
+        assert_eq!(missing, None);
+    }
+
+    #[test]
     fn naturality_square_commutes() {
         assert!(naturality_square_holds_for_first_option());
     }

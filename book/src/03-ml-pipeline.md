@@ -36,6 +36,40 @@ prediction, and measure the error. If you know Rust, you already know that each
 step can have a concrete input and output type. This chapter combines those two
 habits by making each ML step implement the same morphism interface.
 
+## Prediction Trace Before Source
+
+Before reading `src/ml.rs`, keep this trace in view. It separates raw scores,
+probabilities, the target token, and the final loss.
+
+| Stage | Rust type | Plain meaning | What to check |
+| --- | --- | --- | --- |
+| Input token | `TokenId` | the current token position | Is this a vocabulary index, not a dimension? |
+| Embedding | `Vector` | dense hidden features for that token | Has the token become numeric features? |
+| Scores | `Logits` | unnormalized next-token scores | Are these still raw scores, not probabilities? |
+| Normalization | `Distribution` | probabilities over next tokens | Do probabilities sum to one? |
+| Target pairing | `Product<Distribution, TokenId>` | prediction plus correct next token | Which index is the target token? |
+| Loss | `Loss` | surprise assigned to the target token | Did cross entropy use the target probability? |
+
+The target index is the key detail. Cross entropy does not punish every
+probability equally. It first selects the probability assigned to the correct
+next token, then computes:
+
+```text
+loss = -ln(probability assigned to target)
+```
+
+So this chapter's core mental model is:
+
+```text
+Logits
+  -> Distribution
+  -> target probability
+  -> Loss
+```
+
+That order matters. If a reader treats logits as probabilities, or forgets that
+loss uses the target token index, the pipeline becomes hard to debug.
+
 ## Source Snapshot
 
 This file owns the concrete ML arrows.
@@ -101,6 +135,145 @@ validates the result through `Distribution::new`.
 
 Why is it useful for the probability-validation boundary to live in
 `Distribution::new` instead of in every caller that uses probabilities?
+
+## Scores, Probabilities, And Loss
+
+This chapter becomes easier if you keep three numbers separate.
+
+`Logits` are raw scores. They can be negative, larger than one, and they do not
+need to sum to one. A logit says "how strongly the model scores this token
+before normalization."
+
+`Distribution` values are probabilities. They must be finite, non-negative, and
+sum to one. A distribution says "how much probability the model assigns to each
+possible next token."
+
+`Loss` is a scalar penalty. Cross entropy makes the penalty small when the
+model assigns high probability to the correct token and large when it assigns
+low probability to the correct token.
+
+The concrete path is:
+
+```text
+raw scores
+  -> probabilities
+  -> surprise about the target
+```
+
+Here is one small numeric trace:
+
+```text
+target token index: 0
+probability assigned to target: 0.90
+loss = -ln(0.90) = 0.105
+
+target token index: 0
+probability assigned to target: 0.10
+loss = -ln(0.10) = 2.303
+```
+
+Nothing mysterious happened. The loss only looked at the probability assigned
+to the correct target token. A confident correct prediction receives a small
+penalty. A surprised prediction receives a larger penalty.
+
+## Worked Example: Do Not Use The Largest Probability
+
+A common mistake is to compute loss from the largest probability in the
+distribution.
+
+That is wrong.
+
+Cross entropy uses the probability assigned to the actual target token, even
+when the model assigned a larger probability to some other token.
+
+Consider this prediction:
+
+```text
+probabilities over next tokens:
+index 0: 0.60
+index 1: 0.30
+index 2: 0.10
+
+target token index: 1
+```
+
+The largest probability is `0.60`, but it belongs to token index `0`.
+
+The target probability is `0.30`, because the correct next token is index `1`.
+
+So the loss is:
+
+```text
+loss = -ln(0.30) = 1.204
+```
+
+The incorrect shortcut would be:
+
+```text
+loss = -ln(0.60) = 0.511
+```
+
+That shortcut would make the prediction look better than it is. It rewards the
+model for being confident about the wrong token.
+
+The Rust code prevents that confusion by pairing the distribution with the
+target:
+
+```text
+Product<Distribution, TokenId>
+```
+
+Then `CrossEntropy` indexes into the distribution with `target.index()`. The
+target decides which probability becomes the loss.
+
+The Rust path is:
+
+```text
+Logits -> Distribution
+Distribution x TokenId -> Loss
+```
+
+The tests in `src/ml.rs` protect those claims: softmax normalizes logits into a
+distribution, and cross entropy is lower when the target token receives higher
+probability.
+
+Here is the chapter's full data-preparation and prediction diagram:
+
+```text
+TokenSequence
+     |
+     | DatasetWindowing
+     v
+TrainingSet = [
+  Product<TokenId, TokenId>,
+  Product<TokenId, TokenId>,
+  ...
+]
+
+For each TrainingExample:
+
+input TokenId -------------------------------+
+     |                                       |
+     | Embedding                             |
+     v                                       |
+Vector                                      target TokenId
+     |                                       |
+     | LinearToLogits                        |
+     v                                       |
+Logits                                      |
+     |                                       |
+     | Softmax                               |
+     v                                       |
+Distribution ---------------- Product -------+
+     |
+     | CrossEntropy
+     v
+Loss
+```
+
+The left side is the prediction path. The right side carries the target token.
+`CrossEntropy` is the first stage that needs both, so the chapter uses
+`Product<Distribution, TokenId>` at that boundary.
 
 ## `DatasetWindowing`
 
@@ -556,7 +729,9 @@ enforces the distribution contract.
 
 ### ML Concept
 
-Softmax turns raw model scores into probabilities.
+Softmax turns raw model scores into probabilities. In softmax regression and
+classification models, this is the step that makes one score per class
+interpretable as a probability distribution.
 
 High logits become high probabilities.
 
@@ -670,6 +845,9 @@ Cross entropy measures how surprised the model was by the true target.
 If the model assigns high probability to the target, the loss is small.
 
 If the model assigns low probability to the target, the loss is large.
+
+This is why the chapter says loss is a training signal. It turns a probability
+assigned to the correct token into a number the optimizer can try to reduce.
 
 ### Category Theory Concept
 
@@ -869,6 +1047,41 @@ prediction probabilities
 loss for a target token
 ```
 
+## Demo Output Transfer Checklist
+
+Sections 2 through 5 of the demo are the smallest complete ML story in the
+book. Read them as a boundary report.
+
+| Demo output | Boundary to own | Shortcut to reject |
+| --- | --- | --- |
+| `Dataset morphism: TokenSequence -> TrainingSet` | `DatasetWindowing` turns a token stream into adjacent input-target pairs. | Treating a raw token sequence as if it were already supervised data. |
+| `"I" -> "love"` | Each pair is `Product<TokenId, TokenId>`. | Forgetting which token is the input and which token is the target. |
+| `Composition: Softmax after Linear after Embedding` | Prediction is `TokenId -> Vector -> Logits -> Distribution`. | Skipping `Logits` and pretending vectors are probabilities. |
+| `P(next token | 'I') = [...]` | The printed vector is a validated `Distribution`. | Treating the output as raw scores or as a single predicted token. |
+| `Product object: Prediction x Target -> Loss` | Loss needs both the prediction and the correct next token. | Calling loss on `Distribution` alone. |
+| `loss for target 'love' = ...` | Cross entropy uses the probability at the target token index. | Using the largest probability instead of the target probability. |
+
+This checklist compresses the chapter into one reader habit:
+
+```text
+visible output -> typed boundary -> invalid shortcut rejected
+```
+
+The ML idea is that a training example is not just an input. It is an input
+paired with the answer the model should have predicted. The category-theory
+idea is that the answer enters through a product boundary:
+
+```text
+Distribution x TokenId -> Loss
+```
+
+The Rust idea is that the boundary is not only prose. It appears as a concrete
+type:
+
+```rust,ignore
+Product<Distribution, TokenId>
+```
+
 ## Why This Matters
 
 This chapter is where the course stops being abstract.
@@ -937,17 +1150,59 @@ These pages connect the tiny pipeline to the surrounding vocabulary:
 - [Glossary](glossary.md): logits, softmax, probability distribution, cross entropy
 - [References](references.md): softmax regression and linear classifiers
 
+## Practice After This Chapter
+
+Use [Exercise 3](exercises.md#exercise-3-trace-datasetwindowing) to trace
+adjacent training pairs and [Exercise 9](exercises.md#exercise-9-connect-one-external-reference)
+to connect this tiny implementation to a larger ML reference. The pair checks
+both local code understanding and source-backed transfer.
+
 ## Retrieval Practice
 
 ### Recall
 
-What are the concrete ML arrows in the prediction-and-loss path?
+Recover the path before explaining the calculations.
+
+1. What morphism turns a `TokenSequence` into a `TrainingSet`?
+2. Which three arrows turn a `TokenId` into a `Distribution`?
+3. Which two objects are paired before `CrossEntropy` can produce `Loss`?
 
 ### Explain
 
-Why does `CrossEntropy` consume a product of `Distribution` and `TokenId`?
+Use the target token to explain why the loss boundary needs a product object.
+
+1. Why are `Logits` not the same object as `Distribution`?
+2. Why does `CrossEntropy` use the probability at `target.index()` instead of
+   the largest probability in the distribution?
+3. Why does an out-of-range target error belong inside `CrossEntropy`?
 
 ### Apply
 
-Given `TokenId -> Vector -> Logits -> Distribution`, write the Rust type that
-must appear between `Embedding` and `Softmax`.
+Use the demo output and the numeric examples in this chapter.
+
+1. Given `TokenId -> Vector -> Logits -> Distribution`, write the Rust type that
+   must appear between `Embedding` and `Softmax`.
+2. A distribution is `[0.70, 0.20, 0.10]` and the target token index is `1`.
+   Which probability should cross entropy use?
+3. A token sequence is `[4, 9, 2]`. Which adjacent training pairs should
+   `DatasetWindowing` produce?
+
+### Debug
+
+For each invalid shortcut, name the missing boundary or wrong object:
+
+```text
+Logits -> Loss
+Distribution -> Loss
+using the maximum probability instead of the target probability
+```
+
+A strong answer should mention the exact typed path:
+
+```text
+Logits -> Distribution
+Distribution x TokenId -> Loss
+```
+
+The point is not to memorize the formula. The point is to know which object
+owns the probability invariant and which object selects the target probability.

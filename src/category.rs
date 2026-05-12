@@ -106,6 +106,49 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::error::CtError;
+
+    #[derive(Debug, Clone, Copy)]
+    struct AddOne;
+
+    impl Morphism<i32, i32> for AddOne {
+        fn name(&self) -> &'static str {
+            "add_one"
+        }
+
+        fn apply(&self, input: i32) -> CtResult<i32> {
+            Ok(input + 1)
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct Double;
+
+    impl Morphism<i32, i32> for Double {
+        fn name(&self) -> &'static str {
+            "double"
+        }
+
+        fn apply(&self, input: i32) -> CtResult<i32> {
+            Ok(input * 2)
+        }
+    }
+
+    #[derive(Debug, Clone, Copy)]
+    struct Fail;
+
+    impl Morphism<i32, i32> for Fail {
+        fn name(&self) -> &'static str {
+            "fail"
+        }
+
+        fn apply(&self, _input: i32) -> CtResult<i32> {
+            Err(CtError::InvalidQuantity {
+                kind: "test morphism",
+                value: -1,
+            })
+        }
+    }
 
     #[test]
     fn identity_returns_the_same_value() -> CtResult<()> {
@@ -113,5 +156,36 @@ mod tests {
 
         assert_eq!(Identity::<String>::new().apply(value.clone())?, value);
         Ok(())
+    }
+
+    #[test]
+    fn identity_composes_without_changing_behavior() -> CtResult<()> {
+        let left_identity = Compose::<_, _, i32>::new(Identity::<i32>::new(), AddOne);
+        let right_identity = Compose::<_, _, i32>::new(AddOne, Identity::<i32>::new());
+
+        assert_eq!(left_identity.apply(41)?, AddOne.apply(41)?);
+        assert_eq!(right_identity.apply(41)?, AddOne.apply(41)?);
+        Ok(())
+    }
+
+    #[test]
+    fn composition_applies_first_then_second() -> CtResult<()> {
+        let add_then_double = Compose::<_, _, i32>::new(AddOne, Double);
+
+        assert_eq!(add_then_double.apply(4)?, 10);
+        Ok(())
+    }
+
+    #[test]
+    fn composition_returns_the_first_error() {
+        let composed = Compose::<_, _, i32>::new(Fail, AddOne);
+
+        assert!(matches!(
+            composed.apply(4),
+            Err(CtError::InvalidQuantity {
+                kind: "test morphism",
+                value: -1,
+            })
+        ));
     }
 }

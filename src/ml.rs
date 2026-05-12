@@ -266,4 +266,28 @@ mod tests {
         assert!(composed_prediction_matches_direct_prediction(&params)?);
         Ok(())
     }
+
+    #[test]
+    fn softmax_normalizes_logits_into_distribution() -> CtResult<()> {
+        let distribution = Softmax.apply(Logits::new(vec![1.0, 2.0, 3.0]))?;
+        let probabilities = distribution.as_slice();
+        let sum: f32 = probabilities.iter().sum();
+
+        assert!(approx_eq(sum, 1.0, 1e-6));
+        assert!(probabilities[2] > probabilities[1]);
+        assert!(probabilities[1] > probabilities[0]);
+        Ok(())
+    }
+
+    #[test]
+    fn cross_entropy_is_lower_for_more_confident_target_probability() -> CtResult<()> {
+        let confident = Distribution::new(vec![0.9, 0.1])?;
+        let surprised = Distribution::new(vec![0.1, 0.9])?;
+
+        let confident_loss = CrossEntropy.apply(Product::new(confident, TokenId::new(0)))?;
+        let surprised_loss = CrossEntropy.apply(Product::new(surprised, TokenId::new(0)))?;
+
+        assert!(confident_loss.value() < surprised_loss.value());
+        Ok(())
+    }
 }

@@ -35,6 +35,14 @@ The pipeline is built from small arrows:
 TokenId -> Vector -> Logits -> Distribution
 ```
 
+The example prints the middle objects:
+
+```text
+Vector = hidden features
+Logits = vocabulary scores
+Distribution = normalized probabilities
+```
+
 `Compose` is the glue. If the middle types do not match, Rust rejects the
 program before it runs.
 

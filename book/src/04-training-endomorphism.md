@@ -43,6 +43,59 @@ parameters are adjusted and then used again. If you know Rust, you already know
 that a function can return the same type it receives. This chapter names that
 shape precisely: a training step is an endomorphism on `Parameters`.
 
+## Update Trace Before Source
+
+Before reading `src/training.rs`, keep this one-step trace in view. It separates
+loss measurement, gradient accumulation, the parameter update, and repetition.
+
+| Stage | Rust shape | Plain meaning | What to check |
+| --- | --- | --- | --- |
+| Current state | `Parameters` | embeddings, output weights, and bias before the step | What object is being updated? |
+| Training data | `TrainingSet` | adjacent input-target examples | Is the update using examples, not one prediction alone? |
+| Forward pass | `TokenId -> Vector -> Logits -> Distribution` | predict with the current parameters | Are predictions computed before gradients are accumulated? |
+| Error signal | `dlogits[target_id] -= 1.0` | probability minus target indicator | Which target index changes the gradient? |
+| Gradient buffers | `grad_embedding`, `grad_lm_head`, `grad_bias` | accumulated directions for each parameter group | Which buffer matches which parameter group? |
+| Average step | `batch_scale` and `LearningRate` | scale gradients before subtracting them | Is this one full-batch update? |
+| New state | `Parameters` | updated model state with the same shape | Did the output remain reusable as model state? |
+
+One optimizer update has this shape:
+
+```text
+Parameters
+  -> predictions on TrainingSet
+  -> gradients
+  -> Parameters
+```
+
+Repeated optimization is not a different kind of arrow. It is the same arrow
+used again:
+
+```text
+Parameters0 -> Parameters1 -> Parameters2 -> ... -> ParametersN
+```
+
+That is the chapter's main separation. `Parameters -> Loss` measures the model.
+`Parameters -> Parameters` updates the model. The first is diagnostic. The
+second is repeatable training.
+
+The local update rule in this chapter is the same first-order shape used in
+standard gradient descent:
+
+```text
+parameter = parameter - learning_rate * average_gradient
+```
+
+In the Rust source, that appears as:
+
+```rust,ignore
+*value -= learning_rate * grad * batch_scale;
+```
+
+The chapter uses a full-batch step, so one call to `TrainStep::apply` reads all
+examples in the `TrainingSet`, averages their gradients with `batch_scale`, and
+returns a new `Parameters` value. The tests repeat that one endomorphism with
+`apply_endomorphism_n_times`.
+
 ## Source Snapshot
 
 This file implements one full-batch optimizer update.
@@ -97,6 +150,37 @@ update can be run again.
 
 Before reading the full training step, explain why `Parameters -> Parameters`
 is repeatable but `Parameters -> Loss` is not.
+
+## One Step Before Many Steps
+
+Training becomes easier to reason about if you separate two ideas.
+
+One training step has the shape:
+
+```text
+Parameters -> Parameters
+```
+
+It reads the dataset, computes predictions, accumulates gradients, subtracts a
+learning-rate-scaled average gradient, and returns updated model state.
+
+Repeated training is just iteration of that same shape:
+
+```text
+Parameters0 -> Parameters1 -> Parameters2 -> ... -> ParametersN
+```
+
+The chapter's category-theory word for the one-step shape is endomorphism. The
+ML word for the update rule is gradient descent. The Rust evidence is the trait
+implementation:
+
+```rust,ignore
+impl Morphism<Parameters, Parameters> for TrainStep
+```
+
+The tests in `src/training.rs` protect the learner-visible claims: one training
+step preserves the parameter shape, out-of-range targets fail with a typed
+error, and repeated steps reduce loss on the tiny dataset.
 
 ## `TrainStep`
 
@@ -571,6 +655,58 @@ path.
 
 The next loops compose that local derivative back into parameter gradients.
 
+## Worked Example: Why Subtracting A Negative Gradient Increases The Target
+
+The update rule can feel backwards the first time you see it. The code
+subtracts gradients:
+
+```text
+parameter = parameter - learning_rate * gradient
+```
+
+So how can training increase the target score?
+
+Use the same three-class example:
+
+```text
+probs  = [0.70, 0.20, 0.10]
+target = 1
+```
+
+After the target correction:
+
+```text
+dlogits = [0.70, -0.80, 0.10]
+```
+
+Now look only at the bias update with learning rate `0.1` and one example:
+
+```text
+bias[0] = 0.0 - 0.1 *  0.70 = -0.07
+bias[1] = 0.0 - 0.1 * -0.80 =  0.08
+bias[2] = 0.0 - 0.1 *  0.10 = -0.01
+```
+
+The non-target classes had positive gradients, so subtracting them lowers their
+biases. The target class had a negative gradient, so subtracting it raises the
+target bias.
+
+That is the local version of gradient descent: move parameters in the direction
+that lowers loss. In this tiny classifier, the direction says "make the target
+logit larger and make the overconfident non-target logits smaller."
+
+The Rust path is:
+
+```text
+dlogits
+  -> grad_bias
+  -> bias -= learning_rate * grad * batch_scale
+```
+
+For output weights, the same sign passes through `x_feature * dlogit`. For the
+embedding row, the sign passes backward through the output weights. The full
+training step is bigger, but the sign logic starts here.
+
 ## Output-Head And Bias Gradients
 
 The problem this block solves is:
@@ -685,6 +821,28 @@ The problem this block solves is:
 
 > Turn accumulated gradients into new parameters.
 
+The update can be read as a loop around the same object:
+
+```text
+Parameters_t
+    |
+    | prediction on TrainingSet
+    v
+Average Loss
+    |
+    | local gradients
+    v
+Gradient Accumulators
+    |
+    | subtract learning_rate * average_gradient
+    v
+Parameters_{t+1}
+```
+
+The diagram has one important boundary: the first and last objects are both
+`Parameters`. Everything in the middle explains how one state becomes the next
+state.
+
 The code computes:
 
 ```rust,ignore
@@ -785,6 +943,10 @@ The test exercises repeated endomorphism application:
 Parameters0 -> Parameters1 -> ... -> Parameters80
 ```
 
+The companion tests check the one-step contract too. One update keeps the same
+vocabulary size and model dimension, and invalid targets are rejected before an
+unsafe index can enter gradient accumulation.
+
 ## Run The Example
 
 <details>
@@ -807,9 +969,42 @@ Expected pattern:
 ```text
 loss before: ...
 loss after:  ...
+Typed transformation:
+TrainStep : Parameters -> Parameters
+Repeated endomorphism:
+Parameters0 -> Parameters1 -> ... -> Parameters80
+Measurement:
+Parameters x TrainingSet -> Loss
 ```
 
 The second number should be smaller.
+
+## Example Output Transfer Checklist
+
+The example output is deliberately small. It gives you two measurements and
+then names the update shape that produced the second measurement.
+
+Use the printed lines this way:
+
+| Example output | Boundary to own | Shortcut to reject |
+| --- | --- | --- |
+| `loss before: ...` | measure the initial state with `Parameters x TrainingSet -> Loss` | treating the loss measurement as the training update |
+| `loss after: ...` | measure the state after repeated updates | assuming one lower loss proves a full optimizer is correct |
+| `TrainStep : Parameters -> Parameters` | one configured step consumes model state and returns model state | returning `Loss`, loose gradients, or one raw matrix from `apply` |
+| `Parameters0 -> Parameters1 -> ... -> Parameters80` | the same endomorphism can be applied again | repeating `Parameters -> Loss` as if it were training |
+| `Parameters x TrainingSet -> Loss` | evaluation needs both model state and examples | judging the loop from one prediction alone |
+
+This is the same separation used in standard gradient-descent explanations:
+compute a loss and its gradient, then update the parameters in the negative
+gradient direction. The measurement tells you whether the model improved. The
+endomorphism is the repeatable state transition that makes training possible.
+
+If you only remember one distinction from this chapter, remember this:
+
+```text
+Parameters -> Loss        measures
+Parameters -> Parameters  trains
+```
 
 ## Core Mental Model
 
@@ -855,19 +1050,73 @@ shapes consistently, combining traces, and composing local derivative rules.
 These pages give the terms behind the training update:
 
 - [Glossary](glossary.md): endomorphism, parameters, learning rate, gradient
-- [References](references.md): gradient descent, softmax regression, and Rust error handling
+- [References](references.md): gradient descent, computational graphs, backpropagation, and compositional learning
+
+## Practice After This Chapter
+
+Use [Exercise 5](exercises.md#exercise-5-change-the-training-repetition-count)
+to change the number of repeated training steps. The goal is not to tune a real
+model. The goal is to see why a `Parameters -> Parameters` update can be
+applied again and again.
 
 ## Retrieval Practice
 
 ### Recall
 
-What makes `TrainStep` an endomorphism?
+Recover the update shape before explaining the gradient.
+
+1. What makes `TrainStep` an endomorphism?
+2. Which line changes the probability vector into the logit gradient for the
+   target class?
+3. Which helper repeats the same `Parameters -> Parameters` step many times?
 
 ### Explain
 
-Why does the training code validate token bounds before accumulating gradients?
+Separate measurement from update.
+
+1. Why is `Parameters -> Loss` useful for evaluation but not itself a training
+   endomorphism?
+2. Why does the training code validate input and target token bounds before
+   accumulating gradients?
+3. Why does subtracting a negative target gradient increase the target bias or
+   target weight?
 
 ### Apply
 
-If you changed `StepCount::new(80)` to `StepCount::new(1)`, what would you
-expect to happen to the loss, and why?
+Use the sign trace from this chapter.
+
+1. Suppose:
+
+   ```text
+   probs  = [0.65, 0.25, 0.10]
+   target = 2
+   learning_rate = 0.1
+   batch_scale = 1.0
+   bias starts at [0.0, 0.0, 0.0]
+   ```
+
+   What is `dlogits`, and what is the updated bias?
+2. If you changed `StepCount::new(80)` to `StepCount::new(1)`, what would you
+   expect to happen to the loss, and why?
+3. If the dataset has four examples, why does the code multiply each accumulated
+   gradient by `batch_scale = 0.25` before updating parameters?
+
+### Debug
+
+For each invalid shortcut, name the broken shape or missing state:
+
+```text
+returning Loss from TrainStep.apply
+updating only lm_head and discarding embedding and bias
+repeating Parameters -> Loss as if it were Parameters -> Parameters
+skipping token bounds checks before indexing gradient buffers
+```
+
+A strong answer should mention the outer loop shape:
+
+```text
+Parameters_t -> Parameters_{t+1}
+```
+
+The loss and gradients explain how the update is computed. They are not the
+object that must be returned from the training step.

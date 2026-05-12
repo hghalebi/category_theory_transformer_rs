@@ -48,6 +48,11 @@ already know that a token index, a vector, a probability distribution, and a
 loss value play different roles. This chapter turns that familiar separation
 into explicit domain types.
 
+The important move is not "wrap everything because wrappers are nice." The
+important move is to ask what the rest of the pipeline is allowed to trust. Some
+types only separate meanings. Other types also reject invalid values before
+they can enter prediction, loss, or training.
+
 ## Worked Example: Naming One Number
 
 The smallest version of the pattern looks like this:
@@ -77,6 +82,47 @@ sum to one."
 
 Before reading the full source snapshot, explain why `TokenId(3)` communicates
 more than the raw number `3`.
+
+## Two Kinds Of Domain Objects
+
+Read the file with this distinction in mind.
+
+| Kind | Example | What the type gives the pipeline |
+| --- | --- | --- |
+| Semantic wrapper | `TokenId`, `Vector`, `Logits` | A name that prevents one raw representation from being confused with another |
+| Validated object | `TokenSequence`, `Distribution`, `Loss`, `VocabSize`, `LearningRate` | A constructor that rejects states later code should not have to handle |
+
+Both kinds matter. A `TokenId` is useful even though any `usize` can become a
+token ID at this layer, because it prevents accidental mixing with dimensions
+or row counts. A `Distribution` needs a stronger boundary, because not every
+`Vec<f32>` is a valid probability distribution.
+
+This is the Rust API idea behind the chapter: put meaning and validation near
+construction, then expose small accessors for the raw representation when lower
+level code really needs it.
+
+## Mistakes These Types Prevent
+
+Before reading the whole file, scan the reason each type exists. The point is
+not to wrap values for style. The point is to make common pipeline mistakes
+harder to express.
+
+| Domain type | Raw representation it replaces | Concrete mistake it prevents |
+| --- | --- | --- |
+| `TokenId` | `usize` | passing a vocabulary index where a model dimension or row count was expected |
+| `TokenSequence` | `Vec<TokenId>` | training on an empty sequence or mutating a validated sequence after construction |
+| `Vector` | `Vec<f32>` | treating hidden features as if they were vocabulary scores |
+| `Logits` | `Vec<f32>` | treating raw scores as if they were probabilities |
+| `Distribution` | `Vec<f32>` | computing loss from negative, non-finite, empty, or non-normalized probabilities |
+| `Loss` | `f32` | accumulating a negative or non-finite objective value |
+| `VocabSize` | `usize` | constructing parameters for a zero-token vocabulary |
+| `ModelDimension` | `usize` | constructing embedding rows with zero width |
+| `LearningRate` | `f32` | applying an optimizer step with zero, negative, or non-finite step size |
+| `TrainingSet` | `Vec<TrainingExample>` | running training on no examples |
+| `Parameters` | loose matrices and bias vectors | scattering model state across unrelated arrays without one named owner |
+
+Use this table as the chapter's review checklist. When a later section shows
+syntax, ask which mistake the syntax blocks.
 
 ## Source Snapshot
 
@@ -143,6 +189,10 @@ why does the training pipeline need this value?
 Category theory concept:
 what object, product, list, distribution, or morphism endpoint does it model?
 ```
+
+The chapter follows the same order as the model pipeline. First it names token
+data. Then it names hidden representations and probabilities. Then it names
+loss, configuration, paired inputs, training data, and model state.
 
 ## `TokenId`
 
@@ -1113,11 +1163,36 @@ cargo run --example 01_domain_objects
 Expected shape:
 
 ```text
-training pairs:
-1 -> 2
-2 -> 3
-3 -> 4
+TokenSequence:
+[TokenId(1), TokenId(2), TokenId(3), TokenId(4)]
+
+TrainingSet:
+(TokenId(1) -> TokenId(2))
+(TokenId(2) -> TokenId(3))
+(TokenId(3) -> TokenId(4))
+
+Typed boundaries:
+usize -> TokenId
+Vec<TokenId> -> TokenSequence
+TokenSequence -> TrainingSet
+TrainingExample = Product<TokenId, TokenId>
 ```
+
+## Example Output Transfer Checklist
+
+Use the example output to test whether the chapter's boundary idea is working.
+
+| Example output | Rust reading | ML reading | Category-theory reading | Shortcut to reject |
+| --- | --- | --- | --- | --- |
+| `TokenSequence` | a private `Vec<TokenId>` has passed the non-empty constructor | tokenized data is ready for adjacent-pair creation | non-empty list-like object | treating any `Vec<TokenId>` as valid sequence data |
+| `TrainingSet` | `DatasetWindowing` returned validated examples | adjacent input-target pairs are ready for training | list of product objects | training directly on a raw token list |
+| `usize -> TokenId` | a raw index receives a domain name | a number becomes a vocabulary position | raw representation enters a typed object | passing row counts, dimensions, and token IDs as the same `usize` |
+| `Vec<TokenId> -> TokenSequence` | a collection crosses a constructor boundary | tokenized text becomes an ordered sequence stage | partial construction into `Result<TokenSequence, CtError>` | allowing an empty sequence downstream |
+| `TrainingExample = Product<TokenId, TokenId>` | a pair has a named product shape | input token and target token travel together | `TokenId x TokenId` | using an unlabelled tuple and forgetting which side is the target |
+
+This is why the example prints `TokenId(...)` instead of only `1 -> 2`.
+Display can use raw numbers at the edge, but the teaching output should remind
+you that the program is moving through named objects.
 
 ## Why This Matters
 
@@ -1135,6 +1210,12 @@ passing logits where probabilities were expected
 training on an empty dataset
 using a negative learning rate
 ```
+
+Types do not prove that a model is good, that optimization will always
+converge, or that the tiny implementation is production-ready. They do
+something narrower and very useful: they make the wrong wiring harder to write.
+That is the first step toward a pipeline that can be explained, tested, and
+extended.
 
 ## Core Mental Model
 
@@ -1189,7 +1270,15 @@ falling back to loose wiring conventions.
 These pages extend the domain-object vocabulary used in this chapter:
 
 - [Glossary](glossary.md): object, product object, invariant, smart constructor
-- [References](references.md): Rust error handling, Rust API design, and Rust documentation
+- [References](references.md): Rust structs, enums, error handling, API design, and documentation
+
+## Practice After This Chapter
+
+Use [Exercise 1](exercises.md#exercise-1-explain-one-domain-type) to explain one
+domain type and [Exercise 7](exercises.md#exercise-7-explain-one-validation-boundary)
+to explain one constructor boundary. Together they test the chapter's main
+distinction: some types separate meaning, while others also reject invalid
+states.
 
 ## Retrieval Practice
 

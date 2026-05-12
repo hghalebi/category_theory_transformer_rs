@@ -17,6 +17,7 @@ For each lesson:
 2. Open the named Rust module.
 3. Run the named example.
 4. Answer the checkpoint before moving on.
+5. If the lesson names a boundary, find the test that proves the boundary.
 
 ## Lessons
 
@@ -26,6 +27,7 @@ For each lesson:
 4. [The Tiny ML Pipeline](03-ml-pipeline.md)
 5. [Training as an Endomorphism](04-training-endomorphism.md)
 6. [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md)
+7. [Seven Sketches Through Rust](06-seven-sketches.md)
 
 ## Validation
 

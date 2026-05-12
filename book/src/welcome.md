@@ -1,29 +1,122 @@
 # Category Theory for Tiny ML in Rust
 
-This course teaches category-theory ideas through a tiny Rust language-model
-pipeline.
+## First Win
 
-The goal is not to memorize abstract vocabulary.
+From the repository root, run:
 
-The goal is to connect each abstract word to a concrete machine-learning
-operation, a Rust type or trait, an invariant the code protects, and a command
-you can run.
+```bash
+cargo run --example 01_token_sequence
+```
 
-The whole course follows one central idea:
+That command turns one sentence into typed training material:
+
+```text
+Text
+  -> TokenSequence
+  -> TrainingPairs
+```
+
+The point of starting there is practical. Before the book asks you to care
+about category theory, it lets you run a small program and inspect the shape it
+prints.
+
+## First Output Transfer Checklist
+
+Use the first run as a reading test. Do not treat the output as a demo banner.
+Treat each printed block as evidence for a boundary.
+
+| Printed output | Rust reading | ML reading | Category-theory reading |
+| --- | --- | --- | --- |
+| `Raw input` | an ordinary `&str` enters the program | text before tokenization | source object before the first transformation |
+| `TokenSequence` | a validated domain object built from `TokenId` values | tokenized data the tiny system can inspect | object with named structure |
+| `TrainingPairs` | adjacent `Product<TokenId, TokenId>` values | input-target examples for next-token learning | product-shaped training examples |
+| `Typed transformation` | the command names the path the code took | text became examples for learning | a short chain of morphisms |
+
+The first win is not that the tokenizer is impressive. It is deliberately tiny.
+The win is that you can point at the output and say:
+
+```text
+this raw value became this domain object,
+then this domain object became training examples,
+and the transformation path is visible.
+```
+
+That is the reading habit the rest of the book repeats at larger scales.
+
+Then run the guided walkthrough:
+
+```bash
+cargo run --bin category_ml
+```
+
+That command walks through the larger pipeline: domain objects, morphisms,
+composition, prediction, loss, repeated training, functors, monoids, and the
+small chain-rule example.
+
+The repository is public at
+[github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
+Use it for source files, runnable examples, issues, and contribution work.
+
+## What This Book Is About
+
+Most machine-learning education starts with frameworks.
+
+Frameworks are useful. They let us train real models quickly. But they also hide
+the small structure underneath: the types of values moving through the system,
+the transformations between those values, the loss that measures error, and the
+update step that changes the model.
+
+This book takes the opposite path.
+
+It builds a tiny learning system slowly enough that every important shape can be
+read in Rust:
+
+```text
+Text
+  -> TokenSequence
+  -> TrainingSet
+  -> Prediction
+  -> Loss
+  -> Updated Parameters
+```
+
+The goal is to make the hidden structure easier to see.
+
+> Executable structure, not AI magic.
+
+## The Central Thesis
+
+This book is built around one claim:
 
 > A useful ML system is a chain of typed transformations.
 
+Rust gives those transformations compile-checked boundaries. Category theory
+gives names to recurring shapes such as objects, morphisms, products,
+composition, endomorphisms, functors, and monoids. Tiny ML keeps the system
+small enough to inspect completely.
+
+The book uses all three, but in this order:
+
+```text
+intuition
+  -> small Rust example
+  -> ML meaning
+  -> category-theory name
+  -> runnable exercise
+```
+
+The category-theory words should arrive after the reader has seen the shape in
+code.
+
 ## What You Already Know
 
-If you have written a Rust function, you already know the informal shape behind
-much of this book. A function receives a value of one type and returns a value
-of another type. If you have seen an ML pipeline, you already know that data
-moves through staged transformations. Category theory asks us to look at that
-movement structurally.
+If you have written a Rust function, you already know the first shape. A
+function has an input type, an output type, and a body that explains how to move
+from one to the other.
 
-## Worked Example: One Typed Transformation
+## Worked Example: Naming One Raw Value
 
-Start with the smallest version:
+Start with the deliberately unsafe version:
 
 ```rust
 fn token_to_position(token_id: usize) -> usize {
@@ -33,116 +126,99 @@ fn token_to_position(token_id: usize) -> usize {
 assert_eq!(token_to_position(3), 103);
 ```
 
-Rust reads this as a function from `usize` to `usize`. The book's real examples
-make the same movement safer by replacing raw `usize` values with named domain
-types such as `TokenId`, `VocabSize`, and `ModelDimension`.
-
-In this repository, that chain is small enough to read completely:
+This is a transformation from one type to another:
 
 ```text
-raw text idea
-  -> token ids
-  -> token sequence
-  -> next-token training pairs
-  -> prediction distribution
-  -> loss
-  -> updated parameters
+usize -> usize
 ```
 
-Rust gives those stages names.
+The problem is that both sides are too vague. A raw `usize` might mean a token
+index, a vocabulary size, a vector dimension, a training step, or a row number.
+Those are different concepts, even if the machine representation is the same.
 
-Category theory gives those stages shapes.
+The book's first move is to give those concepts names.
 
-Machine learning gives those stages a reason to exist.
+```rust,ignore
+pub struct TokenId(usize);
+pub struct VocabSize(usize);
+pub struct ModelDimension(usize);
+```
 
-## The Explanation Standard
+Now the reader can ask better questions:
 
-Every major chapter now explains code at four levels.
+```text
+Can this token be embedded?
+Does this vector have the expected dimension?
+Is this probability distribution valid?
+Can this loss be accumulated?
+Can this training update be repeated?
+```
 
-First, it says what problem a block solves.
+That is where the Rust type system starts to become part of the explanation.
 
-Second, it places the block in the ML pipeline.
+## Self-check
 
-Third, it reads the Rust syntax directly.
+Before continuing, explain what changed when `token_id: usize` became
+`TokenId`. Did the machine representation change, or did the program gain a
+clearer boundary?
 
-Fourth, it explains the category-theory shape behind the code.
+## The Three Readings
 
-For example, when you see:
+Every important idea in the book is read three ways.
+
+### Rust Reading
+
+The Rust reading asks:
+
+```text
+What type is this?
+What function or trait connects it to another type?
+What invariant does the constructor protect?
+What error can happen at the boundary?
+```
+
+For example:
 
 ```rust,ignore
 pub struct TokenSequence(Vec<TokenId>);
 ```
 
-do not read it as only:
+This is not only "a struct containing a vector." In the real source, it is a
+controlled domain object. Other code can use a `TokenSequence`, but it cannot
+freely reach inside and mutate the raw representation.
+
+### ML Reading
+
+The ML reading asks:
 
 ```text
-a struct containing a vector
+What stage of the learning pipeline is this?
+Is it data, prediction, loss, or an update?
+What would a larger framework usually hide here?
 ```
 
-Read it as:
+A token sequence is not the model yet. It is data after tokenization and before
+training pairs. A distribution is not just a vector of floats. It is a vector of
+non-negative probabilities that should sum to one.
+
+### Category-Theory Reading
+
+The category-theory reading asks:
 
 ```text
-a validated, owned, non-empty list of token IDs
+What object is this?
+What morphism starts here or ends here?
+Can two transformations compose?
+Is this update an endomorphism?
+Which law is the code trying to make visible?
 ```
 
-That one type carries several meanings at once. In Rust, it is a private tuple
-struct wrapping `Vec<TokenId>`. In the ML pipeline, it is tokenized text before
-it becomes examples. At the API boundary, it prevents callers from constructing
-an empty sequence directly. Categorically, it behaves like a non-empty list-like
-object.
-
-This is the level of reading used throughout the course.
-
-## Self-Check
-
-Before continuing, explain this in your own words: what changes when a raw
-number becomes a named type such as `TokenId`?
-
-## Learning Contract
-
-Use the same loop for every chapter. Start with the concrete problem, study the
-code block or source snapshot, translate each type into plain English, and then
-translate each method into the pipeline stage it serves. After that, run the
-chapter command and answer the checkpoint without looking back.
-
-The chapters are deliberately repetitive in structure. That repetition is part
-of the learning design. You should start to recognize the same pattern:
-
-```text
-raw representation
-  -> validated domain object
-  -> typed morphism
-  -> composed pipeline
-  -> tested law
-```
-
-## Fast Start
-
-From the repository root:
-
-```bash
-cargo run --example 01_token_sequence
-```
-
-That command gives the fastest first run: raw text becomes a token sequence and
-then next-token training pairs.
-
-For the full guided walkthrough:
-
-```bash
-cargo run --bin category_ml
-```
-
-That command runs the full guided walkthrough.
-
-You should see token IDs becoming training pairs, a prediction path built from
-embedding, linear projection, and softmax, cross entropy producing a loss,
-repeated training lowering the loss, and small examples for functors,
-naturality, monoids, and the chain rule.
+The point is not to make the code sound more abstract. The point is to name the
+same shape that the Rust and ML readings already revealed.
 
 ## The Main Picture
 
-The tiny model is a chain of typed arrows:
+The tiny model is organized around this chain:
 
 ```text
 TokenSequence -> TrainingSet
@@ -153,54 +229,103 @@ Distribution x TokenId -> Loss
 Parameters    -> Parameters
 ```
 
+Read it left to right.
+
 The first line prepares examples.
 
-The middle lines make predictions and measure error.
+The middle lines make a prediction and measure error.
 
 The last line updates the model.
-
-The category-theory reading is:
-
-```text
-objects + morphisms + composition + laws
-```
 
 The Rust reading is:
 
 ```text
-types + traits + smart constructors + tests
+types + constructors + traits + errors + tests
 ```
 
 The ML reading is:
 
 ```text
-data + model + probabilities + loss + training
+data + scores + probabilities + loss + training
 ```
+
+The category-theory reading is:
+
+```text
+objects + morphisms + products + composition + laws
+```
+
+## Learning Contract
+
+Use the same loop in every chapter. Start with the practical problem, read the
+smallest example, and then inspect the relevant source snapshot. Translate the
+Rust type or function into plain English before connecting it to the ML
+pipeline. Only after the code is concrete should the chapter name the
+category-theory shape. Then run the example and answer the retrieval questions
+without looking back.
+
+The chapters are deliberately repetitive in structure. That repetition is part
+of the learning design. The pattern should become familiar:
+
+```text
+raw representation
+  -> validated domain object
+  -> typed transformation
+  -> composed pipeline
+  -> checked law
+```
+
+## What This Book Is Not
+
+This is not a production ML framework.
+
+This is not a performance-first Rust implementation.
+
+This is not category theory as decoration.
+
+This is not a promise that every advanced mathematical idea has been fully
+formalized in the code.
+
+The examples are intentionally small. They are designed to make structure
+visible before speed, scale, or completeness enter the conversation.
 
 ## Reading Path
 
-Read the chapters in order. The [Course Map](00-map.md) gives the whole
-pipeline shape. [Domain Objects](01-domain-objects.md) names the typed nouns,
-and [Morphism and Composition](02-morphisms-composition.md) names the typed
-arrows between them. [The Tiny ML Pipeline](03-ml-pipeline.md) turns those
-arrows into prediction and loss, while
-[Training as an Endomorphism](04-training-endomorphism.md) shows why repeated
-updates have the shape `Parameters -> Parameters`.
+Read the chapters in order on the first pass.
+
+The [Course Map](00-map.md) gives the whole pipeline shape.
+
+[Domain Objects](01-domain-objects.md) names the typed nouns.
+
+[Morphism and Composition](02-morphisms-composition.md) names the typed arrows
+between them.
+
+[The Tiny ML Pipeline](03-ml-pipeline.md) turns those arrows into prediction and
+loss.
+
+[Training as an Endomorphism](04-training-endomorphism.md) shows why one
+optimizer step has the repeatable shape:
+
+```text
+Parameters -> Parameters
+```
 
 After the core pipeline, [Functors, Naturality, Monoids, and Chain
 Rule](05-structure-and-calculus.md) introduces reusable structure, and
-[Seven Sketches Through Rust](seven-sketches-rust.md) widens the same style to
-applied category theory. The [Exercises](exercises.md),
-[Glossary](glossary.md), [References](references.md), and
-[Transformer Roadmap](roadmap.md) are there for practice, review, deeper
-reading, and the path toward attention.
+[Seven Sketches Through Rust](seven-sketches-rust.md) widens the method to
+applied category theory.
 
-The source repository is public at
-[github.com/hghalebi/category_theory_transformer_rs](https://github.com/hghalebi/category_theory_transformer_rs).
-Use that page for issues, examples, and contribution work.
+Use the [Exercises](exercises.md) for practice, the [Glossary](glossary.md) for
+terms, the [References](references.md) for chapter-specific sources, and the
+[Transformer Roadmap](roadmap.md) for the path toward attention.
+
+## Live Study
 
 The first public workshop for the project is available through
 [Luma registration](https://luma.com/event/evt-Pb1kYMQvzs8JrQq).
+
+The workshop is a guided study path through the same tiny pipeline. It is useful
+if you want to see the code, diagrams, and vocabulary connected live.
 
 ## What To Remember
 
@@ -225,10 +350,17 @@ has a type, and every composition has to make sense before Rust lets it run.
 
 ## Where This Leaves Us
 
-The welcome page sets the reading contract. You will see the same idea through
-three lenses: Rust syntax, tiny ML behavior, and category-theory shape. The next
+This welcome chapter sets the reading contract. You will see the same idea
+through Rust syntax, tiny ML behavior, and category-theory shape. The next
 chapter gives the full map before the book starts reading individual source
 files.
+
+## Practice After This Chapter
+
+Do one small check before moving on: run `cargo run --example 01_token_sequence`
+and explain one output line using the three-lens shape from this chapter. If
+you want a written prompt, use the first-output transfer checklist above and
+Beginner Exercise 3 in [Exercises](exercises.md).
 
 ## Retrieval Practice
 

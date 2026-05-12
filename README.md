@@ -29,7 +29,8 @@ executable AI education in Rust.
 | --- | --- | --- |
 | 5 minutes | `cargo run --example 01_token_sequence` | See text become typed training structure |
 | 30 minutes | [START_HERE.md](START_HERE.md), then examples 01-03 | Learn the core path through the repo |
-| A chapter question | [Open a feedback issue](https://github.com/hghalebi/category_theory_transformer_rs/issues/1) | Point to the first unclear section |
+| A review session | [community/reader-review-packet.md](community/reader-review-packet.md) | Turn reader friction into a useful issue |
+| A chapter question | [Open the reader-confusion form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml) | Point to the first unclear section |
 | A contribution idea | [CONTRIBUTING.md](CONTRIBUTING.md) | Choose a concrete issue or improvement |
 
 ```mermaid
@@ -284,16 +285,23 @@ use category_theory_transformer_rs::{
 
 fn main() -> CtResult<()> {
     let params = Parameters::init(VocabSize::new(5)?, ModelDimension::new(4)?);
+    let token = TokenId::new(1);
+    let embedding = Embedding::from_parameters(&params);
+    let linear = LinearToLogits::from_parameters(&params);
 
     let token_to_logits = Compose::<_, _, Vector>::new(
-        Embedding::from_parameters(&params),
-        LinearToLogits::from_parameters(&params),
+        embedding.clone(),
+        linear.clone(),
     );
     let token_to_distribution = Compose::<_, _, Logits>::new(token_to_logits, Softmax);
 
-    let distribution = token_to_distribution.apply(TokenId::new(1))?;
+    let vector = embedding.apply(token)?;
+    let logits = linear.apply(vector)?;
+    let distribution = Softmax.apply(logits)?;
+    let composed_distribution = token_to_distribution.apply(token)?;
 
-    println!("next-token probabilities: {:?}", distribution.as_slice());
+    println!("stage output: {:?}", distribution.as_slice());
+    println!("composed output: {:?}", composed_distribution.as_slice());
 
     Ok(())
 }
@@ -312,6 +320,9 @@ The point is structure:
 ```text
 TokenId -> Vector -> Logits -> Distribution
 ```
+
+The command also prints the middle objects, so the composed arrow does not hide
+the `Vector` and `Logits` stages that make it legal.
 
 Once the structure is visible, we can ask better questions about correctness,
 composition, training, and eventually performance.
@@ -365,6 +376,7 @@ The compiler is part of the teacher.
 - `src/training.rs`: training as a repeated parameter endomorphism
 - `src/structure.rs`: functors, natural transformations, and monoids
 - `src/calculus.rs`: local derivative and chain-rule example
+- `src/attention.rs`: typed query-key scoring, masks, attention weights, value mixing, head concatenation, output projection, residual addition, layer normalization, position-wise feed-forward structure, hidden projections, block sketches, sequence readout, structured Transformer state, readout-only training, local feed-forward training, and a composed block training step with query/key/value gradients
 - `src/sketches.rs`: Rust models for seven applied-category-theory sketches
 - `src/demo.rs`: the complete terminal walkthrough
 
@@ -378,6 +390,7 @@ The compiler is part of the teacher.
 | `cargo run --example 03_training_endomorphism` | Training | See training as `Parameters -> Parameters` |
 | `cargo run --example 04_structure_and_calculus` | Structure and calculus | See functors, monoids, and chain-rule sketches |
 | `cargo run --example 05_seven_sketches` | Applied sketches | See category ideas beyond tiny ML |
+| `cargo run --example 06_attention_scores` | Attention roadmap | See query-key scores get masked, normalized, mixed, concatenated, projected, passed through blocks, wrapped in structured state, and updated through readout, feed-forward, attention, and composed block training steps |
 
 These examples are small by design.
 Each one is meant to isolate a concept before the book combines it with the
@@ -418,12 +431,16 @@ Chapter maturity:
 
 | Chapter | Status | Best feedback |
 | --- | --- | --- |
+| Welcome | Stable draft | First-run promise and reader contract |
+| Course Map | Stable draft | Path clarity and module-to-pipeline mapping |
 | Domain Objects | Stable draft | Clarity and Rust idiom |
-| Morphism and Composition | Needs expansion | More examples |
-| Tiny ML Pipeline | Draft | Diagrams and ML intuition |
+| Morphism and Composition | Draft | More examples and composition diagrams |
+| The Tiny ML Pipeline | Draft | Diagram review and ML intuition |
 | Training as an Endomorphism | Draft | Training-loop intuition |
-| Functors, Naturality, Monoids, and Chain Rule | Sketch | Terminology precision |
-| Seven Sketches Through Rust | Sketch | Which examples help or distract |
+| Functors, Naturality, Monoids, and Chain Rule | Draft | Law tracing and terminology precision |
+| Seven Sketches Through Rust | Draft | Transfer clarity across sketches |
+| Exercises | Draft | Evidence quality and transfer difficulty |
+| Transformer Roadmap | Sketch | Attention-shape clarity and training-state boundaries |
 
 ## Roadmap
 
@@ -431,7 +448,7 @@ Near-term improvements:
 
 - clearer first-session path
 - more runnable Rust examples
-- better diagrams for the tiny ML pipeline
+- better diagrams for the tiny ML pipeline and training loop
 - fewer dense bullet-style explanations
 - more prose before abstractions
 - chapter maturity labels
@@ -441,7 +458,7 @@ Near-term improvements:
 
 Longer-term direction:
 
-- typed attention examples
+- learner-facing gradient-checking exercises over the current weight, bias, and normalization checks
 - tiny tokenizer examples
 - training-loop examples
 - category-theory glossary for engineers
@@ -470,8 +487,10 @@ A great issue looks like this:
 ```text
 Chapter:
 Section:
-What I expected:
+Command or file I tried:
+What I understood:
 Where I got confused:
+What I expected next:
 Suggestion:
 ```
 
@@ -480,14 +499,19 @@ Example:
 ```text
 Chapter: Morphism and Composition
 Section: Typed transformations
-What I expected: a concrete Rust function before the abstract explanation
+Command or file I tried: cargo run --example 02_morphism_composition
+What I understood: a morphism is a typed transformation
 Where I got confused: the word "morphism" appeared before I had an intuition
+What I expected next: a concrete Rust function before the abstract explanation
 Suggestion: introduce it first as "a typed transformation"
 ```
 
 That kind of feedback is useful.
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+For structured reading feedback, use
+[community/reader-review-guide.md](community/reader-review-guide.md), then open
+the [reader-confusion issue form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=reader-confusion.yml).
+For code or documentation changes, start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Good first issues
 

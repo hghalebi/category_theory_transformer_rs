@@ -3,3 +3,6 @@ contact_links:
   - name: Start Here
     url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/START_HERE.md
     about: Start here if you are new to the project.
+  - name: Reader Review Packet
+    url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/community/reader-review-packet.md
+    about: Use this when you want to review the book and open one useful issue.

@@ -806,6 +806,21 @@ mod tests {
     }
 
     #[test]
+    fn database_instance_rejects_missing_department_reference() {
+        let research = DepartmentId::new(1);
+        let missing_department = DepartmentId::new(99);
+        let ada = EmployeeId::new(7);
+
+        assert!(matches!(
+            CompanyInstance::new([research], [EmployeeRecord::new(ada, missing_department)]),
+            Err(CtError::ShapeMismatch {
+                op: "database instance",
+                ..
+            })
+        ));
+    }
+
+    #[test]
     fn feasibility_relation_matches_requirement_to_offer() -> CtResult<()> {
         let requirement = DesignRequirement::new(Throughput::new(100)?, LatencyMs::new(80)?);
         let offer = ImplementationOffer::new(Throughput::new(120)?, LatencyMs::new(50)?);
@@ -833,6 +848,36 @@ mod tests {
         let composed = add_weighted.compose_after(&duplicate)?;
 
         assert_eq!(composed.coefficients(), &[vec![SignalCoefficient::new(5)]]);
+        Ok(())
+    }
+
+    #[test]
+    fn signal_matrix_composition_rejects_mismatched_middle_dimension() -> CtResult<()> {
+        let previous = SignalMatrix::new(
+            MatrixRows::new(2)?,
+            MatrixCols::new(1)?,
+            vec![
+                vec![SignalCoefficient::new(1)],
+                vec![SignalCoefficient::new(1)],
+            ],
+        )?;
+        let next = SignalMatrix::new(
+            MatrixRows::new(1)?,
+            MatrixCols::new(3)?,
+            vec![vec![
+                SignalCoefficient::new(1),
+                SignalCoefficient::new(1),
+                SignalCoefficient::new(1),
+            ]],
+        )?;
+
+        assert!(matches!(
+            next.compose_after(&previous),
+            Err(CtError::ShapeMismatch {
+                op: "signal matrix composition",
+                ..
+            })
+        ));
         Ok(())
     }
 
@@ -868,6 +913,23 @@ mod tests {
         assert_eq!(serial.component_count(), 2);
         assert_eq!(parallel.input_count(), 2);
         assert_eq!(parallel.output_count(), 2);
+        Ok(())
+    }
+
+    #[test]
+    fn open_circuit_serial_composition_rejects_boundary_mismatch() -> CtResult<()> {
+        let input = PortName::new("input")?;
+        let output = PortName::new("output")?;
+        let left = OpenCircuit::new([input], [output], [])?;
+        let right = OpenCircuit::new([input, output], [output], [])?;
+
+        assert!(matches!(
+            left.then(&right),
+            Err(CtError::ShapeMismatch {
+                op: "open circuit serial composition",
+                ..
+            })
+        ));
         Ok(())
     }
 

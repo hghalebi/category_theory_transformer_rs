@@ -19,20 +19,72 @@ section, code block, or command where the path slows down. Explain what you
 expected next.
 ```
 
-## Diagram
+## Diagram Review
 
 Title:
 
 ```text
-[needs diagram] Text → Tokens → TrainingPairs → ModelState pipeline
+[needs diagram] Review the first pipeline diagrams
 ```
 
 Prompt:
 
 ```text
-Create a simple diagram for the first-run path in examples/01_token_sequence.rs.
-The diagram should show raw text, TokenSequence, TrainingPairs, ModelState,
-Prediction, Loss, and Updated ModelState.
+Review the diagrams in the Course Map, Morphism and Composition, Tiny ML
+Pipeline, and Training as an Endomorphism chapters. Quote the first diagram that
+is unclear, then suggest one concrete simplification or missing label.
+```
+
+## Reader Review
+
+Opened tracking issue:
+
+```text
+https://github.com/hghalebi/category_theory_transformer_rs/issues/6
+```
+
+Title:
+
+```text
+[reader confusion] Complete a thirty-minute reader review
+```
+
+Prompt:
+
+```text
+Use community/reader-review-guide.md. Run the first example, read the entry
+path, then review one core chapter. Quote the first point where your mental
+model becomes uncertain and explain what you expected next.
+
+Maintainers should triage resulting reports with
+community/reader-feedback-triage.md.
+```
+
+## Attention Roadmap Review
+
+Title:
+
+```text
+[ML intuition] Review the query-key attention example
+```
+
+Prompt:
+
+```text
+Run cargo run --example 06_attention_scores, then review src/attention.rs and
+book/src/roadmap.md. Report whether the current example clearly separates the
+implemented query-key score, mask, score-to-weight, value-mixing, and
+head-concatenation, and output-projection boundaries from the block sketches.
+Also report whether residual addition, normalization, position-wise
+feed-forward, positional encoding, hidden projections, and the single-head and
+multi-head blocks plus the masked block variant are clearly presented as
+implemented. Finally, report whether the structured parameter object,
+sequence-level readout, and training-state metadata are clear without implying
+that a production Transformer trainer already exists. Include whether the
+readout-only training step is clearly presented as real but deliberately
+narrow, and whether the local feed-forward update is clearly separated from
+the composed block update. Then report whether the composed update is clearly
+separated from future reader-feedback-driven refinements to gradient checking.
 ```
 
 ## Rust Example

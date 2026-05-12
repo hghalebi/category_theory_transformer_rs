@@ -5,12 +5,73 @@ labels:
   - reader confusion
   - good first feedback
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form after running at least one command or reading one chapter section.
+        Precise friction is more useful than a general review.
+        Do not include email addresses, private messages, personal notes, or contact details.
+
+        Good report shape:
+        `command or chapter -> what made sense -> where the mental model broke -> smallest edit that would help`
+  - type: dropdown
+    id: review_path
+    attributes:
+      label: Review path
+      description: Which path did you use before opening this issue?
+      options:
+        - Five-minute example
+        - Thirty-minute reader review
+        - One core chapter
+        - Attention roadmap review
+        - Exercise attempt
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: reviewer_context
+    attributes:
+      label: Reviewer context
+      description: Which reviewer perspective best describes this report?
+      options:
+        - Rust engineer
+        - ML engineer
+        - Category-theory reader
+        - Technical educator
+        - Beginner-adjacent reader
+        - Other
+    validations:
+      required: true
   - type: input
     id: location
     attributes:
       label: Location
       description: File, chapter, section, or command.
       placeholder: "book/src/01-domain-objects.md"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or file tried
+      description: Name the command you ran or file you opened before the confusion appeared.
+      placeholder: "cargo run --example 01_token_sequence"
+    validations:
+      required: true
+  - type: dropdown
+    id: friction_lens
+    attributes:
+      label: Friction lens
+      description: Which kind of explanation broke first?
+      options:
+        - Entry path
+        - Rust syntax
+        - ML intuition
+        - Category-theory precision
+        - Diagram clarity
+        - Exercise readiness
+        - Reference needed
+        - Other
     validations:
       required: true
   - type: textarea
@@ -21,9 +82,30 @@ body:
     validations:
       required: true
   - type: textarea
+    id: understood
+    attributes:
+      label: What made sense before that point?
+      description: Briefly explain the last idea that felt clear.
+    validations:
+      required: true
+  - type: textarea
+    id: stuck
+    attributes:
+      label: Where did the mental model break?
+      description: Explain the exact missing step, undefined term, unexpected output, or unclear transition.
+    validations:
+      required: true
+  - type: textarea
     id: expectation
     attributes:
       label: What did you expect next?
       description: Explain what would have made the path clearer.
     validations:
       required: true
+  - type: textarea
+    id: smallest_fix
+    attributes:
+      label: Smallest useful fix
+      description: Suggest one sentence, diagram label, command, example, or exercise check that would help.
+    validations:
+      required: false

@@ -7,9 +7,11 @@
 //! - [`training`] turns one optimizer step into an endomorphism on parameters.
 //! - [`structure`] covers functors, natural transformations, and monoids.
 //! - [`calculus`] shows the chain rule as a local backward pass.
+//! - [`attention`] sketches typed attention boundaries and Transformer state for the roadmap.
 //! - [`sketches`] gives Rust models for the seven applied-category-theory sketches.
 //! - [`demo`] connects the pieces into the terminal walkthrough.
 
+pub mod attention;
 pub mod calculus;
 pub mod category;
 pub mod demo;
@@ -20,6 +22,22 @@ pub mod sketches;
 pub mod structure;
 pub mod training;
 
+pub use attention::{
+    AttentionHeadOutputs, AttentionMask, AttentionOutput, AttentionOutputProjection,
+    AttentionScores, AttentionSoftmax, AttentionWeights, ConcatenateHeads, HeadCount,
+    HeadDimension, HiddenSequence, HiddenToKey, HiddenToQuery, HiddenToValue, KeySequence,
+    LayerNormParameters, LayerNormalization, MaskedAttentionScores,
+    MaskedMultiHeadTransformerBlock, MultiHeadOutput, MultiHeadTransformerBlock,
+    NormalizationEpsilon, PositionWiseFeedForward, PositionalEncoding, ProjectedAttentionOutput,
+    QuerySequence, ResidualConnection, ScaledDotProductScores, SelfAttentionHead, SequenceLength,
+    SequenceLogits, SingleHeadTransformerBlock, TinyTransformerParameters,
+    TransformerBlockTrainStep, TransformerBlockTrainingExample, TransformerBlockTrainingSet,
+    TransformerFeedForwardTrainStep, TransformerFeedForwardTrainingExample,
+    TransformerFeedForwardTrainingSet, TransformerReadout, TransformerReadoutTrainStep,
+    TransformerReadoutTrainingExample, TransformerReadoutTrainingSet, TransformerTrainingState,
+    ValueSequence, WeightedValueMixing, transformer_block_average_loss,
+    transformer_feed_forward_average_loss, transformer_readout_average_loss,
+};
 pub use calculus::{LocalGradient, MulOp, Scalar};
 pub use category::{
     Compose, Endomorphism, Identity, Morphism, StepCount, apply_endomorphism_n_times,

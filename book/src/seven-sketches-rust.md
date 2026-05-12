@@ -94,6 +94,35 @@ ML or software concept
 Category theory concept
 ```
 
+## Choose A Sketch Without Losing The Tiny ML Thread
+
+The source paper deliberately tours many application areas. This companion
+chapter keeps that breadth, but the book still has one main learning path:
+small typed systems that make ML structure inspectable.
+
+Use this table to decide how deeply to read each sketch on a first pass.
+
+| Sketch | Read deeply when you need | Tiny ML transfer | Safe first-pass treatment |
+| --- | --- | --- | --- |
+| Information order | staged representations or approval states | raw text, tokens, features, scores, and decisions form ordered levels of processed information | Core transfer |
+| Feature/layer planning | two views of model capacity | feature counts and layer budgets are different descriptions of model size | Optional but useful |
+| Resources | deployment or training constraints | compute and memory limits constrain model choices | Optional but practical |
+| Database instance | structured training data | bad references in source data should fail before training | Core transfer |
+| Co-design feasibility | requirements versus implementations | a model may satisfy some accuracy, latency, or memory requirements and fail others | Core transfer |
+| Signal matrices | linear maps and shape compatibility | composed linear stages need matching middle dimensions | Core transfer |
+| Open circuits | component interfaces | typed ML components compose only when output and input boundaries match | Core transfer |
+| Logic of behavior | local checks and global claims | every batch or interval must satisfy the invariant before the global claim is trusted | Optional but useful |
+
+On a first reading, focus on the rows marked core transfer. They connect most
+directly to the tiny ML pipeline. The optional rows are not less important;
+they are just farther from the first runnable model.
+
+The chapter is successful if you can leave each sketch with one sentence:
+
+```text
+This Rust model prevents this invalid composition.
+```
+
 ## Worked Example: Ordering Information Levels
 
 The smallest first-principles version of this chapter is an ordered enum. Rust
@@ -119,6 +148,49 @@ validation, and law checks.
 
 Before reading the first sketch, explain why `Observation <= Decision` is a
 modeling rule, not just a comparison between enum variants.
+
+## One Method Across Seven Sketches
+
+Do not read the chapter as seven unrelated theory notes. Each sketch follows
+the same modeling method:
+
+```text
+engineering problem
+  -> named Rust values
+  -> validated construction
+  -> composition operation or relation
+  -> law or boundary test
+```
+
+That method is the same one used in the tiny ML pipeline. The difference is the
+domain. Instead of tokens, logits, and parameters, this chapter uses resources,
+database rows, signal matrices, open circuits, and local behavior checks.
+
+When a sketch feels abstract, ask one question:
+
+```text
+What invalid composition should this model prevent?
+```
+
+The answer usually points to the real engineering value of the categorical
+shape.
+
+The chapter's applied models can be scanned by the structure they protect:
+
+| Sketch | Rust handle | Valid structure | Rejected or checked boundary |
+| --- | --- | --- | --- |
+| Information order | `InformationLevel` | information flows upward through refinement levels | preorder laws check reflexivity and transitivity |
+| Feature/layer planning | `FeatureCount`, `LayerBudget` | concrete and abstract capacity views agree | Galois law checks both directions of fit |
+| Resources | `ResourceBundle` | compute and memory combine componentwise | monotonicity checks supply still respects demand |
+| Databases | `CompanyInstance` | employee records refer to known departments | missing department references return `Err(...)` |
+| Co-design | `FeasibilityRelation` | offers satisfy throughput and latency requirements | infeasible offers are not related |
+| Signal flow | `SignalMatrix` | matrices compose when middle dimensions match | mismatched dimensions return `Err(...)` |
+| Open circuits | `OpenCircuit` | serial composition connects matching port boundaries | boundary mismatch returns `Err(...)` |
+| Behavior logic | `SafetyCover` | local interval checks combine into global truth | unknown local truth prevents a false global guarantee |
+
+This table is the chapter's law-and-boundary index. The point is not to
+memorize eight rows. The point is to see that each sketch earns its abstraction
+by protecting one concrete relationship.
 
 ## Sketch 1: Information Order
 
@@ -206,6 +278,28 @@ information_order_obeys_preorder_laws()
 
 iterates over the finite set and verifies those rules.
 
+### Transfer Task: Ordered States
+
+Model a workflow from your own codebase as an ordered enum, such as:
+
+```rust,ignore
+enum ReviewState {
+    Draft,
+    Reviewed,
+    Published,
+}
+```
+
+Then write the Rust sentence you would want to be true:
+
+```text
+Draft can flow to Published
+Published cannot flow to Draft
+state can always flow to itself
+```
+
+The transfer is complete when you can name the invalid flow your order prevents.
+
 ## Sketch 1 Continued: Feature And Layer Galois Law
 
 The problem this block solves is:
@@ -278,6 +372,30 @@ The two directions are not inverses.
 
 They are coordinated by an order law.
 
+### Transfer Task: Concrete And Abstract Capacity
+
+Pick one concrete measure and one abstract budget from software work:
+
+```text
+concrete: batch size, feature count, request rate
+abstract: GPU count, layer budget, service tier
+```
+
+Write the two functions:
+
+```text
+abstract(concrete) -> abstract budget
+concretize(abstract budget) -> concrete capacity
+```
+
+The transfer is complete when you can state the law in both directions:
+
+```text
+abstract(concrete) fits budget
+if and only if
+concrete fits concretize(budget)
+```
+
 ## Sketch 2: Resources
 
 The problem this block solves is:
@@ -348,6 +466,26 @@ resource_tensor_is_monotone()
 shows that adding the same fixed resource bundle to both sides preserves the
 order.
 
+### Transfer Task: Resource Bundle
+
+Extend the idea to three resource dimensions:
+
+```text
+compute
+memory
+disk
+```
+
+Name the constructor boundary and the law check:
+
+```text
+ResourceBundle::new(compute, memory, disk)
+resource_tensor_is_monotone
+```
+
+The transfer is complete when you can explain why componentwise addition should
+not turn an adequate supply into an inadequate supply.
+
 ## Sketch 3: Database Instance
 
 The problem this block solves is:
@@ -415,6 +553,27 @@ An instance assigns sets of rows to schema objects.
 The foreign key is a function from employees to departments.
 
 `CompanyInstance::new` checks that the function is defined for every employee.
+
+### Transfer Task: Foreign Key Boundary
+
+Translate the pattern to another schema arrow:
+
+```text
+Task -> Project
+Order -> Customer
+Comment -> Post
+```
+
+Name two newtypes and one record:
+
+```text
+ProjectId
+TaskId
+TaskRecord { id: TaskId, project: ProjectId }
+```
+
+The transfer is complete when you can write the constructor failure in plain
+English: "reject a task whose project id is missing from the project table."
 
 ## Sketch 4: Co-Design Feasibility
 
@@ -492,6 +651,25 @@ A -> B
 ```
 
 Some should be modeled as constraints or relations.
+
+### Transfer Task: Feasibility Relation
+
+Model a relation that is not a function:
+
+```text
+Requirement x Offer -> Bool
+```
+
+For example, use:
+
+```text
+minimum accuracy
+maximum memory
+maximum latency
+```
+
+The transfer is complete when you can explain why many offers may satisfy one
+requirement, and one offer may satisfy many requirements.
 
 ## Sketch 5: Signal Matrices
 
@@ -581,6 +759,25 @@ composition of meanings
 The code enforces the same middle-dimension law that ordinary morphism
 composition enforces.
 
+### Transfer Task: Shape-Safe Composition
+
+Write the shape of two stages before writing any coefficients:
+
+```text
+A -> B
+B -> C
+```
+
+Then write one invalid pair:
+
+```text
+A -> B
+D -> C
+```
+
+The transfer is complete when you can name the exact middle dimension that must
+match for matrix composition to make sense.
+
 ## Sketch 6: Open Circuits
 
 The problem this block solves is:
@@ -660,6 +857,25 @@ Composition is controlled by boundary compatibility.
 
 The paper develops this with cospans, hypergraph categories, decorated
 cospans, and operads. The Rust code gives a small typed analogue.
+
+### Transfer Task: Interface Boundary
+
+Model two components by boundary only:
+
+```text
+Tokenizer: Text -> TokenSequence
+Embedder: TokenSequence -> HiddenSequence
+```
+
+Then write one invalid serial composition:
+
+```text
+Tokenizer: Text -> TokenSequence
+Classifier: Logits -> Label
+```
+
+The transfer is complete when you can say which output boundary failed to match
+which input boundary.
 
 ## Sketch 7: Logic Of Behavior
 
@@ -741,6 +957,21 @@ The code uses a simple conjunction model, not full sheaf theory.
 The important lesson is that proof-like information becomes explicit data, not
 an informal comment.
 
+### Transfer Task: Local Checks To Global Claim
+
+Pick one invariant over time:
+
+```text
+loss is finite
+latency stays below the budget
+no batch has an empty token sequence
+```
+
+Split it into local intervals and assign a truth value to each interval.
+
+The transfer is complete when you can explain why one false local check must
+make the global claim false.
+
 ## Tests As Exercise Solutions
 
 The problem this block solves is:
@@ -751,6 +982,12 @@ The test module checks preorder laws, the feature/layer Galois law, resource
 tensor monotonicity, database foreign-key resolution, feasibility relation
 behavior, signal matrix composition, open circuit serial and parallel
 composition, and local-to-global truth.
+
+It also includes negative boundary tests. A database instance with a missing
+department reference is rejected. Signal matrices with incompatible middle
+dimensions cannot compose. Open circuits with mismatched serial boundaries do
+not wire together. Those failures are part of the teaching point: the model is
+useful because it rejects incoherent structure near the boundary.
 
 ## Rust Syntax
 
@@ -788,6 +1025,49 @@ Run:
 ```bash
 cargo run --example 05_seven_sketches
 ```
+
+The output gives one executable handle per sketch:
+
+```text
+orders obey preorder laws: true
+feature/layer Galois law: true
+resource tensor monotone: true
+employee EmployeeId(7) belongs to department Some(DepartmentId(1))
+co-design offer feasible: true
+signal-flow matrix semantics: [[SignalCoefficient(5)]]
+serial circuit component count: 2
+global behavior truth: True
+Typed transformation:
+InformationLevel <= InformationLevel checks preorder
+FeatureCount <-> LayerBudget checks Galois law
+ResourceBundle x ResourceBundle -> ResourceBundle
+EmployeeRecord -> DepartmentId must resolve in CompanyInstance
+DesignRequirement x ImplementationOffer -> bool
+SignalMatrix x SignalMatrix -> SignalMatrix when dimensions match
+OpenCircuit x OpenCircuit -> OpenCircuit when ports match
+SafetyCover -> TruthValue
+```
+
+## Example Output Transfer Checklist
+
+Use the companion output as a boundary map. Each line should tell you which
+structure is being protected.
+
+| Example output | Rust handle | Protected structure | Shortcut to reject |
+| --- | --- | --- | --- |
+| `orders obey preorder laws: true` | `InformationLevel` | information can flow upward through an ordered refinement path | treating an enum order as arbitrary display order |
+| `feature/layer Galois law: true` | `FeatureCount`, `LayerBudget` | concrete and abstract capacity views agree by a two-way fit law | treating abstraction and concretization as inverse functions |
+| `resource tensor monotone: true` | `ResourceBundle::tensor` | adding resources componentwise preserves supply ordering | combining compute and memory as one raw number |
+| `employee ... belongs to department ...` | `CompanyInstance::new` | every employee department reference resolves | letting a missing foreign key reach later feature extraction |
+| `co-design offer feasible: true` | `FeasibilityRelation::relates` | requirements and offers form a relation, not a single function | forcing every design question into `A -> B` |
+| `signal-flow matrix semantics: ...` | `SignalMatrix::compose_after` | matrix meanings compose only when middle dimensions match | multiplying stages before checking shape |
+| `serial circuit component count: 2` | `OpenCircuit::then` | serial composition requires matching boundaries | wiring components by name alone |
+| `global behavior truth: True` | `SafetyCover::global_truth` | local checks combine into a global claim | claiming global safety while one local interval is false |
+
+The typed lines at the bottom of the output are not extra decoration. They name
+the form each sketch protects: order, Galois law, monoidal resource
+composition, database instance, feasibility relation, matrix composition, open
+system composition, and local-to-global truth.
 
 For the full validation gate:
 
@@ -859,15 +1139,84 @@ These pages are useful once you have the executable sketch map:
 
 ### Recall
 
-Name three applied structures modeled in this chapter.
+Recover the chapter map before choosing a transfer example.
+
+Name the sketch that models ordered refinement from observation to decision.
+
+Name the sketch that rejects an employee row whose department is missing.
+
+Name the sketch that rejects matrix composition when the middle dimensions do
+not match.
+
+Name the sketch that rejects serial component composition when output and input
+boundaries do not match.
 
 ### Explain
 
-Why does each sketch include constructors or law checks instead of only type
-definitions?
+Explain the protected boundary.
+
+For `InformationLevel`, explain why `Observation` can flow to `Decision` but a
+decision should not silently flow backward to an observation.
+
+For `CompanyInstance`, explain why missing department references should be
+rejected at construction time instead of during later feature extraction.
+
+For `SignalMatrix`, explain why the middle dimension must match before matrix
+composition can run.
+
+For `OpenCircuit`, explain why a boundary mismatch is an interface error, not a
+numeric error.
 
 ### Apply
 
-Pick one engineering concept from your own work, such as permissions, queues, or
-resource budgets. Describe the objects, relationships, and one law you would
-want tests to check.
+Use the companion output as evidence.
+
+The example prints:
+
+```text
+orders obey preorder laws: true
+feature/layer Galois law: true
+resource tensor monotone: true
+signal-flow matrix semantics: [[SignalCoefficient(5)]]
+serial circuit component count: 2
+global behavior truth: True
+```
+
+Choose two printed lines. For each one, write:
+
+```text
+Rust value or function:
+software meaning:
+category-theory shape:
+invalid structure prevented or law checked:
+```
+
+Then pick one engineering concept from your own work, such as permissions,
+queues, schema references, resource budgets, or service interfaces. Describe
+the objects, relationships, and one law or boundary test you would want the
+code to check.
+
+### Debug
+
+For each broken model, name the missing structure:
+
+```text
+using raw usize for both EmployeeId and DepartmentId
+letting a missing department reference enter the training data
+composing signal matrices without checking the middle dimension
+serially wiring components by name without checking boundary counts
+claiming global safety when one local interval is false
+```
+
+A strong answer should use the chapter's repeated method:
+
+```text
+name the objects
+name the relationships
+control construction
+define composition
+check the law
+```
+
+The goal is not to memorize every sketch. The goal is to recognize what each
+model refuses to let pass as valid structure.

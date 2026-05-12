@@ -15,6 +15,13 @@ fn main() -> CtResult<()> {
 
     println!("loss before: {:.6}", before.value());
     println!("loss after:  {:.6}", after.value());
+    println!();
+    println!("Typed transformation:");
+    println!("TrainStep : Parameters -> Parameters");
+    println!("Repeated endomorphism:");
+    println!("Parameters0 -> Parameters1 -> ... -> Parameters80");
+    println!("Measurement:");
+    println!("Parameters x TrainingSet -> Loss");
 
     Ok(())
 }
