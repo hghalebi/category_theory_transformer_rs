@@ -1,5 +1,10 @@
 # Category Theory for Tiny ML in Rust
 
+This is a public working draft. The current edition is published so readers
+can learn from it now, run the examples, and send precise feedback. It is not
+the completed textbook yet; later passes will keep revising the chapters from
+source review, exercises, and direct reader reports.
+
 ## First Win
 
 From the repository root, run:
@@ -43,6 +48,36 @@ and the transformation path is visible.
 
 That is the reading habit the rest of the book repeats at larger scales.
 
+## Source-Backed Reading Contract
+
+This welcome chapter uses sources to keep the first session practical. Each
+source supports one local rule for how the reader should move from the first
+command to the rest of the book.
+
+| Source | What the source supports | Local rule in this chapter | Repository evidence |
+| --- | --- | --- | --- |
+| [How People Learn II](https://www.nationalacademies.org/projects/DBASSE-BBCSS-13-06/publication/24783) | New learning works better when it connects to prior knowledge, learner context, and transfer. | Start from what many readers already know: a function has an input, an output, and a visible transformation. | `fn token_to_position(token_id: usize) -> usize`, `## What You Already Know`, `## Self-check` |
+| [Rust By Example](https://doc.rust-lang.org/rust-by-example/index.html) | Small runnable programs make syntax inspectable before the explanation gets abstract. | Make the first proof a command the reader can run before reading theory. | `cargo run --example 01_token_sequence`, `examples/01_token_sequence.rs` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory becomes learnable through concrete compositional examples. | Name objects, morphisms, products, composition, and laws only after the reader can point to a tiny typed pipeline. | `Text -> TokenSequence -> TrainingPairs`, `Distribution x TokenId -> Loss`, `Parameters -> Parameters` |
+
+The transfer pattern is:
+
+```text
+run one small example -> name the visible boundary -> reuse the reading habit
+```
+
+For this chapter, the first command is evidence for a small claim:
+
+```text
+Text becomes TokenSequence.
+TokenSequence becomes TrainingPairs.
+The path is visible in terminal output.
+```
+
+It is not evidence that the whole book is easy for every reader yet. That is
+why the public review path asks for exact evidence signals when a sentence,
+output line, table row, code block, or exercise breaks the learning path.
+
 Then run the guided walkthrough:
 
 ```bash
@@ -61,15 +96,26 @@ Use it for source files, runnable examples, issues, and contribution work.
 
 If you want to help as a reader, use the public
 [review path](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-path.md).
+If you want the shareable public call for the five reviewer perspectives, use
+[Reviewers Needed](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/REVIEWERS.md).
+If you are reviewing with a group, use the
+[public review sprint](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-sprint.md)
+to collect one report from each reader perspective.
 
 The most useful report is small:
 
 ```text
 Command or page tried:
+Evidence signal:
 Last clear idea:
 First unclear sentence, output line, table row, code block, or exercise:
 What would have helped:
 ```
+
+If you are reading the online book and cannot clone the repository right now,
+use the same shape. Put `public book path` in `Command or page tried`, name the
+page you read, and quote or describe one visible evidence signal: a sentence,
+heading, diagram, table row, code block, or exercise prompt.
 
 Open the
 [chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
@@ -371,8 +417,8 @@ has a type, and every composition has to make sense before Rust lets it run.
 
 This welcome chapter sets the reading contract. You will see the same idea
 through Rust syntax, tiny ML behavior, and category-theory shape. The next
-chapter gives the full map before the book starts reading individual source
-files.
+chapter, [Course Map](00-map.md), gives the full map before the book starts
+reading individual source files.
 
 ## Practice After This Chapter
 

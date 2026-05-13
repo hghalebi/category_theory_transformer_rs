@@ -29,6 +29,52 @@ In category-theory language:
 > feels dense, follow the pipeline order: data preparation first, prediction
 > second, loss third.
 
+## First Mental Model
+
+The public shorthand for the whole project is:
+
+```text
+Text -> Tokens -> TrainingPairs -> ModelState -> Prediction -> Loss -> Updated ModelState
+```
+
+This chapter zooms into the middle of that path. It explains how token pairs,
+current parameters, predictions, and loss become separate typed boundaries.
+
+```mermaid
+flowchart LR
+    A["Text"] --> B["Tokens / TokenSequence"]
+    B --> C["TrainingPairs / TrainingSet"]
+    C --> F["Loss"]
+    M["ModelState / Parameters"] --> P["Prediction / Distribution"]
+    P --> F
+    M --> U["Updated ModelState / Updated Parameters"]
+    F --> U
+```
+
+Read the diagram as orientation, then use the Rust types for precision. The
+loss boundary needs both current model state and training data:
+
+```text
+Parameters x TrainingSet -> Loss
+```
+
+The update boundary returns a complete next model state:
+
+```text
+Parameters -> Updated Parameters
+```
+
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- trace `TokenId -> Vector -> Logits -> Distribution` through the concrete
+  Rust morphisms,
+- explain why cross entropy consumes both a prediction and the target token,
+- distinguish the production shortcut `CrossEntropyLoss(logits, target)` from
+  this book's explicit `Logits -> Distribution -> Product<Distribution,
+  TokenId> -> Loss` teaching path.
+
 ## What You Already Know
 
 If you know ML, you already know the rough path: prepare data, make a
@@ -148,6 +194,12 @@ before normalization."
 sum to one. A distribution says "how much probability the model assigns to each
 possible next token."
 
+That is still a local model probability, not a promise that the model's
+confidence is calibrated in the outside world. Calibration asks whether events
+predicted with about `0.90` confidence really happen about ninety percent of
+the time over a population of predictions. This tiny chapter only builds and
+validates the normalized probability object.
+
 `Loss` is a scalar penalty. Cross entropy makes the penalty small when the
 model assigns high probability to the correct token and large when it assigns
 low probability to the correct token.
@@ -266,6 +318,33 @@ which target index selects the probability used by loss?
 
 When moving back to frameworks, remember that the compact API still owns both
 roles: score normalization and target-conditioned loss.
+
+## Source-Backed Precision Rules
+
+This chapter uses external sources to keep the tiny prediction-and-loss path
+honest. Each source supports a limited claim; these citations are not proof
+that this crate is a production classifier, a calibrated probability model, or
+a framework replacement.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [D2L Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html) | A classifier needs one output per class; softmax turns raw outputs into non-negative probabilities that sum to one. | `Logits` are raw scores; `Softmax` is the only boundary that creates a `Distribution`. | `LinearToLogits : Vector -> Logits`, `Softmax : Logits -> Distribution` |
+| [D2L Softmax From Scratch](https://d2l.ai/chapter_linear-classification/softmax-regression-scratch.html) | Implementing softmax explicitly makes normalization and probability sums visible, and cross entropy selects the probability assigned to the true label. | The local teaching path exposes `Distribution` before loss so readers can inspect normalization and target selection separately. | `Distribution::new`, `CrossEntropy`, `target.index()` |
+| [Accurate Computation of the Log-Sum-Exp and Softmax Functions](https://arxiv.org/abs/1909.03469) | Softmax and log-sum-exp evaluation can overflow or underflow, and shifted formulas are used to improve floating-point behavior. | Subtract the maximum logit before exponentiation, but keep the local claim to numerical stability of this boundary, not full production numerical analysis. | `let max_value = ...`, `let exp = (*value - max_value).exp()` |
+| [On Calibration of Modern Neural Networks](https://proceedings.mlr.press/v70/guo17a.html) | Confidence calibration asks whether predicted probabilities match empirical correctness frequencies. | A `Distribution` is a normalized local model output; it is not a guarantee of calibrated confidence. | `Distribution::new`, `softmax_normalizes_logits_into_distribution` |
+| [PyTorch `CrossEntropyLoss`](https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html) | The production API accepts unnormalized logits and target class indices, and internally corresponds to log-softmax plus negative log likelihood. | The book deliberately expands that compact API into `Logits -> Distribution -> Product<Distribution, TokenId> -> Loss`. | `Product<Distribution, TokenId>`, `CrossEntropy.apply` |
+| [CS231n Linear Classification](https://cs231n.github.io/linear-classify/) | Softmax treats class scores as unnormalized log probabilities and cross entropy penalizes the probability assigned to the correct class. | Do not compute loss from the largest probability; compute it from the target token's probability. | `cross_entropy_is_lower_for_more_confident_target_probability` |
+
+The transfer pattern is:
+
+```text
+source claim -> local typed boundary -> validation command or test
+```
+
+For this chapter, that means reading `cargo test ml::tests` and the
+`src/ml.rs` morphisms as evidence for the tiny
+`Logits -> Distribution -> Product<Distribution, TokenId> -> Loss` boundary,
+not as evidence for every production classification stack.
 
 The tests in `src/ml.rs` protect those claims: softmax normalizes logits into a
 distribution, and cross entropy is lower when the target token receives higher
@@ -1173,16 +1252,89 @@ training examples, a token becomes a vector, a vector becomes logits, logits
 become probabilities, and a probability distribution plus a target token becomes
 loss.
 
-The next chapter changes the question from "how do we evaluate one prediction?"
-to "how do repeated updates change the model state?" That is where training
-enters as an endomorphism.
+The next chapter, [Training as an Endomorphism](04-training-endomorphism.md),
+changes the question from "how do we evaluate one prediction?" to "how do
+repeated updates change the model state?" That is where training enters as an
+endomorphism.
 
 ## Further Reading
 
-These pages connect the tiny pipeline to the surrounding vocabulary:
+The problem this section solves is transfer. If you only read the tiny Rust
+implementation, larger framework APIs may still look unrelated. If you only
+read a framework reference, the explicit typed boundaries in this chapter may
+feel unnecessarily small. Use the references to connect the two views without
+collapsing them.
+
+Start from the local Rust evidence:
+
+```text
+DatasetWindowing.apply : TokenSequence -> TrainingSet
+Embedding.apply        : TokenId -> Vector
+LinearToLogits.apply   : Vector -> Logits
+Softmax.apply        : Logits -> Distribution
+CrossEntropy.apply   : Distribution x TokenId -> Loss
+average_loss          : Parameters x TrainingSet -> Loss
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [D2L Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html) | Multiclass classification uses raw scores, softmax probabilities, and cross entropy as one connected prediction-and-loss story. | `LinearToLogits.apply`, `Softmax.apply`, `CrossEntropy.apply` |
+| [D2L Softmax From Scratch](https://d2l.ai/chapter_linear-classification/softmax-regression-scratch.html) | Implementing the pieces from scratch reveals the roles hidden by concise framework calls. | `src/ml.rs`, `average_loss`, `cargo test ml::tests --lib` |
+| [Accurate Computation of the Log-Sum-Exp and Softmax Functions](https://arxiv.org/abs/1909.03469) | Floating-point softmax implementations use shifted formulas to reduce overflow and harmful underflow. | `let max_value = ...`, `(*value - max_value).exp()` |
+| [On Calibration of Modern Neural Networks](https://proceedings.mlr.press/v70/guo17a.html) | A normalized probability vector is not automatically a calibrated confidence estimate over future predictions. | `Distribution::new`, `softmax_normalizes_logits_into_distribution` |
+| [PyTorch `CrossEntropyLoss`](https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html) | A production API can accept unnormalized logits and target class indices while internally combining log-softmax and negative log likelihood. | `Logits -> Distribution`, `Product<Distribution, TokenId>`, `CrossEntropy.apply` |
+| [CS231n Linear Classification](https://cs231n.github.io/linear-classify/) | Scores, classifiers, and losses should be kept conceptually separate before optimization is discussed. | `Vector -> Logits`, `Distribution x TokenId -> Loss` |
+
+The ML bridge is:
+
+```text
+framework call
+  -> raw scores plus target index
+  -> probability assigned to the target
+  -> loss
+```
+
+The category-theory bridge is:
+
+```text
+Logits -> Distribution
+Distribution x TokenId -> Loss
+```
+
+The first arrow is an ordinary morphism. The second is a product-input morphism
+because loss needs both the model's prediction and the correct target token.
+
+After reading one source, answer four questions:
+
+1. Which local boundary did it clarify?
+2. Which value is raw score, probability, target, or loss?
+3. Which shortcut did the source use that the tiny Rust path expands?
+4. Which command or test shows the local evidence?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --bin category_ml
+cargo test ml::tests --lib
+```
+
+Checkpoint:
+
+```text
+When reading an external loss API, can you name which part corresponds to
+Logits -> Distribution and which part corresponds to Distribution x TokenId
+-> Loss?
+```
+
+For terminology recovery, use:
 
 - [Glossary](glossary.md): logits, softmax, probability distribution, cross entropy
 - [References](references.md): softmax regression and linear classifiers
+
+If a source does not help you point to one local boundary and one output or
+test signal, it has not transferred back into this chapter yet.
 
 ## Practice After This Chapter
 

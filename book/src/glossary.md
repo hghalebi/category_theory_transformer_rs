@@ -37,6 +37,42 @@ term concrete?
 
 That question keeps the glossary grounded.
 
+## Source-Backed Recovery Rules
+
+Use this section when a term feels impressive but not usable yet. The glossary
+is strongest when a definition can be recovered through four anchors:
+
+```text
+term -> source anchor -> Rust evidence -> learner evidence signal
+```
+
+The outside source gives the term a trustworthy boundary. The repository
+evidence shows the smaller claim this book actually makes. The learner evidence
+signal tells you what to run, inspect, or explain before moving on.
+
+| If this term family is unclear | Source anchor | Local evidence | Learner evidence signal |
+| --- | --- | --- | --- |
+| domain object, invariant, smart constructor | [Rust structs](https://doc.rust-lang.org/book/ch05-01-defining-structs.html), [Rust enums](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html), [Rust API Guidelines](https://rust-lang.github.io/api-guidelines/checklist.html), [recoverable `Result`](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) | `TokenId`, `TokenSequence::new`, `Distribution::new`, `Loss::new`, and `LearningRate::new` in `src/domain.rs` | `cargo run --example 01_domain_objects`; `cargo test domain::tests`; explain which invalid state a constructor rejects |
+| morphism, identity, composition | [Rust traits](https://doc.rust-lang.org/book/ch10-02-traits.html), [Rust generics](https://doc.rust-lang.org/book/ch10-01-syntax.html), [Seven Sketches](https://arxiv.org/abs/1803.05316), [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | `Morphism<Input, Output>`, `Identity<T>`, and `Compose<F, G, Middle>` in `src/category.rs` | `cargo run --example 02_morphism_composition`; `cargo test category::tests`; name the middle object that makes composition legal |
+| logits, distribution, cross entropy, loss | [Dive into Deep Learning: Softmax Regression](https://d2l.ai/chapter_linear-classification/softmax-regression.html), [CS231n Linear Classification](https://cs231n.github.io/linear-classify/), [PyTorch CrossEntropyLoss](https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html), [On Calibration of Modern Neural Networks](https://proceedings.mlr.press/v70/guo17a.html) | `Logits -> Distribution -> Product<Distribution, TokenId> -> Loss` in `src/ml.rs` | `cargo run --bin category_ml`; `cargo test ml::tests`; point to the line where target token and prediction meet, then explain why normalized probability is not automatically calibrated confidence |
+| training step, parameters, endomorphism | [Backprop as Functor](https://arxiv.org/abs/1711.10455), [D2L Backpropagation](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html), [PyTorch optimizers](https://docs.pytorch.org/docs/stable/optim.html) | `TrainStep : Parameters -> Parameters` in `src/training.rs` and `TransformerTrainingState -> TransformerTrainingState` in `src/attention.rs` | `cargo run --example 03_training_endomorphism`; `cargo run --example 07_transformer_training_state`; separate measurement from update |
+| functor, naturality, monoid, chain rule | [Categories for the Working Mathematician](https://link.springer.com/book/10.1007/978-1-4757-4721-8), [Seven Sketches](https://arxiv.org/abs/1803.05316), [Category Theory for Programming](https://arxiv.org/abs/2209.01259), [D2L Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html) | `VecFunctor`, `OptionFunctor`, `first_or_none_naturality_square`, `PipelineTrace`, and `MulOp::backward` in `src/structure.rs` and `src/calculus.rs` | `cargo run --example 04_structure_and_calculus`; `cargo test structure::tests --lib`; `cargo test calculus::tests --lib`; explain which small law or local derivative the output checks, and which formal claim the local tests do not prove |
+| query, key, value, mask, attention weights | [Attention Is All You Need](https://arxiv.org/abs/1706.03762), [PyTorch MultiheadAttention](https://docs.pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html), [PyTorch Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html), [PyTorch scaled dot product attention](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html), [Hugging Face Transformer course](https://huggingface.co/docs/course/en/chapter1/4) | `QuerySequence`, `KeySequence`, `ValueSequence`, `AttentionMask`, `AttentionScores`, and `AttentionWeights` in `src/attention.rs` | `cargo run --example 06_attention_scores`; `cargo test attention::tests`; explain why the mask is applied before softmax and why this book's `true -> allowed` polarity must not be confused with APIs where `true -> blocked` |
+| fixed module instance, parameter context, training-state update | [D2L Parameter Management](https://d2l.ai/chapter_builders-guide/parameters.html), [PyTorch optimizers](https://docs.pytorch.org/docs/stable/optim.html), [Rust Book closures](https://doc.rust-lang.org/stable/book/ch13-01-closures.html) | `LayerNormalization`, `PositionWiseFeedForward`, and `TransformerTrainingState` in `src/attention.rs` | `cargo run --example 07_transformer_training_state`; explain why a forward sublayer is an endomorphism only for a fixed module value, while parameter changes belong to training state |
+| finite difference, gradient check, local update evidence | [CS231n numerical gradients](https://cs231n.github.io/optimization-1/), [CS231n Neural Networks Part 3](https://cs231n.github.io/neural-networks-3/), [PyTorch gradcheck](https://docs.pytorch.org/docs/stable/generated/torch.autograd.gradcheck.gradcheck.html) | finite-difference tests for transformer readout, feed-forward, layer norm, attention projection, and block updates in `src/attention.rs` | run `cargo test attention::tests::transformer_block_train_step_matches_finite_difference_for_readout_weight`; state that this is local evidence, not a proof of all training |
+| retrieval, transfer, and misconception repair | [How People Learn II](https://www.nationalacademies.org/projects/DBASSE-BBCSS-13-06/publication/24783), [Test-Enhanced Learning](https://doi.org/10.1111/j.1467-9280.2006.01693.x), [worked-example transition](https://doi.org/10.1207/S15326985EP3801_3) | the worked examples, partial examples, common misreadings, and exercise evidence map in this book | recover one term by writing the Rust handle, the protected ML role, and the exact command or test that checks it |
+
+These source anchors do not make the glossary a substitute for the chapters.
+They protect the smaller local claim:
+
+```text
+If a term matters here, the reader should be able to point to code, run a
+command, inspect a failure signal, or explain a checked boundary.
+```
+
+If you cannot name the Rust handle or evidence signal, treat the term as
+unrecovered and return to the chapter or source file where it first appears.
+
 ## Core Term Alignment
 
 Some ideas have a public phrase, a Rust type, and a category-theory reading.
@@ -54,6 +90,7 @@ Use this table to keep them separate.
 | source sequence length | `KeySequence` and `ValueSequence` row count | "source length" for intuition, `S` when the positions being read may differ from target positions |
 | attention score rows | `AttentionScores` | "scores" for intuition, `AttentionScores` when the row shape must be validated |
 | attention mask | `AttentionMask` | "allowed positions" for intuition, `AttentionMask` when illegal score positions must be removed before softmax |
+| mask polarity | `AttentionMask` | "true means allowed in this Rust type" when comparing with framework APIs whose boolean masks may use the opposite convention |
 | attention weights | `AttentionWeights` | "weights" for intuition, `AttentionWeights` when each query row must sum to one |
 | attention output | `AttentionOutput` | "mixed values" for intuition, `AttentionOutput` when one output row per query matters |
 | head count | `HeadCount` | "number of heads" for intuition, `HeadCount` when zero heads must be rejected |
@@ -77,6 +114,8 @@ Use this table to keep them separate.
 | multi-head block | `MultiHeadTransformerBlock` | "several heads as one block" for intuition, `MultiHeadTransformerBlock` when head count and output-projection shape must be validated |
 | masked multi-head block | `MaskedMultiHeadTransformerBlock` | "block with allowed attention positions" for intuition, `MaskedMultiHeadTransformerBlock` when the mask joins hidden state at the block boundary |
 | fixed mask context | `AttentionMask` selected before a block call | "same mask reused for this run" for intuition, fixed context when an open masked block is viewed as `HiddenSequence -> HiddenSequence` |
+| fixed module instance | `LayerNormalization`, `PositionWiseFeedForward`, or a block value with stored parameters | "this specific layer value" for intuition, fixed module instance when a forward call is named `HiddenSequence -> HiddenSequence` |
+| parameter-changing update | `TransformerTrainingState` | "learning changed the stored parameters" for intuition, training-state endomorphism when scale, shift, weights, biases, learning rate, or step count must stay together |
 | sequence logits | `SequenceLogits` | "vocabulary scores at each sequence position" for intuition, `SequenceLogits` when sequence length and vocabulary width must be explicit |
 | Transformer readout | `TransformerReadout` | "sequence language-model head" for intuition, `TransformerReadout` when hidden width and vocabulary width must be validated |
 | tiny Transformer parameters | `TinyTransformerParameters` | "position plus block plus readout" for intuition, `TinyTransformerParameters` when named model roles should move together |
@@ -107,13 +146,15 @@ category-theory shape the misreading erased.
 | --- | --- | --- | --- |
 | `TokenId` is just a `usize`. | `TokenId` is a domain object for vocabulary positions. | `TokenId` is a named type consumed by token and embedding stages. | The raw number is local machinery; the boundary value says "vocabulary item." |
 | `Logits` are probabilities. | `Logits -> Distribution` is a required stage. | `Softmax` consumes `Logits` and produces `Distribution`. | Scores become probabilities only after row or vocabulary normalization. |
+| A normalized softmax probability is calibrated confidence. | Calibration is an empirical reliability claim, not just a `Distribution` constructor invariant. | `Distribution::new` validates a local probability vector; calibration needs population-level evidence outside this tiny example. | Say "normalized model probability" unless you have checked empirical calibration. |
 | Loss only needs the prediction. | `Distribution x TokenId -> Loss` is a product-input boundary. | `CrossEntropy` consumes prediction and target together. | The target token tells the loss which probability to judge. |
 | A training step can return changed weights only. | `Parameters -> Parameters` or `TransformerTrainingState -> TransformerTrainingState` preserves the next update shape. | `TrainStep` and Transformer train steps return complete state objects. | The updated object must be ready for the next step without reconstruction. |
 | `fmap` means any function call. | `fmap` changes inside values while preserving wrapper shape. | `VecFunctor::fmap` returns `Vec<B>` and `OptionFunctor::fmap` returns `Option<B>`. | The operation maps the contents and keeps the outer structure. |
-| Returning the left object makes a boundary an endomorphism. | Count inputs first: `A x B -> A` is still product-input. | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` needs two inputs. | A unary endomorphism has shape `A -> A`; product input must stay visible. |
+| Returning the left object makes a boundary an endomorphism. | Count inputs first: `A x B -> A` is still product-input. If the product is named as one source object, `(A x B) -> A` is unary from the product but still not an endomorphism. | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` needs two inputs. | A unary endomorphism has shape `A -> A`; an endomorphism on the product would have shape `(A x B) -> (A x B)`. |
 | Self-attention makes Q, K, and V the same role. | Self-attention shares source ownership before projection. | `HiddenToQuery`, `HiddenToKey`, and `HiddenToValue` produce separate role objects. | The same hidden sequence may feed all three projections, but the roles remain distinct. |
 | Masking after softmax is equivalent. | `AttentionScores x AttentionMask -> AttentionScores -> AttentionWeights`. | The mask is applied before `AttentionSoftmax`. | Illegal positions should not receive probability mass. |
 | A masked block is automatically an endomorphism because it returns `HiddenSequence`. | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` while the mask is open. | The block consumes `AttentionMask` at the boundary. | Keep the mask visible, or explicitly say a fixed mask induces a `HiddenSequence -> HiddenSequence` view for that run. |
+| A layer endomorphism means the parameters are not part of the story. | `LayerNormalization : HiddenSequence -> HiddenSequence` is a forward call for one fixed layer value; parameter learning is `TransformerTrainingState -> TransformerTrainingState`. | `LayerNormalization` stores scale and shift; train steps return full `TransformerTrainingState`. | Fixed module context makes a forward endomorphism; changing parameters moves the boundary to training state. |
 | `MultiHeadOutput` can be added directly to `HiddenSequence`. | `MultiHeadOutput -> ProjectedAttentionOutput` must happen first. | `ResidualConnection` expects projected model-width rows. | Concatenated heads must return to model width before residual addition. |
 | One finite-difference match proves training is correct. | A finite-difference check is local evidence for one selected parameter path. | Tests compare one inferred update gradient with one numerical slope. | The check supports the local implementation; it does not prove every parameter, dataset, or optimizer. |
 
@@ -1167,6 +1208,17 @@ An attention mask marks which key positions each query is allowed to attend to.
 Disallowed score positions become a large negative value before softmax, so
 their probability becomes negligible.
 
+Read the mask as a permission table, not as a shorter token sequence. A mask
+cell answers:
+
+```text
+may this query row read this source column?
+```
+
+It selects legal score cells before probability normalization. It does not
+directly produce `AttentionWeights`; softmax still turns the remaining score
+row into weights.
+
 Category theory concept:
 
 `MaskedAttentionScores` is a typed morphism from a product object back to the
@@ -1180,6 +1232,14 @@ First-principles reading:
 
 Every mask row must allow at least one key. Otherwise softmax would be asked to
 choose among no legal positions.
+
+Recovery rule:
+
+```text
+mask cells select legal score cells
+softmax turns remaining score rows into weights
+weights read value rows
+```
 
 ## Attention Weights
 

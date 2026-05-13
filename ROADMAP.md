@@ -74,13 +74,30 @@ Sponsor-worthy tracks:
 - advanced modules that turn the current finite-difference checks into richer learner-facing gradient-checking exercises over structured Transformer state
 - facilitator notes for teams using the material internally
 
-## Milestone 5: License Decision
+## Milestone 5: Citation And Reuse Policy
 
-Goal: choose explicit licenses for code and book material before serious public
-promotion.
+Goal: keep citation, reuse, and permission boundaries explicit before broader
+public promotion.
 
-Status: needed.
+Status: initial policy declared.
 
-This is a project-owner decision. The likely shape is separate handling for
-Rust code and prose/book content, but no license is declared until the owners
-choose it.
+The repository now includes [LICENSE.md](LICENSE.md) and [CITATION.cff](CITATION.cff).
+The public book will always remain open access at
+<https://hghalebi.github.io/category_theory_transformer_rs/>. The source
+repository is available at
+<https://github.com/hghalebi/category_theory_transformer_rs>. Short quotation,
+personal study, links, and noncommercial educational discussion are allowed
+with citation. Plain rule: group reuse with more than one person needs written
+permission. Commercial or organizational reuse involving more than one person
+requires written permission when it reproduces, adapts, distributes, or teaches
+material from the book or repository beyond short quotation, linking, review,
+and individual-study allowances. This includes company workshops, internal team
+workshops, company reading groups based on copied or adapted material, paid
+training material, course packs, adapted slide decks, handouts, labs, and
+workshop packets. If the material is reused by or for a company, team, class,
+workshop, cohort, course, or training program with more than one person,
+request written permission first. Citation alone is not permission and does not
+replace written permission for group commercial or organizational reuse.
+Permission requests should start through the source repository. Future Kindle
+or hard copy editions are support editions, not access gates; they will not
+remove free public access to the online book.

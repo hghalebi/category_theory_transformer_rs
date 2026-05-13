@@ -44,6 +44,41 @@ for expected behavior. This book uses the same habit for learning: a failed
 test, rejected constructor, or compiler error is not only a problem to remove.
 It is evidence about which boundary the code protects.
 
+## Source-Backed Practice Contract
+
+This chapter uses sources to keep practice cumulative, testable, and
+transfer-oriented. Each source supports one local exercise rule and one kind of
+repository evidence.
+
+| Source | What the source supports | Local rule in this chapter | Repository evidence |
+| --- | --- | --- | --- |
+| [How People Learn II](https://www.nationalacademies.org/projects/DBASSE-BBCSS-13-06/publication/24783) | Learners need practice that connects prior knowledge to new transfer situations. | Move from one small Rust boundary to a new but related boundary. | `TokenId` to `Distribution`, then `TrainStep`, then attention shapes |
+| [Test-Enhanced Learning](https://doi.org/10.1111/j.1467-9280.2006.01693.x) | Retrieval practice can improve retention rather than only measure it. | Ask Recall, Explain, and Apply questions before the answer key. | `## Checkpoint Quiz`, `## Retrieval Practice`, `exercises/ANSWER_KEY.md` |
+| [Structuring the Transition From Example Study to Problem Solving](https://doi.org/10.1207/S15326985EP3801_3) | Learners benefit from moving from worked examples toward independent problem solving. | Use a worked example, then a partially completed example, then an open transfer exercise. | `## Worked Example`, `## Partially Completed Example`, `## Transfer Exercise` |
+| [Rust Book: Writing Automated Tests](https://doc.rust-lang.org/stable/book/ch11-00-testing.html) | Tests check expected behavior that the type system alone cannot prove. | Treat tests, constructor errors, and compiler errors as learning evidence. | `cargo test --all-targets --all-features`, `domain::tests`, `category::tests`, `ml::tests` |
+| [Rust By Example: Tests](https://doc.rust-lang.org/rust-by-example/cargo/test.html) | Small test commands and targeted test names make feedback inspectable. | Prefer one named command and one visible signal per exercise attempt. | `cargo test structure::tests --lib`, `cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib` |
+| [CS231n Optimization](https://cs231n.github.io/optimization-1/) and [PyTorch gradcheck](https://docs.pytorch.org/docs/stable/generated/torch.autograd.gradcheck.gradcheck.html) | Numerical gradient checks are useful local debugging signals with limits. | Use finite differences to compare one local update path, then state what the check does not prove. | Advanced Exercise 5, `TransformerBlockTrainStep` finite-difference tests |
+
+The transfer pattern is:
+
+```text
+worked example -> partial example -> independent attempt -> evidence signal
+```
+
+For this chapter, evidence means one of:
+
+```text
+command output
+constructor error
+compiler error
+named test result
+answer-key mismatch
+```
+
+It is not evidence that every exercise works for every reader yet. Direct
+exercise-attempt reports are still needed before the exercise ladder can be
+called fully validated.
+
 Before starting, make sure the basic Rust feedback loop works:
 
 ```bash
@@ -199,7 +234,7 @@ evidence should exist when an exercise is complete.
 | Exercise 6 | rewritten output distribution | probabilities stay attached to transformed outcomes |
 | Exercise 7 | constructor boundary explanation | `Err(...)` is connected to the invalid value |
 | Exercise 8 | five-sentence file summary | one command is named as the proof that the file still works |
-| Exercise 9 | source-backed comparison | one external resource is connected to one local source file |
+| Exercise 9 | source-role comparison | one external resource is connected to one local source file, one owned boundary, and one unsupported claim |
 | Exercise 10 | `cargo run --example 05_seven_sketches` or a negative test | one law still holds, or one invalid structure is rejected |
 | Exercise 11 | block explanation | a beginner-facing Rust explanation and a shape name are both present |
 | Exercise 12 | `cargo run --example 06_attention_scores` | first output line and category shape for each attention boundary are recorded |
@@ -283,6 +318,12 @@ background details that are not needed to improve the exercise.
 Use the answer key after the attempt record. If the answer key explains the
 concept but not the failure you saw, that is evidence that the exercise needs a
 better hint, pass condition, or worked example.
+
+Open an
+[exercise clarity report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+exercise+attempt+brief&location=book%2Fsrc%2Fexercises.md+or+exercises%2FREADME.md&command=exercise+command+tried)
+after you have one concrete attempt record. The link fills the route, not the
+evidence; the evidence signal should come from what you personally read, ran,
+or attempted.
 
 ## Worked Example
 
@@ -799,17 +840,32 @@ Pick one complete source file and write a five-sentence summary:
 Use [References](references.md).
 
 Pick one external resource and connect it to one source file in this course.
+First classify the source using the source-role table in the references
+chapter.
 
 Answer:
 
 ```text
 External resource:
+Source role:
+Owned boundary:
 Source file:
 Rust syntax connection:
 ML or software concept connection:
 Category theory concept connection:
+What this source can support:
+What this source cannot support:
 One difference between the full treatment and this tiny implementation:
 ```
+
+Pass condition:
+
+- You classify the source as official documentation, academic paper, open
+  textbook or university material, implementation bridge, or learner-friction
+  signal.
+- You name the boundary the source owns.
+- You connect it to one concrete source file, type, function, test, or example.
+- You state one claim the source does not license this book to make.
 
 ## Exercise 10: Test One Sketch Law
 
@@ -821,6 +877,7 @@ Pick one law from `src/sketches.rs`:
 - feature/layer Galois law
 - resource monotonicity
 - foreign-key resolution
+- co-design feasibility relation
 - signal-flow matrix composition
 - local-to-global safety truth
 
@@ -847,6 +904,63 @@ Instead of changing the runnable example, inspect one of the negative tests in
 
 Explain what invalid structure the test rejects. This is often the fastest way
 to understand what a law or constructor is protecting.
+
+PDF-to-Rust contract option:
+
+Use the chapter's `PDF-To-Rust Reading Contract`. Pick one source idea from
+the Seven Sketches chapter and fill this row:
+
+```text
+source idea from the PDF:
+Rust handle:
+protected law, relation, or boundary:
+larger source claim not implemented by this code:
+local evidence command or test:
+```
+
+If the source idea still feels too large, fill the chapter's transfer triage
+card before writing the final answer:
+
+```text
+source idea:
+local Rust handle:
+protected law, relation, or boundary:
+invalid shortcut rejected:
+tiny ML transfer:
+larger claim not implemented:
+local evidence command or test:
+```
+
+Pass condition:
+
+- your Rust handle is one concrete type, method, constructor, example output
+  line, or test from `src/sketches.rs`
+- your protected claim is smaller than the full source text
+- your evidence can be checked with `cargo run --example 05_seven_sketches`
+  or `cargo test sketches::tests --lib`
+- your transfer card names one invalid shortcut and one non-claim
+
+Co-design option:
+
+Use `DesignRequirement`, `ImplementationOffer`, and `FeasibilityRelation`.
+Write the relation as:
+
+```text
+DesignRequirement x ImplementationOffer -> bool
+```
+
+Then translate it to:
+
+```text
+ArchitectureConstraint x CandidateImplementation -> Bool
+```
+
+Pass condition:
+
+- you explain why this is a relation rather than a function
+- you give one passing offer and one failing offer
+- you say why one passing implementation does not prove the whole constraint
+  space
 
 ## Exercise 11: Write A New Block Explanation
 
@@ -955,6 +1069,24 @@ HiddenSequence x ProjectedAttentionOutput -> HiddenSequence:
 HiddenSequence x MultiHeadOutput -> HiddenSequence:
 ```
 
+Then answer the terminal-output audit. For each printed line, write what the
+line proves and what category overclaim it does not prove:
+
+```text
+projected attention shape: 2 positions x model dimension 2
+residual shape: 2 positions x model dimension 2
+masked multi-head block shape: 2 positions x model dimension 2
+training state step: 0 -> 1
+```
+
+Use this rule:
+
+```text
+printed shape line -> target evidence
+typed transformation line -> source and target evidence
+category name -> only after both are known
+```
+
 Then answer the source-ownership diagnostic:
 
 ```text
@@ -971,6 +1103,37 @@ which sequence owns the value side?
 Shape check:
 which length counts score rows?
 which length counts score columns?
+```
+
+Then fill the shape ledger:
+
+```text
+target length:
+source length:
+attention mask:
+attention output:
+```
+
+For each row, write:
+
+```text
+framework cue -> Rust roadmap meaning -> category-shape consequence
+```
+
+Then answer the mask-role ledger:
+
+```text
+What does an attention-mask cell select?
+Why is the mask not a shorter token sequence?
+Why does the mask not directly produce AttentionWeights?
+Which block-level boundary keeps the mask visible instead of hidden?
+In a fixed-mask view, what context was selected first?
+What does true mean in this repository's AttentionMask?
+Why can a framework mask with the same shape still need boolean inversion?
+Write the three-step rule:
+  mask cells ...
+  softmax ...
+  weights ...
 ```
 
 Then answer the linear-scope diagnostic:
@@ -991,6 +1154,15 @@ What does neither source license you to claim about the whole Rust roadmap block
 What is the local Rust contract for every component in this book?
 ```
 
+Then answer the architecture-constraint diagnostic:
+
+```text
+What is one architecture constraint in the roadmap?
+Which Rust type, constructor, example, or test is implementation evidence for it?
+Why is that implementation evidence not the same as proving the whole future
+Transformer architecture satisfies every intended constraint?
+```
+
 Then answer the stackability diagnostic:
 
 ```text
@@ -999,6 +1171,53 @@ Why is MaskedMultiHeadTransformerBlock not an endomorphism while the mask is
 still an open input?
 What are the two precise ways to repeat a masked block?
 When is a fixed-mask view allowed to be named HiddenSequence -> HiddenSequence?
+When is LayerNormalization allowed to be named HiddenSequence -> HiddenSequence?
+When is PositionalEncoding allowed to be named HiddenSequence -> HiddenSequence?
+When is MultiHeadTransformerBlock allowed to be named HiddenSequence -> HiddenSequence?
+If the layer's scale and shift are being learned, which larger boundary owns
+that change?
+```
+
+Then answer the context-fixing drill:
+
+```text
+Open masked block:
+what is the whole input object?
+what is the safe category shape?
+can it stack unaided as HiddenSequence -> HiddenSequence?
+
+Fixed-mask view:
+what was selected first?
+what is the induced boundary?
+what promise must remain true while stacking?
+
+Changing mask per call:
+what must the caller supply or carry?
+why is this not the same as a fixed-mask view?
+
+Residual addition:
+which two inputs remain visible?
+why is this not a unary endomorphism?
+if you name the whole product as the source object, why is
+  (HiddenSequence x ProjectedAttentionOutput) -> HiddenSequence
+  still not an endomorphism?
+
+Rust closure bridge:
+what value would a closure capture to create a fixed-mask view?
+which argument would remain when the closure is called?
+why does the closure analogy still not change the open block boundary?
+```
+
+Then answer the add-norm order drill:
+
+```text
+Which order does the current Rust block implement around the attention sublayer?
+Which order does it implement around the feed-forward sublayer?
+Which two local boundaries show the order?
+Why can post-norm and pre-norm blocks both have shape
+  HiddenSequence -> HiddenSequence
+  while still being different morphisms?
+If a future pre-norm variant is added, what must be named separately?
 ```
 
 Before naming each boundary, write the answer to the first diagnostic question:
@@ -1006,6 +1225,18 @@ Before naming each boundary, write the answer to the first diagnostic question:
 ```text
 How many inputs does this boundary require?
 ```
+
+Then write the source-target audit card for at least three boundaries:
+
+```text
+boundary:
+whole source object:
+target object:
+context status:
+safe conclusion:
+```
+
+Use at least one product-input boundary and one fixed-context boundary.
 
 Pass condition:
 
@@ -1015,6 +1246,12 @@ Pass condition:
 - You connect one terminal output line to one typed boundary.
 - You explain why self-attention shares a source before projection without
   collapsing query, key, and value into one role.
+- You map target length, source length, attention mask, and attention output
+  from framework notation to the Rust roadmap shape ledger.
+- You explain that mask cells select legal score cells before softmax, not token rows after probability mass has been assigned.
+- You state that this repository's `AttentionMask` uses `true` for an allowed
+  source position, while some framework masks use `true` for a blocked or
+  padding position.
 - You keep claims about linear Q/K/V projections separate from softmax,
   masking, residual addition, normalization, and training state.
 - You classify the quick roadmap drill by counting inputs before naming
@@ -1022,13 +1259,30 @@ Pass condition:
 - You explain that anatomy-of-attention research supports decomposition, while
   parametric-endofunctor research supports a narrower linear self-attention
   comparison.
+- You separate architecture constraints from implementation boundaries.
 - You do not claim the tiny Rust roadmap implements either full formalism.
 - You distinguish an open masked-block product input from a fixed-mask induced
   endomorphism.
+- You name what context was fixed before using the fixed-mask
+  `HiddenSequence -> HiddenSequence` view.
+- You state that a shape-preserving layer is an endomorphism only for a fixed
+  module instance, while parameter changes belong to
+  `TransformerTrainingState -> TransformerTrainingState`.
+- You state that positional encodings and Transformer blocks follow the same
+  fixed-value rule: the table or block value must already be selected before
+  the forward call is named `HiddenSequence -> HiddenSequence`.
+- You state that residual-normalization order is part of the morphism, so
+  post-norm and pre-norm blocks can share source and target while remaining
+  different implementations.
 - You classify at least one product-input morphism, one endomorphism, and one
   illegal boundary.
 - You do not call a product-input boundary an endomorphism only because its
   output matches the left input object.
+- You write the whole source object and target object before deciding whether a
+  row is an endomorphism.
+- You explain that naming the whole product as the source object gives a unary
+  morphism out of the product, not an endomorphism unless the same product
+  object is also returned.
 - You explain why two lines that return `HiddenSequence` can still have
   different category shapes.
 

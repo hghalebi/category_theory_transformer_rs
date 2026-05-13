@@ -36,6 +36,15 @@ Because the input and output type are the same, the step can be repeated.
 > explicit training step whose purpose is to make the shape `Parameters ->
 > Parameters` visible and runnable.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- explain why one training step is modeled as `Parameters -> Parameters`,
+- separate loss measurement from parameter update,
+- compare the tiny `TrainStep(dataset, learning_rate)` boundary with a
+  production optimizer loop that calls `zero_grad`, `backward`, and `step`.
+
 ## What You Already Know
 
 If you have seen gradient descent, you already know the informal movement:
@@ -253,6 +262,31 @@ When you return to a framework, the useful transfer question is:
 which object owns the update state, and which call turns current parameters
 into next parameters?
 ```
+
+## Source-Backed Precision Rules
+
+This chapter uses external sources to keep the tiny update honest. Each source
+supports a limited claim; these citations are not proof that this crate is a
+production optimizer or a full automatic-differentiation engine.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [D2L Gradient Descent](https://d2l.ai/chapter_optimization/gd.html) | First-order gradient descent updates a value by moving against the gradient, and the learning rate controls whether the step is useful or unstable. | The local update is `parameter = parameter - learning_rate * average_gradient`; do not claim every step count or learning rate must improve every dataset. | `*value -= learning_rate * grad * batch_scale;`, `LearningRate`, `StepCount` |
+| [D2L Backpropagation and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html) | Backpropagation computes gradients through intermediate variables using the chain rule in reverse order. | This chapter hand-computes the local softmax-linear gradients for one tiny model; it is not a general autograd tape. | `dlogits[target_id] -= 1.0`, `grad_lm_head`, `grad_embedding` |
+| [Automatic differentiation in machine learning: a survey](https://arxiv.org/abs/1502.05767) | Automatic differentiation is broader than backpropagation and distinct from symbolic differentiation and finite differences. | Do not call this chapter's hand-written gradient buffers an AD engine; they are one visible gradient path for one tiny model. | `TrainStep::apply`, `grad_embedding`, `grad_lm_head`, `grad_bias` |
+| [PyTorch `torch.optim`](https://docs.pytorch.org/docs/stable/optim.html) | A production optimizer owns update state and updates parameters after gradients have been computed. | `TrainStep` compresses `zero_grad`, `backward`, and `step` into one inspectable full-batch teaching boundary. | `TrainStep(dataset, learning_rate) : Parameters -> Parameters` |
+| [Backprop as Functor](https://arxiv.org/abs/1711.10455) | Parameter-update rules can be studied compositionally under stated assumptions. | The categorical claim here is narrower: one fixed training step is an endomorphism on `Parameters`; the chapter does not prove a monoidal-functor result. | `impl Morphism<Parameters, Parameters> for TrainStep`, `apply_endomorphism_n_times` |
+
+The transfer pattern is:
+
+```text
+source claim -> local typed boundary -> validation command or test
+```
+
+For this chapter, that means reading `cargo run --example
+03_training_endomorphism` and the `src/training.rs` tests as evidence for the
+tiny `Parameters -> Parameters` boundary, not as evidence for every production
+training system.
 
 ## Worked Example: Repeating One Update
 
@@ -1169,13 +1203,95 @@ This chapter turned training into a repeatable typed transformation. The model
 state enters as `Parameters`, the training step computes gradients from the tiny
 dataset, and the updated model state leaves as `Parameters` again.
 
-The next chapter steps back from the training loop and names reusable structures
-that appear across the whole course: mapping inside wrappers, changing wrapper
-shapes consistently, combining traces, and composing local derivative rules.
+The next chapter, [Functors, Naturality, Monoids, and Chain
+Rule](05-structure-and-calculus.md), steps back from the training loop and names
+reusable structures that appear across the whole course: mapping inside
+wrappers, changing wrapper shapes consistently, combining traces, and composing
+local derivative rules.
 
 ## Further Reading
 
-These pages give the terms behind the training update:
+The problem this section solves is transfer. A framework training loop compresses
+several responsibilities into familiar calls. This chapter expands those
+responsibilities so the reader can see which object is measured, which object is
+updated, and why the update can repeat.
+
+Start from the local Rust evidence:
+
+```text
+average_loss(&params, &dataset) -> Loss
+TrainStep::apply(params)       -> Parameters
+apply_endomorphism_n_times     -> Parameters
+```
+
+Then compare that with a framework loop:
+
+```text
+optimizer.zero_grad()
+loss = loss_fn(model(input), target)
+loss.backward()
+optimizer.step()
+```
+
+The framework loop is compact because the model, gradient buffers, optimizer
+state, parameter groups, and update rule live behind framework objects. The
+teaching path is expanded because the reader needs to separate four ideas:
+
+| Framework responsibility | Tiny Rust question |
+| --- | --- |
+| clear old gradients | Which temporary gradient accumulators start empty inside `TrainStep::apply`? |
+| compute current loss | Which call has shape `Parameters x TrainingSet -> Loss`? |
+| compute gradients | Which local derivative changes `Distribution` into a logit gradient? |
+| update parameters | Which call returns the next full `Parameters` object? |
+
+Read the sources in this order:
+
+1. [D2L Gradient Descent](https://d2l.ai/chapter_optimization/gd.html): use it
+   for the update direction and learning-rate intuition.
+2. [D2L Backpropagation and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html):
+   use it for the forward-then-reverse gradient story.
+3. [Automatic differentiation in machine learning: a survey](https://arxiv.org/abs/1502.05767):
+   use it to keep "automatic differentiation", "backpropagation", "symbolic
+   differentiation", and "finite differences" separate.
+4. [PyTorch `torch.optim`](https://docs.pytorch.org/docs/stable/optim.html):
+   use it to recognize `zero_grad`, `backward`, and `step` as production
+   boundaries.
+5. [PyTorch Autograd mechanics](https://docs.pytorch.org/docs/stable/notes/autograd.html):
+   use it to contrast graph-recording autograd with this chapter's hand-written
+   gradient path.
+6. [Backprop as Functor](https://arxiv.org/abs/1711.10455): use it only as
+   advanced context for compositional update rules.
+
+The transfer bridge is:
+
+```text
+production loop
+  -> measure current model
+  -> compute gradients
+  -> update optimizer/model state
+  -> repeat
+```
+
+The category-theory bridge is smaller and stricter:
+
+```text
+Parameters x TrainingSet -> Loss
+TrainStep(dataset, learning_rate) : Parameters -> Parameters
+```
+
+The first boundary measures. The second boundary updates. Only the second one
+is the endomorphism that can be repeated by `apply_endomorphism_n_times`.
+
+Checkpoint:
+
+```text
+When reading an external optimizer or autograd reference, can you name which
+part corresponds to Parameters x TrainingSet -> Loss and which part
+corresponds to TrainStep(dataset, learning_rate) : Parameters -> Parameters?
+```
+
+These pages connect the tiny update to the surrounding vocabulary and source
+material:
 
 - [Glossary](glossary.md): endomorphism, parameters, learning rate, gradient
 - [References](references.md): gradient descent, computational graphs, backpropagation, and compositional learning

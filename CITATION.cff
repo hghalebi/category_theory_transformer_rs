@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this book or repository where reuse is allowed, cite both the public book URL and the source repository URL. Citation alone is not permission. Commercial or organizational group reuse with more than one person requires written permission when it reproduces, adapts, distributes, or teaches substantial material from this project. This includes substantial reuse for a company, team, class, cohort, workshop, course, or other group with more than one person; see LICENSE.md. Kindle and hard copy editions support the project, but the online book remains open access."
+title: "Category Theory for Tiny ML in Rust"
+type: book
+authors:
+  - family-names: "Ghalebi"
+    given-names: "Hamze"
+  - family-names: "Jafarranmani"
+    given-names: "Farzad"
+abstract: "An open-access, first-principles Rust book for understanding tiny machine-learning systems through category-theory structure and runnable examples."
+version: "open-access-working-draft"
+url: "https://hghalebi.github.io/category_theory_transformer_rs/"
+repository-code: "https://github.com/hghalebi/category_theory_transformer_rs"

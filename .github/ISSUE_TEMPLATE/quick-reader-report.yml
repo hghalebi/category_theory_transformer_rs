@@ -1,0 +1,113 @@
+name: Quick reader report
+description: Share one exact point where the book, example, or exercise became unclear.
+title: "[good first feedback] "
+labels:
+  - good first feedback
+  - documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this shorter form when you have one concrete reader signal.
+
+        A useful report comes from your own reading, public-page review, command run, or exercise attempt. It names one visible evidence signal and one point where the learning path stopped working.
+
+        Minimum accepted report:
+        - perspective,
+        - command or page tried,
+        - evidence signal,
+        - last clear idea,
+        - first unclear point,
+        - smallest useful fix.
+
+        If you cannot fill those six fields, keep reading or running until you can point to one visible sentence, output line, compiler error, table row, code block, type boundary, or exercise prompt.
+
+        Do not include email addresses, private messages, personal notes, or contact details.
+
+        No-clone reports are welcome. If you reviewed the online book without cloning the repository, put `public book path` in the command/page field, name the public page you read, and use a visible sentence, heading, diagram, table row, code block, or exercise prompt as the evidence signal.
+
+        Facilitator-transcribed reports are welcome from reading sessions or workshops. If you are transcribing for a participant, preserve one participant's concrete reading or command attempt, write `workshop report` or `reading-session report` in the command/page field, and do not include names, email addresses, private messages, or contact details.
+
+        Good evidence signals include:
+        - a terminal output line,
+        - a compiler error,
+        - a test name,
+        - a Rust type boundary,
+        - a table row,
+        - a sentence or heading from the public book,
+        - an exercise prompt.
+
+        Broad praise, broad dislike, copied prompts, AI-generated critique, routing issues, and feature requests without a blocked learning step do not count as direct reader evidence.
+
+        If your quick report is about a reference, citation, source-backed claim, or missing source, fill the optional source-role field. Use the source-role table in `book/src/references.md`: repository code and tests, official documentation, academic papers, open textbooks and university material, implementation bridges, or learner-friction signals.
+  - type: dropdown
+    id: perspective
+    attributes:
+      label: Your perspective
+      description: Choose the closest fit.
+      options:
+        - Rust engineer
+        - ML engineer or learner
+        - category-theory reader
+        - technical educator
+        - beginner-adjacent learner
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: source_role_check
+    attributes:
+      label: Optional source-role check
+      description: Fill this only when your report is about a reference, citation, source-backed claim, or missing source.
+      placeholder: |
+        Source role:
+        Owned boundary:
+        Claim this source supports:
+        Claim this source does not support:
+        Local Rust file, type, example, or chapter section:
+    validations:
+      required: false
+  - type: input
+    id: location
+    attributes:
+      label: Chapter, section, or file
+      placeholder: "book/src/02-morphisms-composition.md"
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or page you tried
+      description: Paste the command, example, test, exercise, or public book page you used. If you reviewed without cloning, write `public book path` and name the page.
+      placeholder: "cargo run --example 02_morphism_composition or public book path -> Welcome"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_signal
+    attributes:
+      label: Evidence signal
+      description: Name the output line, compiler error, test name, public-page sentence, heading, diagram, table row, code block, or exercise prompt that made the issue visible.
+      placeholder: "Composition rule: Embedding then Softmax is illegal because Vector != Logits"
+    validations:
+      required: true
+  - type: textarea
+    id: unclear_point
+    attributes:
+      label: First unclear point
+      description: Quote or name the first sentence, code line, output line, table row, or exercise prompt where the path became unclear.
+    validations:
+      required: true
+  - type: textarea
+    id: last_clear_idea
+    attributes:
+      label: Last clear idea
+      description: Name the last idea, output line, or code boundary that still made sense before the confusion.
+    validations:
+      required: true
+  - type: textarea
+    id: suggested_fix
+    attributes:
+      label: What would have helped?
+      description: A smaller example, diagram, glossary entry, rewritten paragraph, or expected output is enough.
+    validations:
+      required: true

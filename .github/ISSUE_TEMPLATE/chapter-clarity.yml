@@ -12,12 +12,51 @@ body:
         Precise friction is more useful than a broad review.
         Do not include email addresses, private messages, personal notes, or contact details.
 
+        Minimum accepted report:
+        - perspective,
+        - command or page tried,
+        - evidence signal,
+        - last clear idea,
+        - first unclear point,
+        - smallest useful fix.
+
+        If you cannot fill those six fields, keep reading or running until you can point to one visible sentence, output line, compiler error, table row, code block, type boundary, or exercise prompt.
+
+        This counts as direct reader evidence only if it comes from your own reading, public-page review, or command run and names one concrete evidence signal.
+        Broad praise, broad dislike, copied prompts, AI-generated critique, routing issues, and feature requests without a blocked learning step do not count as direct reader evidence.
+
+        No-clone reports are welcome. If you reviewed the online book without cloning the repository, put `public book path` in the command/page field, name the public page you read, and use a visible sentence, heading, diagram, table row, code block, or exercise prompt as the evidence signal.
+
+        Facilitator-transcribed reports are welcome from reading sessions or workshops. If you are transcribing for a participant, preserve one participant's concrete reading or command attempt, write `workshop report` or `reading-session report` in the command/page field, and do not include names, email addresses, private messages, or contact details.
+
+        Evidence signal examples:
+        - Rust: compiler error, test name, constructor result, output line, or type boundary.
+        - ML: trace line, loss value, framework-translation row, diagram row, or state-update output.
+        - Category theory: law, table row, morphism shape, output line, or naming rule.
+        - Roadmap category precision: `book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff`, the `Source-Target Audit Card`, `cargo run --example 06_attention_scores`, or `AttentionScores x AttentionMask -> AttentionScores`.
+        - Public book or beginner/educator path: public book page, output line, page section, command result, heading, diagram, exercise prompt, link, or missing next action.
+
         If you are not sure where to start, choose one public review path:
         - Rust engineer first-run path: https://github.com/hghalebi/category_theory_transformer_rs/issues/8
         - ML engineer training and attention path: https://github.com/hghalebi/category_theory_transformer_rs/issues/9
         - Category-theory precision path: https://github.com/hghalebi/category_theory_transformer_rs/issues/10
         - Technical educator learning path: https://github.com/hghalebi/category_theory_transformer_rs/issues/11
         - Beginner-adjacent first confusion path: https://github.com/hghalebi/category_theory_transformer_rs/issues/12
+
+        If you are unsure what a useful report looks like, read the direct reader report examples first:
+        https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-examples.md
+
+        Rewrite-ready checklist:
+        - one person read or ran one concrete path;
+        - one command, public page, chapter, file, or exercise is named;
+        - one evidence signal is visible in the book, terminal output, compiler output, test output, or exercise prompt;
+        - the report separates the last clear idea from the first unclear point;
+        - the suggested fix is small enough to apply to one chapter, example, table, diagram, or exercise.
+
+        A report that passes this checklist gives maintainers enough evidence to rewrite the affected section without guessing.
+        After submission, maintainers may ask for clarification, accept the report as reader evidence, batch it with a repeated theme, or link it to a validated rewrite.
+
+        If the report is about a reference, citation, source-backed claim, or missing source, fill the optional source-role field. Use the source-role table in `book/src/references.md`: repository code and tests, official documentation, academic papers, open textbooks and university material, implementation bridges, or learner-friction signals.
   - type: dropdown
     id: perspective
     attributes:
@@ -36,7 +75,7 @@ body:
     id: friction_lens
     attributes:
       label: Friction lens
-      description: Choose the main kind of confusion. This helps route the report to the right rewrite pass.
+      description: Choose the main kind of confusion. This helps route the report to the right kind of fix.
       options:
         - Rust syntax or idiom
         - ML intuition
@@ -47,6 +86,19 @@ body:
         - other
     validations:
       required: true
+  - type: textarea
+    id: source_role_check
+    attributes:
+      label: Optional source-role check
+      description: Fill this only when your report is about a reference, citation, source-backed claim, or missing source.
+      placeholder: |
+        Source role:
+        Owned boundary:
+        Claim this source supports:
+        Claim this source does not support:
+        Local Rust file, type, example, or chapter section:
+    validations:
+      required: false
   - type: input
     id: location
     attributes:
@@ -58,8 +110,16 @@ body:
     id: command
     attributes:
       label: Command or page you tried
-      description: Paste the command, example, test, or public book page you used.
-      placeholder: "cargo run --example 02_morphism_composition"
+      description: Paste the command, example, test, or public book page you used. If you reviewed without cloning, write `public book path` and name the page.
+      placeholder: "cargo run --example 02_morphism_composition or public book path -> Welcome"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_signal
+    attributes:
+      label: Evidence signal
+      description: Name the output line, compiler error, test name, constructor result, public-page sentence, heading, diagram, table row, code block, exercise prompt, or page section that made the issue visible.
+      placeholder: "Composition rule: Embedding then Softmax is illegal because Vector != Logits"
     validations:
       required: true
   - type: textarea

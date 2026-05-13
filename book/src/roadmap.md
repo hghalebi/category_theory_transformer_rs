@@ -71,9 +71,29 @@ linear focus from nonlinear pieces such as softmax and layer normalization.
 This roadmap follows the same caution: name the linear maps, product-input
 boundaries, shape-preserving endomorphisms, and state updates separately.
 
+A broader categorical deep-learning source makes the same warning at the
+architecture level: a model can be described by constraints it should satisfy
+and by the implementation that realizes those constraints. This roadmap uses
+that distinction as a practical rule. Do not treat a compiled Rust boundary as
+proof that the whole architecture satisfies a mathematical constraint. Do not
+treat an architecture diagram as a substitute for a concrete type, constructor,
+example, and test.
+
 This chapter keeps those sources in view, but it does not import their full
 complexity all at once. The rule is: add one typed concept only when the tiny
 Rust version can explain its boundary.
+
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- trace the attention example from query/key scoring through masking,
+  softmax, value mixing, projection, residual addition, normalization, and
+  feed-forward refinement,
+- classify Transformer boundaries by counting inputs before naming morphisms,
+  product-input morphisms, endomorphisms, or illegal attempted compositions,
+- separate architecture constraints from implementation evidence in the tiny
+  Rust roadmap.
 
 ## What You Already Know
 
@@ -137,11 +157,127 @@ Use this contract while reading the roadmap:
 | `A x B -> A` | product-input morphism returning `A` | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | an endomorphism unless the whole input object and output object are identical |
 | missing projection or wrong role | illegal attempted composition | `HiddenSequence x MultiHeadOutput -> HiddenSequence` | a clever shortcut |
 
+One more context rule matters for learned layers. When this roadmap writes
+`LayerNormalization : HiddenSequence -> HiddenSequence` or
+`PositionWiseFeedForward : HiddenSequence -> HiddenSequence`, it means:
+
+```text
+for this fixed layer instance, with its current parameters already stored
+inside the Rust object
+```
+
+If the parameters themselves are allowed to vary, name the larger boundary
+instead. For example, a parameter-learning story belongs to
+`TransformerTrainingState -> TransformerTrainingState`, not to a hidden
+sequence endomorphism that silently changes weights.
+
 This rule keeps the category-theory vocabulary proportional to the code. The
 linear query, key, value, positional, and layered pieces can be compared with
 advanced categorical work on self-attention. Masking, softmax, residual
 addition, normalization, feed-forward refinement, and training updates still
 need their own typed boundaries in this teaching project.
+
+### Fixed-Value Endomorphism Ledger
+
+Use this ledger whenever a roadmap boundary looks like
+`HiddenSequence -> HiddenSequence`. The shape is not enough by itself; the
+stored context must also be stable for the forward call.
+
+| Boundary | Fixed value that makes the unary view valid | If that value changes |
+| --- | --- | --- |
+| `PositionalEncoding : HiddenSequence -> HiddenSequence` | one position table with fixed row count and model dimension | name the table update or rebuild path separately |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | one layer-normalization value with fixed scale, shift, and epsilon | move to `TransformerTrainingState -> TransformerTrainingState` |
+| `PositionWiseFeedForward : HiddenSequence -> HiddenSequence` | one feed-forward value with fixed weights, biases, and activation rule | move to `TransformerTrainingState -> TransformerTrainingState` |
+| `MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence` | one block value with fixed heads, projections, residual path, normalization, and feed-forward layers | move to `TransformerTrainingState -> TransformerTrainingState` |
+| fixed-mask view of `MaskedMultiHeadTransformerBlock` | one named `AttentionMask` selected before the hidden-sequence call | return to `HiddenSequence x AttentionMask -> HiddenSequence`, or name a larger state carrying the changing mask |
+
+This table is backed by the same source roles as the precision rules below:
+parameter-management references explain why model components own parameters,
+optimizer references explain why changing parameters belongs to the training
+loop, and Rust closure references explain the local analogy for fixing a mask
+before the remaining call.
+
+### Add-Norm Order Ledger
+
+Residual addition and layer normalization are not only two names that happen in
+the same neighborhood. Their order is part of the block boundary.
+
+The original Transformer uses residual addition around each sublayer followed
+by layer normalization. Dive into Deep Learning teaches the same `AddNorm`
+shape as residual addition followed by layer normalization. PyTorch exposes the
+order as a configurable boundary: `TransformerEncoderLayer` has `norm_first`,
+where layer normalization can happen before attention and feed-forward
+operations instead of after them. Research on layer-normalization placement
+also treats the difference between Post-LN and Pre-LN as an optimization
+question, not a cosmetic rewrite.
+
+This repository currently teaches the post-add normalization path:
+
+```text
+attention sublayer output
+-> ResidualConnection
+-> attention_norm
+
+feed-forward sublayer output
+-> ResidualConnection
+-> feed_forward_norm
+```
+
+Use this ledger when reading or extending the block:
+
+| Order question | Source signal | Current Rust reading | Safe category statement |
+| --- | --- | --- | --- |
+| original post-norm shape | original Transformer and D2L AddNorm place normalization after residual addition | `ResidualConnection` runs before `attention_norm` and `feed_forward_norm` | fixed block is still `HiddenSequence -> HiddenSequence` |
+| configurable framework shape | PyTorch `norm_first` can move normalization before attention and feed-forward operations | no pre-norm block is implemented here yet | a future pre-norm block needs a named constructor or type |
+| optimization meaning | layer-normalization placement affects gradient behavior in Transformer training | current tests validate the local post-add path only | same source and target object does not imply same morphism |
+| teaching boundary | order is visible in `MultiHeadTransformerBlock::apply` and `MaskedMultiHeadTransformerBlock::apply_with_cache` | residual output is normalized before feed-forward runs | do not erase order when explaining composition |
+
+The important category-theory lesson is modest:
+
+```text
+post-norm block : HiddenSequence -> HiddenSequence
+pre-norm block  : HiddenSequence -> HiddenSequence
+```
+
+Those two arrows can have the same source and target while being different
+morphisms. Shape compatibility permits composition. It does not say the two
+implementations are interchangeable.
+
+## Source-Backed Precision Rules
+
+Use this table as a citation-to-claim guard while reading the rest of the
+roadmap. Each source supports a local teaching rule. None of them should be
+used as a shortcut around the typed Rust boundary.
+
+| Source signal | Local rule in this roadmap | Rust evidence to inspect |
+| --- | --- | --- |
+| [Attention Is All You Need](https://arxiv.org/abs/1706.03762) introduces the Transformer around attention instead of recurrence or convolution | treat attention as the architecture target, not as proof that the current crate is a full Transformer | `examples/06_attention_scores.rs` is a shape lab, not a production model |
+| [Dive into Deep Learning: Scaled Dot Product Attention](https://d2l.ai/chapter_attention-mechanisms-and-transformers/attention-scoring-functions.html) writes attention with `n` queries and `m` key-value pairs | keep query-side length and source-side length visible before naming the morphism | `QuerySequence x KeySequence -> AttentionScores` and `AttentionWeights x ValueSequence -> AttentionOutput` |
+| [PyTorch MultiheadAttention](https://docs.pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html) exposes separate `query`, `key`, and `value` inputs with target length `L` and source length `S` | do not collapse self-attention and cross-attention into one vague `HiddenSequence -> HiddenSequence` arrow | `TargetHiddenSequence -> QuerySequence` and `SourceHiddenSequence -> KeySequence`, `ValueSequence` are the future cross-attention shape |
+| [PyTorch scaled dot product attention](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html) says the attention mask must broadcast to the attention-weight shape, a boolean `True` means the element participates in attention, and a float mask is added to attention scores | a mask modifies the score table before probability normalization; it is not a token sequence and not attention weights | `AttentionScores x AttentionMask -> AttentionScores` runs before `AttentionScores -> AttentionWeights` |
+| [PyTorch Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html) and [PyTorch MultiheadAttention](https://docs.pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html) expose mask arguments where boolean `True` can mean "not allowed" or "ignore this key" | mask shape and mask polarity are separate ideas; translate polarity before comparing APIs with this Rust roadmap | `AttentionMask::new(vec![vec![true, false, true], ...])` uses `true` for "this source position is allowed" |
+| [TensorFlow Keras MultiHeadAttention](https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention) uses query shape `(B, T, dim)`, value/key shape `(B, S, dim)`, mask shape `(B, T, S)`, and a boolean attention mask where `1` means attention is allowed | treat target/query length, source/key-value length, and allow-mask polarity as framework-neutral shape evidence | `AttentionMask` answers which source positions each target position may read |
+| [PyTorch Transformer building blocks](https://docs.pytorch.org/tutorials/intermediate/transformer_building_blocks.html) separates dense tensors, nested tensors, masks, scaled dot-product attention, and cross-attention concerns | production masking and variable-length behavior are framework boundary choices; the tiny Rust mask is deliberately stricter | `AttentionMask::new` rejects a row with no legal keys |
+| [PyTorch TransformerEncoderLayer](https://docs.pytorch.org/docs/stable/generated/torch.nn.TransformerEncoderLayer.html) exposes `norm_first` and the original encoder-layer reference shape | residual-normalization order is a named architecture choice, not a detail to hide behind `HiddenSequence -> HiddenSequence` | `MultiHeadTransformerBlock::apply` uses post-add normalization today; a future pre-norm variant needs a named boundary |
+| [On Layer Normalization in the Transformer Architecture](https://arxiv.org/abs/2002.04745) distinguishes Post-LN and Pre-LN Transformer variants and studies their training behavior | same source and target object can still mean different morphisms when the internal order changes | local tests validate the current post-add path, not every normalization-order variant |
+| [Dive into Deep Learning: Parameter Management](https://d2l.ai/chapter_builders-guide/parameters.html) treats parameters as named model components that can be accessed and updated | a forward sublayer may be an endomorphism only for a fixed layer instance; parameter-changing claims belong to the training-state boundary | `LayerNormalization` stores scale and shift parameters; `TransformerTrainingState` owns mutable training context |
+| [CS231n Neural Networks Part 3](https://cs231n.github.io/neural-networks-3/) and [PyTorch gradcheck](https://docs.pytorch.org/docs/stable/generated/torch.autograd.gradcheck.gradcheck.html) compare numerical finite differences with analytical gradients under tolerance and precision caveats | a finite-difference match is local evidence for one selected parameter path, not proof of every gradient, dataset, optimizer, or future training loop | `transformer_block_train_step_matches_finite_difference_for_readout_weight`, feed-forward, layer-normalization, output-projection, and attention-projection tests |
+| [Rust Book: Closures](https://doc.rust-lang.org/stable/book/ch13-01-closures.html) explains closures as callable values that can capture values from their surrounding environment | use closure capture as the Rust analogy for fixing a mask context before applying a unary view | `move |hidden| masked_block.apply(Product::new(hidden, fixed_mask.clone()))` keeps the fixed mask visible |
+| [On the Anatomy of Attention](https://arxiv.org/abs/2407.02423) studies attention by decomposing variants into components | decompose attention first, then compare variants | the roadmap names scores, masks, weights, values, heads, projection, residuals, normalization, and feed-forward separately |
+| [Self-Attention as a Parametric Endofunctor](https://arxiv.org/abs/2501.02931) focuses on linear self-attention structure and explicitly separates nonlinear pieces | use "endofunctor" language only after naming the linear scope; do not carry it through softmax, masking, residuals, normalization, or training state without a new argument | `HiddenSequence -> QuerySequence` is a linear role-producing morphism; `AttentionScores x AttentionMask -> AttentionScores` is still product-input context |
+
+If a future chapter cites a stronger categorical result, it should add the same
+three pieces:
+
+```text
+source claim
+local typed boundary
+validation command or test
+```
+
+That keeps the roadmap useful for both readers: the ML reader can see which
+shape is being implemented, and the category-theory reader can see which
+formal claim is being used and where it stops.
 
 ## Worked Example Priority
 
@@ -239,6 +375,55 @@ instead of a non-finite value so that the pedagogical constructors can keep the
 "all scores are finite" invariant. The teaching meaning is the same as the
 standard attention implementation pattern: make disallowed positions
 effectively impossible before row-wise softmax.
+
+### Mask Polarity Ledger
+
+Mask shape answers:
+
+```text
+which query row and source column is this mask cell about?
+```
+
+Mask polarity answers:
+
+```text
+does true mean allowed, or does true mean blocked?
+```
+
+Those are different questions. This repository chooses the smaller teaching
+polarity:
+
+```text
+true  -> this query may read this source position
+false -> this query may not read this source position
+```
+
+That choice matches the boolean mask meaning used by PyTorch's
+`scaled_dot_product_attention`, where `True` means the element participates in
+attention. It also matches the Keras `MultiHeadAttention` attention-mask rule
+where `1` marks a query-key pair that may attend. It does not match every
+PyTorch attention API. In `MultiheadAttention` padding masks, and in the
+boolean masks described by `torch.nn.Transformer`, `True` can mean the
+position is blocked or ignored.
+
+So translate a framework mask in two steps:
+
+| Question | Rust roadmap answer | Framework caution |
+| --- | --- | --- |
+| What is the shape? | one cell per query-source score position | `L x S`, `(B, T, S)`, and padding masks point at different axes |
+| What is the polarity? | `true` means allowed | some APIs use `true` to mean blocked or padding |
+| When is it applied? | before softmax, while values are still scores | after-softmax masking would change the meaning of the probability row |
+
+The safe translation rule is:
+
+```text
+first match the mask cells to score cells,
+then translate boolean polarity,
+then apply the mask before softmax
+```
+
+Do not carry a raw boolean mask from a framework into this Rust roadmap without
+stating its polarity. Two masks can have the same shape and opposite meaning.
 
 ## Production Masking Caveat
 
@@ -606,6 +791,12 @@ queries from source sequence length `S` for keys and values. Dive into Deep
 Learning makes the same teaching distinction when it writes attention over
 `n` queries and `m` key-value pairs.
 
+TensorFlow/Keras exposes the same split with different letters: query has
+target length `T`, value and key have source length `S`, and the attention mask
+has shape `(B, T, S)`. That cross-framework agreement is useful because it
+keeps the rule from sounding like a PyTorch naming quirk. A target/query row
+asks a question. A source/key-value column is something that can be read.
+
 This matters for the book because it prevents a subtle category mistake. The
 attention scoring boundary is not automatically:
 
@@ -669,6 +860,69 @@ Use this Q/K/V source diagnostic before reading a framework call:
 This table prevents a common framework-reading mistake. Passing the same
 hidden sequence into Q, K, and V means the source object is shared. It does not
 mean the projected query, key, and value roles have become the same role.
+
+PyTorch and TensorFlow/Keras use different names but expose the same shape
+split:
+
+| Framework cue | Query side | Key-value side | Mask cue |
+| --- | --- | --- | --- |
+| PyTorch | target length `L` | source length `S` | attention weights and masks use `L x S` |
+| TensorFlow/Keras | target length `T` | source length `S` | mask shape is `(B, T, S)` |
+| Rust roadmap | `QuerySequence` | `KeySequence` and `ValueSequence` | `AttentionMask` says which source positions each query may read |
+
+Use the same ledger when reading the Rust types:
+
+| Ledger item | Meaning in framework docs | Meaning in this roadmap | Category-shape consequence |
+| --- | --- | --- | --- |
+| target length | PyTorch `L`, Keras `T` | number of `QuerySequence` rows | score rows belong to the query-side object |
+| source length | PyTorch/Keras `S` | number of `KeySequence` and `ValueSequence` rows | score columns belong to the key-value source object |
+| attention mask | PyTorch `L x S`, Keras `(B, T, S)` | one permission table from query rows to source rows | the mask is context over a product boundary |
+| attention output | target-side output rows | one `AttentionOutput` row for each query row | value mixing returns information to the query side |
+
+The shape ledger gives a quick sanity check:
+
+```text
+score table rows == query positions
+score table columns == key-value positions
+mask cells == query-position/source-position permissions
+output rows == query positions after reading values
+```
+
+If those four statements are not true, the explanation has probably collapsed
+source ownership, role ownership, or mask context too early.
+
+### Mask Role Ledger: Permissions, Not Tokens
+
+Framework APIs make the mask shape look like another tensor argument, but the
+teaching question is more specific:
+
+```text
+Which query rows may read which source columns before softmax?
+```
+
+That is why the roadmap names the mask separately from the token sequence,
+score table, and attention weights. The mask is permission context over the
+score table.
+
+| Mask misreading | Correct local boundary | What to inspect |
+| --- | --- | --- |
+| the mask is a shorter token sequence | `AttentionScores x AttentionMask -> AttentionScores` | the score table keeps query rows and source columns |
+| the mask directly produces probabilities | `AttentionScores -> AttentionWeights` still happens after masking | `query 0 attends with [0.5, 0.0, 0.5]` |
+| the mask is hidden global state | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` | the block boundary keeps the mask visible |
+| a fixed mask means no mask exists | `MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence` | the chosen mask `M` is fixed context for that view |
+
+The local rule is:
+
+```text
+mask cells select legal score cells;
+softmax turns remaining score rows into weights;
+weights read value rows.
+```
+
+Do not say "the mask removes tokens" unless you also say which score cells
+were removed from probability competition. The source sequence still owns the
+value rows. The mask only says which of those rows each query is allowed to
+read.
 
 The category-theory reading follows the input count. Self-attention can be
 wrapped inside a shape-preserving block after projection, masking, value
@@ -1182,7 +1436,8 @@ sequence object:
 HiddenSequence x ProjectedAttentionOutput -> HiddenSequence
 ```
 
-The larger block shape is still an endomorphism:
+For a fixed block value, the larger unmasked block shape is still an
+endomorphism:
 
 ```text
 HiddenSequence -> HiddenSequence
@@ -1240,6 +1495,11 @@ The normalization boundary is an endomorphism:
 HiddenSequence -> HiddenSequence
 ```
 
+Read that as a forward call for one fixed `LayerNormalization` value. Its
+scale, shift, and epsilon are already stored in the layer. If those values are
+being learned, the changing object is the larger training state, not the
+hidden sequence alone.
+
 Design contract:
 
 Normalization should not change the object type. If a later block expects a
@@ -1294,8 +1554,13 @@ The feed-forward sublayer is another endomorphism:
 HiddenSequence -> HiddenSequence
 ```
 
-It is not the whole Transformer block. It is the next shape-preserving sublayer
-that a later block can compose.
+Read that the same way: for this fixed `PositionWiseFeedForward` value, the
+call receives a hidden sequence and returns a hidden sequence. The layer's
+weights and biases are context already stored inside the Rust object. Training
+those weights belongs to a state update, not to this forward boundary.
+
+It is not the whole Transformer block. It is the next shape-preserving
+sublayer that a later block can compose.
 
 Design contract:
 
@@ -1405,11 +1670,17 @@ transformations.
 
 ## Category Theory Concept
 
-The public shape is still an endomorphism:
+For one fixed positional-encoding table, the public shape is still an
+endomorphism:
 
 ```text
 HiddenSequence -> HiddenSequence
 ```
+
+Read that as a forward call with the encoding table already selected. If a
+future chapter learns, swaps, or rebuilds the position table, that changing
+context must be named separately instead of being hidden inside the
+`HiddenSequence -> HiddenSequence` arrow.
 
 Design contract:
 
@@ -1463,13 +1734,22 @@ input live in the same object.
 
 ## Category Theory Concept
 
-This is another endomorphism:
+For one fixed single-head or multi-head block value, this is another
+endomorphism:
 
 ```text
 HiddenSequence -> HiddenSequence
 ```
 
 Stacking layers is repeated endomorphism application.
+
+If the block's heads, projections, normalization parameters, or feed-forward
+weights are changing, the boundary is no longer only this forward call. The
+changing object is the larger training state:
+
+```text
+TransformerTrainingState -> TransformerTrainingState
+```
 
 Design contract:
 
@@ -1785,6 +2065,69 @@ That makes the next training step guess how to rebuild the model. The roadmap
 uses one structured state object instead, so every update must preserve the
 state boundary.
 
+## Gradient Evidence Ledger
+
+The block training step has finite-difference tests. They are important, but
+they are not magic certificates. Read them as local evidence checks.
+
+The test shape is:
+
+```text
+one selected parameter
+  -> perturb it by +epsilon and -epsilon
+  -> measure two nearby losses
+  -> compute a central finite difference
+
+one training step
+  -> compare before and after parameter values
+  -> infer the gradient used by the update
+```
+
+Those two paths should agree for the selected parameter:
+
+```text
+central finite difference of loss ~= inferred update gradient
+```
+
+CS231n uses gradient checking this way: compare a numerical gradient with an
+analytic gradient, preferably with a centered finite-difference formula and
+careful error interpretation. PyTorch's `gradcheck` documentation gives the
+framework version of the same idea: finite differences are compared with
+analytical gradients, and the result depends on tolerance, precision,
+differentiability, and memory-layout assumptions.
+
+The Rust roadmap keeps the claim smaller:
+
+| Test family | Parameter path checked | What it can catch | What it cannot prove |
+| --- | --- | --- | --- |
+| `transformer_block_train_step_matches_finite_difference_for_readout_weight` | sequence readout weight | wrong sign, missing target-class gradient, wrong averaging scale | correctness of attention gradients |
+| `transformer_block_train_step_matches_finite_difference_for_feed_forward_weight` | feed-forward weight | dropped ReLU or hidden-layer path | correctness of every feed-forward configuration |
+| `transformer_block_train_step_matches_finite_difference_for_layer_norm_parameter` | normalization scale or shift | wrong layer-normalization backward path | correctness of all normalization behavior |
+| `transformer_block_train_step_matches_finite_difference_for_attention_projection` | query, key, value, or output projection weight | dropped attention projection path | correctness of every attention variant |
+| bias finite-difference tests | readout, feed-forward, output projection, or attention projection bias | missing bias gradient | correctness of all trainable fields |
+
+The category-theory reading is also modest. These tests compare two local
+morphisms around one selected coordinate:
+
+```text
+loss measurement around current state
+parameter update inside TransformerTrainingState -> TransformerTrainingState
+```
+
+They support the implementation of the current state endomorphism. They do not
+prove that every possible dataset, learning rate, optimizer, mask, sequence
+length, or future Transformer block is correct.
+
+Use this decision rule when reading a gradient-check result:
+
+```text
+match    -> local evidence for this parameter path
+mismatch -> inspect sign, scaling, dropped path, nonsmooth point, or tolerance
+```
+
+Do not respond to a mismatch by only loosening the tolerance. First ask which
+typed boundary or gradient path failed.
+
 ## Category Theory Concept
 
 The forward path is now a typed morphism:
@@ -1974,6 +2317,22 @@ line an endomorphism. A true endomorphism in this book has the form
 `A -> A`. A product-input boundary such as `A x B -> A` may return the same
 object as its left input, but it still needs extra information.
 
+There is a second kind of extra information: learned parameters stored inside
+a layer object. When this diagnostic names
+`LayerNormalization : HiddenSequence -> HiddenSequence`,
+`PositionWiseFeedForward : HiddenSequence -> HiddenSequence`, or
+`MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence`, read it as a
+forward call for one fixed layer or block instance. The scale, shift, weights,
+and biases are already inside that Rust value. If those parameters are being
+changed, the boundary has moved to training state:
+
+```text
+TransformerTrainingState -> TransformerTrainingState
+```
+
+That distinction keeps the chapter honest. It allows a fixed module call to
+be shape-preserving without pretending parameter learning has disappeared.
+
 They also prevent a second mistake: importing an advanced categorical name too
 early. Research on self-attention as a parametric endofunctor is useful for the
 linear portions of self-attention, especially query, key, value, positional,
@@ -1986,6 +2345,20 @@ Research on the anatomy of attention supports the opposite teaching move:
 decompose attention first, then compare variants. In this book, the
 decomposition is not a full diagrammatic formalism. It is a Rust teaching
 contract: every component must have a named type, a boundary shape, and a failure it prevents.
+
+Categorical deep-learning research also separates architecture constraints
+from implementations. That distinction is useful here because the Rust code is
+an implementation witness for one small boundary at a time, not a proof that a
+future full Transformer satisfies every intended constraint. A good chapter
+claim should say which side it is on:
+
+```text
+architecture constraint:
+what should remain true?
+
+implementation boundary:
+which Rust type, constructor, example, or test currently enforces it?
+```
 
 Do not call the whole block an endofunctor when the explanation only checked
 one internal linear path. In this chapter, use the smaller safe name first:
@@ -2011,6 +2384,24 @@ the same as being an endomorphism. A boundary that still needs a mask, value
 sequence, projected sublayer output, dataset, or learning rate is not a pure
 `A -> A` story until that context is explicitly fixed.
 
+### Source-Target Audit Card
+
+Use this card when a row still feels ambiguous. Do not start from the output
+type. Name the whole source object, then name the target object.
+
+| Boundary | Whole source object | Target object | Context status | Safe conclusion |
+| --- | --- | --- | --- | --- |
+| `HiddenSequence -> QuerySequence` | `HiddenSequence` | `QuerySequence` | no extra context in the boundary | ordinary morphism |
+| `AttentionScores x AttentionMask -> AttentionScores` | `AttentionScores x AttentionMask` | `AttentionScores` | mask is open context | product-input morphism, not an endomorphism on scores |
+| `MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence` | `HiddenSequence` | `HiddenSequence` | one mask `M` was fixed first | induced endomorphism for that named mask |
+| `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | `HiddenSequence x ProjectedAttentionOutput` | `HiddenSequence` | residual input is open context | product-input morphism returning hidden state |
+| `TransformerTrainingState -> TransformerTrainingState` | `TransformerTrainingState` | `TransformerTrainingState` | update context is inside the state object | state endomorphism |
+
+The second and fourth rows are unary only if you choose to regard the product
+as one source object, but they are still not endomorphisms. Their targets are
+not the same product object. The fixed-mask row is different because the mask
+has been selected before the remaining call.
+
 ### Linear Scope Diagnostic
 
 Use this when an external source gives a categorical reading of
@@ -2027,8 +2418,8 @@ classified.
 | score normalization | `AttentionScores -> AttentionWeights` | nonlinear normalization boundary |
 | value mixing | `AttentionWeights x ValueSequence -> AttentionOutput` | product-input boundary |
 | residual addition | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | product-input boundary returning hidden state |
-| layer normalization | `HiddenSequence -> HiddenSequence` | shape-preserving but nonlinear endomorphism |
-| training update | `TransformerTrainingState -> TransformerTrainingState` | state endomorphism over the whole training object |
+| layer normalization for a fixed layer instance | `HiddenSequence -> HiddenSequence` | shape-preserving but nonlinear endomorphism |
+| parameter-changing training update | `TransformerTrainingState -> TransformerTrainingState` | state endomorphism over the whole training object |
 
 Safe rule:
 
@@ -2094,12 +2485,69 @@ The fourth row is the trap. Returning the left object is not enough to make a
 boundary an endomorphism. The whole input must be one object, and the output
 must be that same object.
 
+There is a second safe reading that is useful but different. You may choose to
+treat the product itself as one source object:
+
+```text
+(A x B) -> A
+```
+
+That makes the arrow unary from the product object, but it still is not an
+endomorphism. The source object is `A x B`; the target object is `A`. An
+endomorphism on the product would have shape:
+
+```text
+(A x B) -> (A x B)
+```
+
+This is why the roadmap keeps the phrase "product-input morphism returning
+`A`" instead of shortening it to "endomorphism on `A`."
+
+### Terminal Output Audit: Shape Line Is Not Boundary Shape
+
+The runnable example prints several lines with the same public dimensions:
+
+```bash
+cargo run --example 06_attention_scores
+```
+
+Those lines are useful evidence, but they are not category names by
+themselves. A printed shape tells you something about the target object. The
+typed transformation line tells you the whole source object and the target
+object.
+
+| Printed output line | What the line proves | What it does not prove | Boundary to name |
+| --- | --- | --- | --- |
+| `projected attention shape: 2 positions x model dimension 2` | raw head output has been projected back to model width | the residual connection has already happened | `MultiHeadOutput -> ProjectedAttentionOutput` |
+| `residual shape: 2 positions x model dimension 2` | the result has returned to hidden-sequence shape | residual addition was unary | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` |
+| `masked multi-head block shape: 2 positions x model dimension 2` | the block output can feed the next hidden-sequence layer | the open masked block is a pure endomorphism | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` |
+| `training state step: 0 -> 1` | the update returns a state that can be updated again | training is a loose `Loss -> Parameters` shortcut | `TransformerTrainingState -> TransformerTrainingState` |
+
+Use this three-step audit whenever the terminal output seems to settle the
+category name too quickly:
+
+```text
+printed shape line -> evidence about the target object
+typed transformation line -> evidence about the source and target objects
+category name -> only after both source and target are known
+```
+
+That is why `residual shape` and `masked multi-head block shape` can both show
+model-width hidden rows while still having different safe category readings.
+Same printed dimensions are not the same boundary.
+
 ### Stackability With Context
 
 Stacking means the output of one boundary can feed the next boundary without
 inventing missing inputs. A direct endomorphism can stack by itself. A
 product-input boundary can stack only if the extra context is carried along or
 fixed explicitly.
+
+For learned sublayers, "direct" means the layer instance is fixed for the
+forward call. A different `LayerNormalization` or `PositionWiseFeedForward`
+value is a different morphism. Changing those parameters is training-state
+work, so the safe outer name is `TransformerTrainingState ->
+TransformerTrainingState`.
 
 | Boundary | Can it stack directly as `HiddenSequence -> HiddenSequence`? | Safe reading |
 | --- | --- | --- |
@@ -2113,6 +2561,92 @@ This is the same discipline as the rest of the chapter. Do not erase context
 to make a category name fit. If a mask, dataset, learning rate, or parameter
 object is part of the boundary, either keep it in the type shape or say exactly
 where it was fixed.
+
+### Context Fixing Drill
+
+The open masked block and a fixed-mask view are related, but they are not the
+same boundary:
+
+```text
+open boundary:
+MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence
+
+fixed-context boundary:
+choose one mask M
+MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence
+```
+
+The fixed-context boundary is a new named view after selecting `M`.
+It is not a claim that the original block had only one input. The source of
+the context must stay visible in the prose, the exercise, or the type that
+carries it.
+
+| Case | What is fixed? | Safe category shape | Can it stack as `HiddenSequence -> HiddenSequence`? | Overclaim to avoid |
+| --- | --- | --- | --- | --- |
+| open masked block | nothing | product-input morphism | no | "it returns `HiddenSequence`, so it is an endomorphism" |
+| fixed-mask view | one named `AttentionMask` | induced endomorphism for that mask | yes, while the same mask context remains fixed | "the mask disappeared" |
+| changing mask per call | the mask is supplied again each call | repeated product-input calls, or a larger state carrying the mask | only if the caller threads or fixes the context | "this is the same as a fixed-mask view" |
+| residual addition | no input is fixed; both hidden stream and projected output are supplied | product-input morphism returning hidden state | no | "a binary operation is unary because the result is hidden state" |
+
+The residual row is a negative contrast. It is not a context-fixing example.
+The hidden stream is still an input, and the projected sublayer output is still
+an input. Nothing has been selected in advance. The boundary therefore remains:
+
+```text
+HiddenSequence x ProjectedAttentionOutput -> HiddenSequence
+```
+
+It returns `HiddenSequence`, but it does not become a unary
+`HiddenSequence -> HiddenSequence` boundary unless one input has actually been
+fixed. If the product object itself is named as the source, the arrow is unary
+from that product object:
+
+```text
+(HiddenSequence x ProjectedAttentionOutput) -> HiddenSequence
+```
+
+That is still not an endomorphism, because the target is not the same product
+object. An endomorphism on the named product would have to return the whole
+product again:
+
+```text
+(HiddenSequence x ProjectedAttentionOutput)
+    -> (HiddenSequence x ProjectedAttentionOutput)
+```
+
+This is only a local teaching use of fixing context.
+It is not a proof that the whole attention block lives in a closed category,
+and it is not permission to hide arbitrary inputs. The practical rule stays
+simple:
+
+```text
+name the open boundary first
+name exactly what was fixed
+then name the induced unary view
+```
+
+Rust already has a familiar mechanism for this idea:
+a closure can capture a value from the surrounding environment. The official
+Rust Book uses closures to teach how a callable value can remember
+environment. In this roadmap, a fixed-mask view can be read the same way:
+
+```rust,ignore
+let fixed_mask = mask.clone();
+let fixed_mask_view = move |hidden: HiddenSequence| {
+    masked_block.apply(Product::new(hidden, fixed_mask.clone()))
+};
+```
+
+That closure-shaped explanation is only an analogy for this local boundary. It
+does not change the original open type:
+
+```text
+MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence
+```
+
+It says how one chosen `AttentionMask` can be captured before the remaining
+call receives `HiddenSequence`. If a reader cannot point to the captured
+`fixed_mask`, the text has hidden context instead of fixing it.
 
 | Boundary | Category shape to name | Why this is the right name | Common misread |
 | --- | --- | --- | --- |
@@ -2150,6 +2684,39 @@ composable yet?
 If a boundary needs two objects, write both. If it returns to the same public
 object, say whether that return is unary or product-input. Precision here is
 what keeps the roadmap from turning attention into a single vague arrow.
+
+### Reader Evidence Handoff
+
+If this diagnostic becomes unclear, the most useful report is not "attention is
+confusing." The useful report names the exact rule that failed.
+
+Use this shape:
+
+```text
+Command: cargo run --example 06_attention_scores
+Page: Transformer Roadmap -> Category Shape Diagnostic
+Evidence signal: one boundary row or printed output line
+Last clear idea: the last boundary name that still made sense
+First unclear rule: input count, fixed context, legal composition, source role,
+target role, or linear-scope limit
+Smallest useful fix: one sentence, table row, diagram, or exercise check
+```
+
+Good evidence signals are small:
+
+```text
+AttentionScores x AttentionMask -> AttentionScores
+MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence
+HiddenSequence x MultiHeadOutput -> HiddenSequence
+query 0 attends with [0.5, 0.0, 0.5]
+```
+
+A report like that gives the next rewrite a concrete target: which boundary,
+which rule, and which reader expectation failed.
+
+Open the
+[chapter clarity feedback form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
+with those fields filled from your own run or reading.
 
 ## Retrieval Practice
 

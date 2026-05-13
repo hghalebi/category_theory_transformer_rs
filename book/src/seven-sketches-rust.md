@@ -41,6 +41,16 @@ objects + relationships + composition + laws
 > the full mathematical theory before reading the Rust. Start from the type,
 > then read the constructor, then read the law check.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- name the one law, relation, or boundary each Rust sketch preserves,
+- explain which part of the source text each sketch deliberately does not
+  implement,
+- transfer one sketch to a small software or ML design problem without
+  overclaiming the mathematics.
+
 ## What You Already Know
 
 If you have modeled business rules, resource limits, database relationships, or
@@ -113,6 +123,74 @@ mathematical development outside the tiny example.
 Use the table as a precision guard. When the Rust code checks one law, say
 which law it checks. When the source paper develops a larger theory, do not
 pretend the small Rust model has implemented all of it.
+
+## PDF-To-Rust Reading Contract
+
+The arXiv record describes *Seven Sketches in Compositionality* as a long
+invitation to applied category theory, built around concrete examples and
+seven major sketches. That matters for how to use this chapter. The goal is
+not to compress every page into a smaller page. The goal is to give every
+major sketch a Rust handle that a reader can run, inspect, and test.
+
+Complete coverage in this companion chapter means:
+
+```text
+every major sketch area has a Rust handle;
+every Rust handle names one protected law, relation, or boundary;
+every protected claim says what the source text still develops beyond the code;
+every reader can run one command before arguing about the abstraction.
+```
+
+Use this ledger while reading the PDF beside the Rust:
+
+| When the source text discusses | Ask in this chapter | Local evidence |
+| --- | --- | --- |
+| an order, relation, or refinement | Which enum, newtype, or method names the ordered world? | `InformationLevel::can_flow_to`, `FeatureCount`, `LayerBudget` |
+| a resource or compositional quantity | Which operation combines independent pieces? | `ResourceBundle::tensor` |
+| a schema, instance, or reference | Which constructor rejects invalid references? | `CompanyInstance::new` |
+| a feasibility relation | Which requirement-offer pair is accepted or rejected? | `FeasibilityRelation::relates` |
+| a signal-flow or matrix composition | Which middle dimension must match? | `SignalMatrix::compose_after` |
+| an open system or circuit interface | Which boundary ports must agree? | `OpenCircuit::then` |
+| a local-to-global behavior claim | Which local checks combine into a global result? | `SafetyCover::global_truth` |
+
+This is also the limit of the chapter. If a PDF section develops a richer
+construction than the Rust handle, record the richer construction as context,
+not as something the code has proved. The safe sentence is:
+
+```text
+The source develops a larger theory here.
+This Rust handle checks one executable boundary from that theory.
+```
+
+## Source-Backed Precision Rules
+
+This chapter uses external sources as scope guards. Each source supports a
+limited teaching claim, and each claim is tied to one local Rust boundary or
+test. The chapter does not claim that `src/sketches.rs` implements the full
+source text, a general categorical semantics library, or a production ML
+architecture theory.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory can be introduced through concrete examples such as databases, circuits, dynamical systems, and other real-world structures. | Treat every sketch as one executable handle for one source idea, not as a replacement for the full mathematical development. | `InformationLevel`, `ResourceBundle`, `CompanyInstance`, `OpenCircuit`, `SafetyCover` |
+| [MIT Applied Category Theory OCW](https://ocw.mit.edu/courses/18-s097-applied-category-theory-january-iap-2019/) | The seven topic areas can be studied as a course sequence: orders, resources, databases, co-design, signal flow, circuits, and logic of behavior. | Keep the chapter order and `Paper Map To Rust` aligned with that applied-category sequence. | `cargo run --example 05_seven_sketches` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Category-theory vocabulary can be taught through programming-shaped structures. | Explain the programming boundary before naming the category-theory pattern. | `information_order_obeys_preorder_laws`, `feature_layer_galois_law_holds`, `resource_tensor_is_monotone` |
+| [Compositional Deep Learning](https://arxiv.org/abs/1907.08292) | Categorical schemas, functorial structure, and composition invariants can appear in neural-network settings under stated assumptions. | Use the database and co-design sketches as ML transfer analogies only; do not claim the crate learns functors or implements the thesis. | `CompanyInstance`, `FeasibilityRelation`, `database_instance_rejects_missing_department_reference` |
+| [Categorical Deep Learning](https://proceedings.mlr.press/v235/gavranovic24a.html) | Architecture discussions can separate constraints a model should satisfy from implementations that realize them. | Use co-design as a tiny `Requirement x Offer -> Bool` boundary, not as a theory of all neural architectures. | `DesignRequirement`, `ImplementationOffer`, `FeasibilityRelation::relates` |
+| [Rust Book: Enums](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) | Enums encode values that must be one variant from a finite set. | Use enums for finite state-like domains before adding laws around them. | `InformationLevel`, `TruthValue` |
+| [Rust Book: Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) | Traits name shared behavior and make contracts explicit. | Treat laws and methods as contracts that tests must witness, not as prose-only claims. | `SignalMatrix::compose_after`, `OpenCircuit::then`, `SafetyCover::global_truth` |
+
+The transfer pattern is:
+
+```text
+source idea -> local Rust model -> law or boundary check
+```
+
+For this chapter, that means reading `cargo run --example
+05_seven_sketches` and `cargo test sketches::tests` as evidence for the tiny
+models above, not as evidence that the full seven-sketch source text,
+categorical deep-learning literature, or every applied-category construction
+has been implemented.
 
 ## Choose A Sketch Without Losing The Tiny ML Thread
 
@@ -211,6 +289,51 @@ The chapter's applied models can be scanned by the structure they protect:
 This table is the chapter's law-and-boundary index. The point is not to
 memorize eight rows. The point is to see that each sketch earns its abstraction
 by protecting one concrete relationship.
+
+### Transfer Triage Card
+
+Use this card when a source idea feels too large to turn into code. The goal is
+not to shrink the source. The goal is to choose one local boundary that can be
+inspected.
+
+| If the transfer feels like... | Do this first | Ready when you can write... |
+| --- | --- | --- |
+| a broad theory claim | shrink to one law, relation, or boundary | `Source claim -> local Rust handle` |
+| a vocabulary list | choose one constructor, method, example line, or test | `Rust handle -> protected relationship` |
+| a passing example only | name the invalid case it rejects or the law it checks | `protected relationship -> rejected shortcut` |
+| an ML analogy | name the ML object, constraint, or composition it maps to | `tiny ML transfer -> safe non-claim` |
+| a research source | state what the source does not license this chapter to claim | `non-claim -> evidence command` |
+
+The completed transfer card has seven fields:
+
+```text
+source idea:
+local Rust handle:
+protected law, relation, or boundary:
+invalid shortcut rejected:
+tiny ML transfer:
+larger claim not implemented:
+local evidence command or test:
+```
+
+Example:
+
+```text
+source idea: schemas and instances
+local Rust handle: CompanyInstance::new
+protected law, relation, or boundary: EmployeeRecord -> DepartmentId must resolve
+invalid shortcut rejected: letting a missing department reach feature extraction
+tiny ML transfer: validate structured training rows before training
+larger claim not implemented: a general categorical database semantics
+local evidence command or test: cargo test sketches::tests --lib
+```
+
+This follows the source discipline used above. *Seven Sketches* gives a broad
+tour through concrete examples. MIT's course frames category theory as a way
+to organize formal systems and transfer knowledge between them. Categorical
+deep-learning work distinguishes architecture constraints from
+implementations. The local job here is smaller: choose one implementable
+handle, name one protected relationship, and state the non-claim.
 
 ## Sketch 1: Information Order
 
@@ -672,6 +795,27 @@ A -> B
 
 Some should be modeled as constraints or relations.
 
+This also gives a small handle for reading newer categorical deep-learning
+work. At architecture scale, a model can be discussed in terms of constraints
+it should satisfy and implementations that realize those constraints. This Rust
+sketch keeps only the first tiny version of that idea:
+
+```text
+DesignRequirement x ImplementationOffer -> bool
+```
+
+The important distinction is:
+
+| Question | Co-design sketch answer |
+| --- | --- |
+| What should be true? | throughput is high enough and latency is low enough |
+| What implementation evidence do we have? | one `ImplementationOffer` value with checked throughput and latency |
+| What does the relation decide? | whether that offer satisfies that requirement |
+
+That is not a full theory of neural architectures. It is the learner-sized
+boundary that prevents a common overclaim: one implementation example is not
+the same thing as the whole constraint space.
+
 ### Transfer Task: Feasibility Relation
 
 Model a relation that is not a function:
@@ -688,8 +832,16 @@ maximum memory
 maximum latency
 ```
 
+Then write the architecture version:
+
+```text
+ArchitectureConstraint x CandidateImplementation -> Bool
+```
+
 The transfer is complete when you can explain why many offers may satisfy one
-requirement, and one offer may satisfy many requirements.
+requirement, one offer may satisfy many requirements, and one passing offer is
+not proof that every future implementation satisfies the architecture
+constraint.
 
 ## Sketch 5: Signal Matrices
 
@@ -1142,18 +1294,67 @@ matrices, open circuits, and local behavior checks can all be read in the same
 way: name the values, constrain construction, define composition, and test the
 law that makes the composition trustworthy.
 
-The remaining practice material asks you to use that reading method yourself.
-The exercises are not meant to test memorized definitions. They are meant to
-train the habit of translating one Rust block into its software role and its
-categorical shape.
+The remaining practice material in [Exercises](exercises.md) asks you to use
+that reading method yourself. The exercises are not meant to test memorized
+definitions. They are meant to train the habit of translating one Rust block
+into its software role and its categorical shape.
 
 ## Further Reading
 
-These pages are useful once you have the executable sketch map:
+Do not treat these sources as a separate theory shelf. Use them to improve one
+local Rust sentence at a time.
+
+Start from this local evidence:
+
+```text
+cargo run --example 05_seven_sketches
+cargo test sketches::tests --lib
+src/sketches.rs
+examples/05_seven_sketches.rs
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Each sketch is one compositional structure: orders, resources, schemas, co-design, signal flow, open systems, or local-to-global behavior. | `Paper Map To Rust`, `Source Scope Contract`, `Example Output Transfer Checklist` |
+| [MIT Applied Category Theory OCW](https://ocw.mit.edu/courses/18-s097-applied-category-theory-january-iap-2019/) | The seven topic areas form a study sequence, not a bag of unrelated examples. | `cargo run --example 05_seven_sketches` output order |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Programming examples should carry the vocabulary before the formal name is emphasized. | `InformationLevel`, `ResourceBundle`, `SignalMatrix`, `OpenCircuit` |
+| [Compositional Deep Learning](https://arxiv.org/abs/1907.08292) | Categorical schemas and composition invariants can appear in neural-network settings under explicit assumptions. | `CompanyInstance`, `FeasibilityRelation`, `database_instance_rejects_missing_department_reference` |
+| [Categorical Deep Learning](https://proceedings.mlr.press/v235/gavranovic24a.html) | Architecture-level claims should separate constraints from implementations that realize them. | `DesignRequirement x ImplementationOffer -> bool` |
+| [Rust Book: Enums](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) | Finite domains are often clearer as enums than as unstructured numbers. | `InformationLevel`, `TruthValue` |
+| [Rust Book: Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) | Shared behavior should become an explicit contract before laws are tested around it. | `SignalMatrix::compose_after`, `OpenCircuit::then`, `SafetyCover::global_truth` |
+
+After reading one source, answer four questions:
+
+1. Which Rust handle did it clarify?
+2. Which law, relation, or boundary did it support?
+3. Which larger claim did the source not license?
+4. Which command or test shows the local evidence?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --example 05_seven_sketches
+cargo test sketches::tests --lib
+```
+
+For terminology recovery, use:
 
 - [References](references.md): paper links and supporting Rust/materials
 - [Glossary](glossary.md): terms used by the course
 - [Repository Source Snapshots](source-snapshots.md): complete source files
+
+If a source does not help you name a Rust handle, a law or boundary, a
+non-claim, and an evidence command, it has not transferred back into this
+chapter yet.
+
+## Practice After This Chapter
+
+Use [Exercise 10](exercises.md#exercise-10-test-one-sketch-law) to test one
+sketch law or inspect one negative test. The goal is to choose a structure,
+name the invalid state it rejects, and explain the result through Rust syntax,
+software or ML meaning, and category-theory shape.
 
 ## Retrieval Practice
 

@@ -36,6 +36,16 @@ They explain patterns you already saw:
 > category-theory name. The names are not decoration; they are compression for
 > patterns that appear repeatedly in real model code.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- trace a functor, natural transformation, monoid, and chain-rule example
+  through concrete Rust code,
+- explain which two paths must agree in the naturality and monoid examples,
+- distinguish the tiny `MulOp::backward` local derivative boundary from a full
+  automatic-differentiation engine.
+
 ## What You Already Know
 
 If you have mapped over a `Vec`, handled an `Option`, appended logs, or applied
@@ -223,6 +233,35 @@ analogies. Those are related, but they are not the same kind of evidence.
 The rule for this book is conservative: a law word should point to a concrete
 Rust test, and an analogy should be named as an analogy. That keeps the chapter
 useful without pretending that a few tests prove all of category theory.
+
+## Source-Backed Precision Rules
+
+This chapter uses external sources to keep the structure vocabulary precise.
+Each source supports a limited claim; these citations are not proof that this
+crate implements a full category-theory library or a production
+automatic-differentiation engine.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [Categories for the Working Mathematician](https://link.springer.com/book/10.1007/978-1-4757-4721-8) | Functors, natural transformations, and monoids are formal category-theory structures with laws, not just programming metaphors. | Use formal vocabulary only where the local Rust boundary names a concrete structure and the text states what the tests do not prove. | `Functor<A, B>`, `naturality_square_commutes`, `pipeline_trace_obeys_monoid_laws` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Category-theory topics can be introduced through programming-shaped examples and functional-language structure. | Use `Functor`, naturality, and monoid as names for checked local patterns, not as a claim that the crate models all categorical laws. | `Functor<A, B>`, `VecFunctor`, `OptionFunctor`, `pipeline_trace_obeys_monoid_laws` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory can be taught through concrete examples before formal generality. | The chapter introduces laws through inspectable Rust examples before broad abstraction. | `naturality_square_holds_for_first_option`, `PipelineTrace` |
+| [D2L Backpropagation and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html) | Forward propagation stores intermediate values, and backpropagation computes gradients through the graph using the chain rule. | The local calculus example keeps only one operation and one upstream-gradient boundary. | `MulOp::forward`, `MulOp::backward`, `LocalGradient` |
+| [Automatic differentiation in machine learning: a survey](https://arxiv.org/abs/1502.05767) | Automatic differentiation evaluates derivatives of programs and is broader than one hand-written backpropagation example. | Keep `MulOp::backward` framed as one local derivative boundary, not as a general AD implementation. | `MulOp::backward`, `LocalGradient` |
+| [PyTorch Autograd Mechanics](https://docs.pytorch.org/docs/stable/notes/autograd.html) | Production autograd records a graph, saves needed tensors, and traverses the graph backward with the chain rule. | `MulOp::backward` is a microscope for one local derivative rule, not a replacement for dynamic autograd. | `multiply_backward_returns_local_chain_rule_gradients`, `multiply_backward_scales_with_upstream_gradient` |
+| [Backprop as Functor](https://arxiv.org/abs/1711.10455) | Backpropagation and parameter-update rules can be studied compositionally under stated assumptions. | The chapter uses this as advanced context only; the local claim is a pair of explicit derivative tests, not a monoidal-functor proof. | `MulOp::backward`, `cargo test calculus::tests` |
+
+The transfer pattern is:
+
+```text
+source claim -> local typed boundary -> validation command or test
+```
+
+For this chapter, that means reading `cargo run --example
+04_structure_and_calculus`, `cargo test structure::tests`, and `cargo test
+calculus::tests` as evidence for these small law-shaped examples, not as
+evidence that every functor, natural transformation, monoid, or differentiable
+program has been modeled.
 
 ## `Functor<A, B>`
 
@@ -1949,19 +1988,66 @@ explains changing wrappers consistently. A monoid explains safe accumulation. A
 local gradient explains why a large training computation can be assembled from
 small derivative rules.
 
-The next chapter uses the same engineering habit on a wider set of ideas from
-applied category theory. Instead of adding a larger ML model, it shows how the
-same typed-Rust style can model orders, resources, database instances, design
-relations, signal flow, circuits, and local-to-global behavior.
+The next chapter, [Seven Sketches Through Rust](seven-sketches-rust.md), uses
+the same engineering habit on a wider set of ideas from applied category
+theory. Instead of adding a larger ML model, it shows how the same typed-Rust
+style can model orders, resources, database instances, design relations, signal
+flow, circuits, and local-to-global behavior.
 
 ## Further Reading
 
-These pages reinforce the structure vocabulary used here:
+Do not read these links as a bibliography to admire. Read them as a transfer
+path from the small laws in this chapter to larger systems.
 
-- [Glossary](glossary.md): functor, natural transformation, monoid, chain rule
-- [References](references.md): Backprop as Functor, computational graphs, applied category theory, and programming-oriented category theory
-- [Exercises](exercises.md#exercise-14-trace-naturality-and-monoid-laws):
-  trace the naturality square and monoid laws back to the exact tests
+Start from the local Rust evidence:
+
+```text
+VecFunctor::fmap : Vec<A> x (A -> B) -> Vec<B>
+naturality_square_holds_for_first_option() -> bool
+PipelineTrace x PipelineTrace -> PipelineTrace
+MulOp::backward : Scalar x Scalar x LocalGradient -> (LocalGradient, LocalGradient)
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [Categories for the Working Mathematician](https://link.springer.com/book/10.1007/978-1-4757-4721-8) | Functor, natural transformation, and monoid are formal structures with laws; the local tests are examples, not universal proofs. | `Functor<A, B>`, `naturality_square_commutes`, `pipeline_trace_obeys_monoid_laws` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Functor and monoid names are useful only when they point to operation shapes and laws. | `Functor<A, B>`, `VecFunctor`, `OptionFunctor`, `monoid_laws_hold_for_pipeline_trace` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory can begin with concrete examples before general formalism. | `naturality_square_holds_for_first_option`, `PipelineTrace` |
+| [D2L Backpropagation and Computational Graphs](https://d2l.ai/chapter_multilayer-perceptrons/backprop.html) | Backpropagation reverses the forward dependency path and uses the chain rule over stored intermediates. | `MulOp::forward`, `MulOp::backward` |
+| [The Matrix Calculus You Need For Deep Learning](https://arxiv.org/abs/1802.01528) | Matrix-calculus notation is support for understanding local derivative rules, not a prerequisite for running the tiny example. | `LocalGradient`, `Scalar` |
+| [Automatic differentiation in machine learning: a survey](https://arxiv.org/abs/1502.05767) | Automatic differentiation is a general program-derivative technique; the local example is one visible derivative boundary. | `MulOp::backward`, `LocalGradient` |
+| [PyTorch Autograd Mechanics](https://docs.pytorch.org/docs/stable/notes/autograd.html) | Production systems record a graph and traverse it backward; this chapter keeps one local backward rule visible. | `multiply_backward_returns_local_chain_rule_gradients`, `multiply_backward_scales_with_upstream_gradient` |
+| [Backprop as Functor](https://arxiv.org/abs/1711.10455) | Backpropagation can be studied compositionally under stated assumptions. | Advanced context only; do not promote this chapter's tests into a proof of the paper's theorem. |
+
+Use [Glossary](glossary.md) when a word becomes slippery. Use
+[References](references.md) when you want the full source list.
+
+After reading one external source, ask four questions:
+
+1. Which exact Rust type or function did it clarify?
+2. Which law, local derivative, or path agreement did it support?
+3. Which claim did it **not** license this chapter to make?
+4. Which command would you run to inspect the local evidence?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --example 04_structure_and_calculus
+cargo test structure::tests --lib
+cargo test calculus::tests --lib
+```
+
+If you can answer those questions, the external sources have transferred back
+into the code.
+
+## Practice After This Chapter
+
+Use [Exercise 14](exercises.md#exercise-14-trace-naturality-and-monoid-laws)
+to trace the naturality square and monoid laws back to the exact tests. This is
+the chapter's main transfer check: a term such as "natural transformation" or
+"monoid" should point to a runnable law check, not only to a definition.
 
 ## Retrieval Practice
 

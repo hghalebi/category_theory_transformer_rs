@@ -32,6 +32,16 @@ The central Rust sentence is:
 > explains how values move between those objects. That movement is the bridge
 > between ordinary Rust functions and the categorical idea of morphisms.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- read `Morphism<Input, Output>` as a typed transformation contract,
+- explain why `Compose<F, G, Middle>` requires the first target object to match
+  the second source object,
+- diagnose why `Embedding` followed directly by `Softmax` is illegal without
+  weakening either stage.
+
 ## What You Already Know
 
 If you know Rust functions, you already know that computation moves from an
@@ -59,6 +69,41 @@ Rust shape and one tiny ML example.
 Use the table as a translation layer. When a formal word appears later, ask
 which Rust trait, type parameter, or implementation makes it concrete. If no
 Rust shape is nearby, the explanation is probably moving too fast.
+
+## Source-Backed Precision Rules
+
+This chapter uses external sources to keep the word `morphism` small enough to
+teach. Each source supports a limited claim, and each claim is tied to one
+local Rust boundary. The chapter does not claim that this crate implements a
+general category-theory library; it models typed transformations, identity,
+composition, and one repeated endomorphism helper for the tiny ML system.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [Rust Book: Generics](https://doc.rust-lang.org/book/ch10-01-syntax.html) | Generic type parameters let one definition describe many concrete types while preserving type relationships. | Read `Input`, `Middle`, and `Output` as type-level objects, not runtime values. | `Morphism<Input, Output>`, `Compose<F, G, Middle>` |
+| [Rust Book: Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) | Traits name shared behavior and make a contract that concrete types implement. | Treat a morphism as a trait contract: a named, fallible, typed transformation. | `trait Morphism<Input, Output>`, `impl Morphism<TokenId, Vector> for Embedding` |
+| [Stanford Encyclopedia of Philosophy: Category Theory](https://plato.stanford.edu/entries/category-theory/) | A category has morphisms between objects, identity morphisms, composition, and identity/associativity axioms. | Keep the local Rust claim narrow: the chapter models source type, target type, identity, and composition for this teaching crate. | `Identity<T>`, `Compose<F, G, Middle>`, `identity_composes_without_changing_behavior`, `composition_applies_first_then_second` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Category theory introduces objects, arrows, identity, and composition through concrete applied examples. | Use category words only when they point to a visible Rust object, arrow, identity, or composition boundary. | `Identity<T>`, `Compose<F, G, Middle>`, `identity_composes_without_changing_behavior` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Programming-shaped category-theory notes connect categorical vocabulary to datatypes, functions, and typed structure. | Explain the ordinary typed-function shape before using the word `morphism`. | `fn add_one(input: i32) -> i32`, `Morphism<Input, Output>` |
+
+The transfer pattern is:
+
+```text
+source idea -> local typed boundary -> compiler, output, or test evidence
+```
+
+For this chapter, that means reading `cargo run --example
+02_morphism_composition`, `cargo test category::tests`, and the failed-shape
+diagnostic as evidence for a small claim:
+
+```text
+two arrows compose only when the first target object matches the second source
+object
+```
+
+It is not evidence that every categorical law has been formalized. It is
+evidence that this tiny Rust interface makes the relevant middle object hard to
+ignore.
 
 ## Source Snapshot
 
@@ -454,6 +499,43 @@ out-of-range token, softmax can receive empty logits, cross entropy can receive
 an invalid target, and training can receive malformed parameters. The shared
 return type keeps those failures explicit instead of hiding them behind a
 panic.
+
+### Read One Concrete Implementation
+
+The abstract trait becomes concrete when a stage implements it. In `src/ml.rs`,
+the embedding stage has this shape:
+
+```rust,ignore
+impl Morphism<TokenId, Vector> for Embedding {
+    fn name(&self) -> &'static str {
+        "embedding"
+    }
+
+    fn apply(&self, token: TokenId) -> CtResult<Vector> {
+        // lookup and validation happen here
+    }
+}
+```
+
+Read the first line slowly:
+
+```text
+Embedding is a morphism from TokenId to Vector.
+```
+
+That one line gives the reader all four pieces requested by the public starter
+issue:
+
+| Piece | In the code | Meaning |
+| --- | --- | --- |
+| typed input | `TokenId` | a vocabulary position, not a raw integer |
+| typed output | `Vector` | hidden features for that token |
+| transformation | `Embedding` | table lookup from token to feature row |
+| explicit failure | `CtResult<Vector>` | out-of-range tokens return an error |
+
+The implementation does not say that every `usize` can become features. It says
+that a validated `TokenId` can be applied to this embedding table, and the
+result is either a `Vector` or a typed error.
 
 ### ML Concept
 
@@ -1143,15 +1225,62 @@ leaves a value unchanged, `Compose<F, G, Middle>` connects compatible arrows,
 and `Endomorphism<T>` names the special case where the input and output object
 are the same.
 
-The next chapter fills those arrow shapes with concrete ML behavior: token
-windowing, embedding lookup, linear projection, softmax, and cross entropy.
+The next chapter, [The Tiny ML Pipeline](03-ml-pipeline.md), fills those arrow
+shapes with concrete ML behavior: token windowing, embedding lookup, linear
+projection, softmax, and cross entropy.
 
 ## Further Reading
 
-These pages give the supporting vocabulary for the arrow layer:
+Do not use these sources to make the word "morphism" sound larger. Use them to
+debug one concrete question:
 
-- [Glossary](glossary.md): morphism, identity morphism, composition, endomorphism
-- [References](references.md): Rust traits, Rust generics, applied category theory, and programming-oriented category theory
+```text
+what is the source object, target object, and middle object?
+```
+
+Start from the local Rust evidence:
+
+```text
+Morphism<Input, Output>
+Compose<F, G, Middle>
+F: Morphism<Input, Middle>
+G: Morphism<Middle, Output>
+Embedding      : TokenId -> Vector
+LinearToLogits : Vector -> Logits
+Softmax        : Logits -> Distribution
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [Rust Book: Generics](https://doc.rust-lang.org/book/ch10-01-syntax.html) | Generic parameters preserve relationships between input, middle, and output types. | `Compose<F, G, Middle>` |
+| [Rust Book: Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) | A trait defines the method signatures each implementation must provide. | `trait Morphism<Input, Output>` |
+| [Stanford Encyclopedia of Philosophy: Category Theory](https://plato.stanford.edu/entries/category-theory/) | The formal category shape needs morphisms, identity, composition, associativity, and identity laws. | `Identity<T>`, `Compose<F, G, Middle>`, `composition_applies_first_then_second` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Objects, arrows, identity, and composition can be introduced through concrete applied examples. | `Identity<T>`, `Compose<F, G, Middle>` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Category-theory vocabulary can be connected to typed programming structure. | `fn add_one(input: i32) -> i32`, `Morphism<Input, Output>` |
+
+After reading one external source, ask four questions:
+
+1. Which local boundary did it clarify?
+2. Which type relationship did it help protect?
+3. Which illegal composition does it help reject?
+4. Which command would you run to see the evidence?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --example 02_morphism_composition
+cargo test category::tests --lib
+cargo test ml::tests::composed_and_direct_prediction_match --lib
+```
+
+Use [Glossary](glossary.md) when a term becomes slippery. Use
+[References](references.md) when you want the full source list.
+
+If a source does not help you explain why `Embedding` can compose with
+`LinearToLogits` but not directly with `Softmax`, it has not transferred back
+into the chapter yet.
 
 ## Practice After This Chapter
 

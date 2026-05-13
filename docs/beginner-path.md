@@ -37,6 +37,25 @@ Do not worry about the hash-like token IDs yet. The important point is:
 raw text became a named object, then that object became training examples
 ```
 
+## First Output Diagnostic
+
+If the first command runs but the output does not click, do not read the whole
+project again. Find the first printed block that feels confusing.
+
+| First confusing block | What it usually means | Next move |
+| --- | --- | --- |
+| `Raw input` | this is still plain text before the model sees structure | say the sentence out loud, then look at the next block |
+| `TokenSequence` | each `TokenId(...)` is a named token index, not a meaningful word by itself | read the `TokenId` paragraph in Domain Objects |
+| `TrainingPairs` | each line is one input token and the next token to predict | trace one pair by hand from the token sequence |
+| `Typed transformation` | this is the path from raw text to training examples | copy `Text -> TokenSequence -> TrainingPairs` and label each object |
+| `No framework magic` | the example is intentionally small so the structure stays visible | resist looking for a hidden model call |
+
+You are ready to continue when you can point to one output line and say:
+
+```text
+this is the object, and this arrow made the next object
+```
+
 ## First Thirty Minutes
 
 Read and run in this order:
@@ -99,15 +118,24 @@ A strong answer says:
 Open the [chapter clarity feedback form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
 when the first-session path becomes unclear.
 
+For this path, use
+[Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path).
+The link fills the route, not the evidence; the evidence signal should come
+from what you personally read, ran, or attempted.
+
 Use this shape:
 
 ```text
 Perspective: beginner-adjacent learner
 Command or page tried:
+Evidence signal:
 First unclear sentence, command output, or term:
 Last idea that was clear:
 What would have helped:
 ```
+
+Use the evidence signal for the exact output line, page section, term, or
+command result that made the first-session path hard to follow.
 
 The most useful report names the first exact sentence, command output line, or
 term where the mental model broke.

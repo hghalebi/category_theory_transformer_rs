@@ -386,21 +386,56 @@ cargo test ml::tests --lib validates its core behavior.
 
 Expected reasoning:
 
-The answer should not only paste a link. It should explain what the larger
-resource teaches that the tiny implementation compresses.
+The answer should not only paste a link. It should classify the source role,
+name the boundary the source owns, and explain what the larger resource teaches
+that the tiny implementation compresses.
 
 Good example:
 
 ```text
 External resource: Dive into Deep Learning softmax regression.
+Source role: open textbook or university material.
+Owned boundary: ML intuition for logits, softmax normalization, and
+cross-entropy.
 Source file: src/ml.rs.
 Rust syntax connection: Softmax implements Morphism<Logits, Distribution>.
 ML concept connection: logits become normalized probabilities.
 Category theory concept connection: Logits -> Distribution is a typed
 transformation.
+What this source can support: the ML interpretation of the tiny softmax and
+loss path.
+What this source cannot support: a claim that this repository implements a full
+tensor framework, minibatch training stack, or calibrated confidence model.
 Difference: the course uses a tiny hand-written example, not a full tensor
 library or minibatch training system.
 ```
+
+Second good example:
+
+```text
+External resource: PyTorch CrossEntropyLoss.
+Source role: official framework documentation.
+Owned boundary: production API shape for unnormalized logits and target class
+indices.
+Source file: src/ml.rs.
+Rust syntax connection: CrossEntropy consumes Product<Distribution, TokenId>
+after the teaching path has already built a Distribution.
+ML concept connection: production frameworks usually combine log-softmax and
+negative log-likelihood behind one loss interface.
+Category theory concept connection: the book expands the path into
+Logits -> Distribution -> Product<Distribution, TokenId> -> Loss so the
+objects are visible.
+What this source can support: the distinction between logits and target class
+indices in a production API.
+What this source cannot support: changing the book's teaching path into a
+direct CrossEntropyLoss clone.
+Difference: the source documents a framework interface; the repository teaches
+the smaller typed boundary step by step.
+```
+
+Reject answers that use a learner-friction source as authority for a formal
+definition, or an implementation bridge as proof that the tiny Rust code
+implements a full research paper.
 
 ### Exercise 10: Test One Sketch Law
 
@@ -413,11 +448,77 @@ Examples:
 - `InformationLevel` checks reflexivity and transitivity.
 - `SignalMatrix::compose_after` rejects mismatched middle dimensions.
 - `OpenCircuit::then` rejects incompatible output/input boundaries.
+- `FeasibilityRelation::relates` checks whether one implementation offer
+  satisfies one requirement.
 
 Facilitator note:
 
 This is the key transfer exercise from tiny ML into applied category theory.
 Ask: "What invalid composition does this model prevent?"
+
+Expected co-design answer:
+
+```text
+DesignRequirement x ImplementationOffer -> bool
+```
+
+This is a relation because one requirement can be satisfied by many offers, and
+one offer can satisfy many compatible requirements. It is not a function from a
+requirement to one unique implementation.
+
+A passing offer might have higher throughput than required and lower latency
+than allowed. A failing offer might have enough throughput but too much latency.
+
+The architecture translation is:
+
+```text
+ArchitectureConstraint x CandidateImplementation -> Bool
+```
+
+One passing candidate is implementation evidence for that candidate under that
+constraint. It is not proof that every future implementation satisfies the
+whole architecture constraint space.
+
+Expected PDF-to-Rust contract answer:
+
+```text
+source idea from the PDF: schemas and instances
+Rust handle: CompanyInstance::new
+protected law, relation, or boundary: every EmployeeRecord department must
+resolve to an existing DepartmentId
+larger source claim not implemented by this code: a general functorial
+semantics for database schemas and instances
+local evidence command or test: cargo test sketches::tests --lib
+```
+
+A complete transfer triage card for that answer is:
+
+```text
+source idea: schemas and instances
+local Rust handle: CompanyInstance::new
+protected law, relation, or boundary: EmployeeRecord -> DepartmentId must
+resolve
+invalid shortcut rejected: letting a missing department reach feature extraction
+tiny ML transfer: validate structured training rows before training
+larger claim not implemented: a general categorical database semantics
+local evidence command or test: cargo test sketches::tests --lib
+```
+
+Another valid answer:
+
+```text
+source idea from the PDF: open systems compose through interfaces
+Rust handle: OpenCircuit::then
+protected law, relation, or boundary: the output ports of the first circuit
+must match the input ports of the second circuit
+larger source claim not implemented by this code: a full circuit algebra
+local evidence command or test:
+sketches::tests::open_circuit_serial_composition_rejects_boundary_mismatch
+```
+
+Reject answers that say the chapter "implements Seven Sketches." A good answer
+says which local Rust handle carries one executable boundary from the larger
+source text.
 
 ### Exercise 11: Write A New Block Explanation
 
@@ -506,6 +607,23 @@ unless `B` has been fixed as context or the product `A x B` is the object being
 studied.
 ```
 
+If the product is treated as the source object, the arrow can be read as:
+
+```text
+(A x B) -> A
+```
+
+That is a unary morphism out of the product object, not an endomorphism. An
+endomorphism on the product would be:
+
+```text
+(A x B) -> (A x B)
+```
+
+So the safe name remains "product-input morphism returning `A`" unless the
+answer explicitly changes the source and target objects and checks that they
+match.
+
 Expected same-output classification:
 
 | Boundary | Classification | Reason |
@@ -516,6 +634,20 @@ Expected same-output classification:
 
 The shared output name is not enough. The answer must count inputs before
 naming the category shape.
+
+Expected terminal-output audit:
+
+| Printed output line | What the line proves | Overclaim to reject | Boundary to name |
+| --- | --- | --- | --- |
+| `projected attention shape: 2 positions x model dimension 2` | raw head output has been projected back to model width | residual addition has already happened | `MultiHeadOutput -> ProjectedAttentionOutput` |
+| `residual shape: 2 positions x model dimension 2` | the result has returned to hidden-sequence shape | residual addition was unary | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` |
+| `masked multi-head block shape: 2 positions x model dimension 2` | the block output can feed the next hidden-sequence layer | the open masked block is a pure endomorphism | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` |
+| `training state step: 0 -> 1` | the update returns a state that can be updated again | training is a loose `Loss -> Parameters` shortcut | `TransformerTrainingState -> TransformerTrainingState` |
+
+The shape line is target evidence. It is not enough to name the category
+boundary. A strong answer also reads the typed transformation line and names
+the whole source object before deciding whether the boundary is ordinary,
+product-input, an endomorphism, or illegal.
 
 Expected source-ownership diagnostic:
 
@@ -529,6 +661,52 @@ role split after projection. A strong answer should still name
 `QuerySequence`, `KeySequence`, and `ValueSequence` separately, then say that
 the simple self-attention case feeds all three projections from the same
 `HiddenSequence`.
+
+Expected shape-ledger answer:
+
+| Ledger item | Framework cue | Rust roadmap meaning | Category-shape consequence |
+| --- | --- | --- | --- |
+| target length | PyTorch `L`, TensorFlow/Keras `T` | number of `QuerySequence` rows | score rows belong to the query-side object |
+| source length | PyTorch/Keras `S` | number of `KeySequence` and `ValueSequence` rows | score columns belong to the key-value source object |
+| attention mask | PyTorch `L x S`, TensorFlow/Keras `(B, T, S)` | permission table from query rows to source rows | the mask is context over a product boundary |
+| attention output | target-side output rows | one `AttentionOutput` row for each query row | value mixing returns information to the query side |
+
+Sanity check:
+
+```text
+score table rows == query positions
+score table columns == key-value positions
+mask cells == query-position/source-position permissions
+output rows == query positions after reading values
+```
+
+If an answer says the mask is only a vector over tokens, or says output rows
+belong to key positions, it has collapsed source ownership or mask context too
+early.
+
+Expected mask-role ledger:
+
+| Question | Expected answer |
+| --- | --- |
+| What does an attention-mask cell select? | Whether one query row may read one source column before softmax. |
+| Why is the mask not a shorter token sequence? | The token/source rows still exist; the mask selects legal score cells in the query-by-source score table. |
+| Why does the mask not directly produce `AttentionWeights`? | `AttentionScores x AttentionMask -> AttentionScores` happens first; `AttentionScores -> AttentionWeights` is the later softmax boundary. |
+| Which block-level boundary keeps the mask visible instead of hidden? | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence`. |
+| In a fixed-mask view, what context was selected first? | One named `AttentionMask`, such as mask `M`, was selected before the remaining `HiddenSequence` call. |
+| What does true mean in this repository's `AttentionMask`? | This source position is allowed for that query row. |
+| Why can a framework mask with the same shape still need boolean inversion? | Shape and polarity are separate. Some framework APIs use `true` for blocked or padding positions, while this repository uses `true` for allowed positions. |
+
+Three-step rule:
+
+```text
+mask cells select legal score cells
+softmax turns remaining score rows into weights
+weights read value rows
+```
+
+Reject answers that say "the mask removes tokens" without naming score cells.
+The source sequence still owns the value rows. The mask only says which source
+rows each query is allowed to read before probability normalization.
 
 Expected linear-scope diagnostic:
 
@@ -556,15 +734,57 @@ Expected source-scope diagnostic:
 
 Use this to keep source roles separate. The anatomy source supports decomposition before comparison. The parametric-endofunctor source supports a narrower comparison around linear self-attention structure. The local teaching claim is smaller than both papers: the Rust roadmap names each component so a reader can inspect the boundary and the invalid connection it blocks.
 
+Expected architecture-constraint diagnostic:
+
+| Question | Expected answer |
+| --- | --- |
+| What is one architecture constraint in the roadmap? | One valid answer: masked attention should assign probability only to legal source positions. Another valid answer: residual addition should return to the public hidden-sequence shape. |
+| Which Rust type, constructor, example, or test is implementation evidence for it? | `AttentionMask::new` rejects fully masked rows; `cargo run --example 06_attention_scores` shows masked weights; `ResidualConnection` rejects mismatched widths before returning `HiddenSequence`. |
+| Why is that not proof of the whole future architecture? | It checks one local implementation boundary. A full architecture claim would also need every surrounding boundary, nonlinear step, parameter update, data case, and composition law to be named and tested. |
+
+This is where Categorical Deep Learning is useful as scope control. It reminds
+the reader to separate a constraint the architecture should satisfy from the
+implementation evidence currently present in the tiny Rust code.
+
 Expected stackability diagnostic:
 
 | Boundary | Can stack directly as `HiddenSequence -> HiddenSequence`? | Reason |
 | --- | --- | --- |
-| `LayerNormalization : HiddenSequence -> HiddenSequence` | yes | it has one input and returns the same public object |
-| `MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence` | yes | the block owns its internal attention, residual, normalization, and feed-forward path behind one unary boundary |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | yes, for a fixed layer instance | it has one input and returns the same public object while scale, shift, and epsilon are already stored in the layer |
+| `MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence` | yes, for a fixed block instance | the block owns its internal attention, residual, normalization, and feed-forward path behind one unary boundary |
 | `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` | no, not while the mask is open | the full input object is a product, so the mask context is still required |
 | fixed-mask view of `MaskedMultiHeadTransformerBlock` | yes, for that named mask context | selecting the mask first induces a unary map over `HiddenSequence` for that run |
 | `TransformerTrainingState -> TransformerTrainingState` | yes | the complete training object carries the parameter and update context |
+
+When a layer's parameters are changing, the answer should move from the
+forward boundary to the training-state boundary. A strong answer says:
+
+```text
+LayerNormalization : HiddenSequence -> HiddenSequence
+is an endomorphism for one fixed layer value.
+
+Changing scale, shift, weights, or biases belongs to
+TransformerTrainingState -> TransformerTrainingState.
+```
+
+The same fixed-value rule applies to positional encodings and whole blocks:
+
+```text
+PositionalEncoding : HiddenSequence -> HiddenSequence
+is an endomorphism only after one position table has been selected.
+
+MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence
+is an endomorphism only for one fixed block value.
+```
+
+If the position table, heads, projections, normalization values, or
+feed-forward weights are learned, swapped, or rebuilt, the answer should name
+the changing context instead of hiding it in the forward arrow. In this
+repository's training examples, changing trainable block values belongs to:
+
+```text
+TransformerTrainingState -> TransformerTrainingState
+```
 
 The precise ways to repeat a masked block are:
 
@@ -577,6 +797,46 @@ Do not accept "it returns `HiddenSequence`" as enough evidence. A strong answer
 counts the full input object, names the mask context, and says whether the
 context is open or fixed.
 
+Expected context-fixing drill:
+
+| Case | Expected answer |
+| --- | --- |
+| Open masked block: whole input object | `HiddenSequence x AttentionMask` |
+| Open masked block: safe category shape | product-input morphism returning `HiddenSequence` |
+| Open masked block: stackability | it cannot stack unaided as `HiddenSequence -> HiddenSequence` because the mask is still an open input |
+| Fixed-mask view: selected first | one named `AttentionMask`, such as mask `M`, is selected before the block call |
+| Fixed-mask view: induced boundary | `MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence` |
+| Fixed-mask view: promise while stacking | the same mask context remains fixed, or the prose names when it changes |
+| Changing mask per call | the caller must supply `HiddenSequence x AttentionMask` each time, or carry the mask inside a larger state |
+| Why changing mask per call differs from fixed mask | the context is not fixed once; every call still depends on a fresh or threaded mask |
+| Residual addition | `HiddenSequence` and `ProjectedAttentionOutput` remain visible inputs |
+| Why residual addition is not unary | the whole input is still a product, even though the output returns to `HiddenSequence` |
+| Residual addition after naming the product as source | `(HiddenSequence x ProjectedAttentionOutput) -> HiddenSequence`, a unary morphism out of a product object, not an endomorphism |
+| Rust closure bridge: captured value | the closure captures one chosen `AttentionMask`, such as `fixed_mask` |
+| Rust closure bridge: remaining argument | the closure is called with `HiddenSequence` |
+| Rust closure bridge: unchanged open boundary | the original block still has type `HiddenSequence x AttentionMask -> HiddenSequence`; the closure is only a fixed-context view |
+
+Fixed context must be named.
+Fixing a mask does not erase the source of context; it only creates a smaller
+view for one run, proof, or example.
+If the mask changes, the boundary has changed back into an open product-input path.
+Some larger state object can still carry the mask for the next call, but then
+the state object must be named.
+
+Expected add-norm order drill:
+
+| Question | Expected answer |
+| --- | --- |
+| Current attention sublayer order | projected attention output is added to the old hidden stream, then `attention_norm` normalizes the residual result |
+| Current feed-forward sublayer order | feed-forward output is added to the normalized attention stream, then `feed_forward_norm` normalizes the result |
+| Local boundaries that show the order | `ResidualConnection` followed by `LayerNormalization`; in the block this appears as `with_attention -> normalized_attention` and `with_feed_forward -> feed_forward_norm` |
+| Why same shape is not same morphism | post-norm and pre-norm blocks can both have source and target `HiddenSequence`, but the internal composition order differs |
+| Future pre-norm variant | name a separate constructor, type, or mode such as `PreNormMultiHeadTransformerBlock`; do not silently reuse the current post-add block explanation |
+
+The key category-theory point is that source and target equality permits an
+endomorphism name for a fixed block. It does not prove two endomorphisms are
+the same arrow.
+
 Naming rule:
 
 ```text
@@ -587,6 +847,18 @@ A product input returning the left object is still a product-input morphism.
 An attempted product input with the wrong second object is illegal before it
 gets a category-theory name.
 ```
+
+Expected source-target audit card examples:
+
+| Boundary | Whole source object | Target object | Context status | Safe conclusion |
+| --- | --- | --- | --- | --- |
+| `AttentionScores x AttentionMask -> AttentionScores` | `AttentionScores x AttentionMask` | `AttentionScores` | mask is open context | product-input morphism returning scores |
+| fixed-mask view of a masked block | `HiddenSequence` | `HiddenSequence` | one named `AttentionMask` was selected first | induced endomorphism for that mask |
+| `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | `HiddenSequence x ProjectedAttentionOutput` | `HiddenSequence` | residual input is open context | product-input morphism returning hidden state |
+| `TransformerTrainingState -> TransformerTrainingState` | `TransformerTrainingState` | `TransformerTrainingState` | training context is inside the state object | state endomorphism |
+
+Reject any answer that compares only the left side of a product input with the
+output. A product-input boundary's whole source object is the product.
 
 For example, `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence`
 returns `HiddenSequence`, but it is not unary. The projected attention output

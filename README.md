@@ -12,6 +12,11 @@ Rust can make parts of AI understandable.
 This is a first-principles, compile-checked tutorial for engineers who want to
 understand the structure underneath machine-learning systems.
 
+**Status:** public working draft. The current book and Rust examples are useful
+and publishable now, but this is not the completed textbook yet. Completion
+will continue through reader reports, source-backed rewrites, and later
+validated editions.
+
 ```bash
 cargo run --bin category_ml
 ```
@@ -21,8 +26,15 @@ executable AI education in Rust.
 
 - Public book: <https://hghalebi.github.io/category_theory_transformer_rs/>
 - First-session guide: [START_HERE.md](START_HERE.md)
+- Reviewers needed: [REVIEWERS.md](REVIEWERS.md)
+- Review worksheet: [docs/review-worksheet.md](docs/review-worksheet.md)
 - Review guide: [docs/review-path.md](docs/review-path.md)
+- Public review sprint: [docs/review-sprint.md](docs/review-sprint.md)
+- Example review reports: [docs/review-examples.md](docs/review-examples.md)
 - Project FAQ: [docs/faq.md](docs/faq.md)
+- Term glossary: [docs/glossary.md](docs/glossary.md)
+- Citation, reuse, and support terms: [LICENSE.md](LICENSE.md)
+- Quick reader report: <https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=quick-reader-report.yml>
 - Chapter clarity feedback: <https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml>
 
 ## Choose your path
@@ -34,7 +46,9 @@ executable AI education in Rust.
 | You are new to one piece | [docs/beginner-path.md](docs/beginner-path.md) | Get unstuck across Rust, ML, and category words |
 | You know Rust | [docs/rust-path.md](docs/rust-path.md) | Trace how types, traits, and tests protect ML meaning |
 | You know ML frameworks | [docs/ml-path.md](docs/ml-path.md) | Map framework habits to tiny explicit Rust objects |
+| You want to help review | [REVIEWERS.md](REVIEWERS.md) | Pick a perspective and file one evidence-shaped report |
 | You want to review | [docs/review-path.md](docs/review-path.md) | File one precise clarity report |
+| A group wants to review | [docs/review-sprint.md](docs/review-sprint.md) | Collect five concrete reports from five reader perspectives |
 | A chapter question | [Open the clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml) | Point to the first unclear section |
 | A contribution idea | [CONTRIBUTING.md](CONTRIBUTING.md) | Choose a concrete issue or improvement |
 | A teaching review | [docs/educator-path.md](docs/educator-path.md) | Check whether every stage has a clear next action |
@@ -49,13 +63,32 @@ smallest edit that would help.
 | --- | --- | --- |
 | Rust engineer | [Rust engineer first-run path](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | Run examples 01 and 02, then inspect the typed boundaries |
 | ML engineer or learner | [ML engineer training and attention path](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | Run the tiny training and training-state examples |
-| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Classify the arrows in the morphism and attention examples |
+| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Use the Source-Target Audit Card to classify morphism and attention boundaries |
 | Technical educator | [Technical educator learning path](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | Check whether each entry point gives the learner a next action |
 | Beginner-adjacent learner | [Beginner-adjacent first confusion path](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | Run the first example or read the public start path |
 
-Use the [chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
-for the actual report. Broad praise is welcome, but the book improves fastest
-from one concrete confusion point.
+Open the matching report link after you run or read the path. The link fills
+the route, not the evidence; the evidence signal should come from what you
+personally read, ran, or attempted.
+
+| Perspective | Report link |
+| --- | --- |
+| Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
+| ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
+| Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
+
+Use the [quick reader report form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=quick-reader-report.yml)
+when you have one concrete signal and little time. Use the
+[chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
+when you want to give the fuller expected-versus-actual context. Broad praise
+is welcome, but the book improves fastest from one concrete confusion point.
+
+For a group pass, use the [public review sprint](docs/review-sprint.md) to
+collect one report from each reader perspective.
+If you are unsure what a useful report looks like, compare your report with
+[docs/review-examples.md](docs/review-examples.md).
 
 ```mermaid
 flowchart LR
@@ -419,6 +452,13 @@ https://luma.com/event/evt-Pb1kYMQvzs8JrQq
 
 This is a working public draft.
 
+It is published now so readers can use the current book, run the examples, and
+send concrete feedback while the final textbook pass continues.
+
+It is not complete yet. Some chapters are stable enough to read and cite with
+the required citation, while other sections are still being revised from
+source review, exercises, and direct reader reports.
+
 Some chapters are stable.
 Some chapters are still evolving.
 Some sections still need direct reader validation.
@@ -474,6 +514,7 @@ Useful clarity feedback has this shape:
 Chapter or file:
 Friction lens:
 Command or page tried:
+Evidence signal:
 First unclear sentence, output line, or exercise prompt:
 Last clear idea:
 What you expected:
@@ -483,7 +524,7 @@ What would have helped:
 
 For structured chapter clarity feedback, use the
 [chapter clarity form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml).
-A useful issue names a chapter, a command, and a revision target.
+A useful issue names a chapter, a command, an evidence signal, and a revision target.
 For code or documentation changes, start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Good first issues
@@ -521,6 +562,19 @@ Useful ways to engage:
 - suggest a tiny Rust example
 - share the project with a Rust or ML engineer
 - join a reading session or workshop when announced
+
+Public routes:
+
+- [Reviewers needed](REVIEWERS.md): pick one perspective and file one
+  evidence-shaped report.
+- [Public review sprint](docs/review-sprint.md): split a group pass across
+  Rust, ML, category-theory, educator, and beginner-adjacent paths.
+- [Reading club](community/reading-club.md): run one chapter session and turn
+  one confusion point into a report.
+- [Workshops](community/workshops.md): join the public workshop path and file
+  one follow-up report.
+- [Contributor ladder](community/contributor-ladder.md): start with reader
+  feedback, then move toward docs, examples, review, and maintainer-level work.
 
 The project is especially interested in feedback from:
 
@@ -574,20 +628,110 @@ demo.
 
 ## Citation
 
-If you reference this project, you can cite it as:
+Use this as the default project citation. If you quote, reference, teach from,
+adapt, or build on this work where reuse is allowed, cite it with both the
+public book URL and the source repository URL:
 
 ```text
-Hamze Ghalebi and contributors.
+Ghalebi, H., & Jafarranmani, F.
 Category Theory for Tiny ML in Rust.
-Public draft, GitHub.
+Open-access working draft.
+Book: https://hghalebi.github.io/category_theory_transformer_rs/
+Source: https://github.com/hghalebi/category_theory_transformer_rs
 ```
 
-## License
+Machine-readable citation metadata is available in [CITATION.cff](CITATION.cff).
+Citation is required where reuse is allowed, but citation alone is not
+permission for commercial or organizational group reuse.
 
-The repository does not declare a final license yet.
+Use this citation in permitted reuse contexts such as papers, posts, slides,
+course notes, workshop pages, repositories, and public references.
 
-Choosing the code and book licenses is a project-owner decision on the roadmap
-before broader community promotion.
+Keep both URLs in public references. The book page is the open-access reading
+surface; the source repository is the executable Rust source for the examples.
 
-Until a license is added, do not assume reuse rights beyond the explicit
-reference guidance inside the book draft.
+Reproducing, adapting, distributing, or teaching substantial material from the
+book or repository for a company, team, class, cohort, workshop, course, or
+other group with more than one person requires written permission when the use
+is commercial or organizational.
+
+## License, Reuse, And Support
+
+Short version:
+
+- The public book will always remain open access at
+  <https://hghalebi.github.io/category_theory_transformer_rs/>.
+- The source repository is available at
+  <https://github.com/hghalebi/category_theory_transformer_rs>.
+- Cite both the public book URL and the source repository URL where reuse is
+  allowed. The required citation appears in the `Citation` section above and in
+  [LICENSE.md](LICENSE.md).
+- Personal and individual study are allowed with clear citation.
+- One reader may study, cite, link, clone, and run the project for personal
+  learning.
+- Commercial or organizational group reuse involving more than one person
+  requires written permission before reproducing, adapting, distributing, or
+  teaching material from the book or repository beyond short quotation, linking,
+  review, and individual-study allowances. This includes company workshops,
+  internal team workshops, classes, cohorts, courses, and training programs.
+- Company workshops, internal team workshops, paid workshops, commercial
+  training programs, course packs, adapted slide decks, handouts, labs, and
+  workshop packets require written permission when they reuse substantial
+  material from this project.
+- When Kindle or hard copy editions are available, buying the Kindle version or
+  a hard copy supports continued public work. Paid editions are support
+  editions, not access gates.
+
+The public book will always remain open access at
+<https://hghalebi.github.io/category_theory_transformer_rs/>.
+
+The source repository is available at
+<https://github.com/hghalebi/category_theory_transformer_rs>.
+
+These are custom citation-and-permission terms. Open access means the public
+book remains free to read online; it does not mean unrestricted commercial
+redistribution, commercial training use, company workshop use, or
+organizational group reuse.
+
+The source code is published so readers can inspect, run, test, and contribute
+to the examples. Substantial reproduced code, prose, exercises, diagrams, or
+adapted teaching material used in a commercial or organizational group setting
+follows the same written-permission rule.
+
+Short quotations, links, review, personal study, and noncommercial educational
+discussion are allowed with clear citation.
+
+Commercial or organizational reuse involving more than one person requires
+written permission when it reproduces, adapts, distributes, or teaches
+material from the book or repository beyond short quotation, linking, review,
+and individual-study allowances. This includes company workshops,
+company-sponsored workshops, internal team workshops, company reading groups
+based on copied or adapted material, paid courses, internal course packs,
+translations for distribution, adapted slide decks, handouts, labs, workshop
+packets, and other adapted material.
+
+If the material is reused by or for a company, team, class, workshop, cohort,
+course, or training program with more than one person, request written
+permission first.
+
+Company workshops, internal team workshops, paid workshops, and workshop
+packets count as commercial or organizational group reuse when they reproduce,
+adapt, distribute, or teach substantial material from the book or repository.
+
+Citation is required where reuse is allowed. Citation does not replace written
+permission for commercial or organizational group reuse.
+
+See [LICENSE.md](LICENSE.md) for the full citation, reuse, permission, and
+support terms.
+
+Permission requests should start through the source repository:
+<https://github.com/hghalebi/category_theory_transformer_rs>.
+
+Opening an issue or sending a request does not itself grant permission. Only an
+explicit written approval from a project owner or maintainer grants permission
+for the requested commercial or organizational group use.
+
+When Kindle or hard copy editions are available, buying the Kindle version or a
+hard copy is a way to support continued public work. Paid editions are support
+editions, not access gates. Paid editions will not remove free public access to
+the online book.

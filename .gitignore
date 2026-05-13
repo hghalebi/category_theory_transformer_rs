@@ -4,6 +4,12 @@
 
 # Local private workspace for maintainer-only material.
 .book-internal/
+book-internal/
+.book-generation/
+.book-review/
+.rewrite-logs/
+.review-slots/
+review-slots/
 
 # Legacy local-only paths. These should not return to the public repository.
 scripts/
@@ -26,6 +32,9 @@ community/reader-review-guide.md
 community/reviewer-*.md
 community/starter-issues.md
 .github/ISSUE_TEMPLATE/reader-confusion.yml
+*rewrite-log*.md
+*review-slot-tracker*.md
+*generation-log*.md
 
 # Local editor and OS files
 .idea/

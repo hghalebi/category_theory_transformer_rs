@@ -1,5 +1,20 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Public book
+    url: https://hghalebi.github.io/category_theory_transformer_rs/
+    about: Read the open-access book before filing chapter feedback.
+  - name: Quick reader report
+    url: https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=quick-reader-report.yml
+    about: Share one concrete point where the book, example, or exercise became unclear.
+  - name: Detailed chapter clarity report
+    url: https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml
+    about: Use this fuller report when you can name the last clear idea, first unclear point, and expected fix.
+  - name: Direct reader report examples
+    url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-examples.md
+    about: See examples of useful reader evidence before opening a report.
+  - name: Reader review worksheet
+    url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/docs/review-worksheet.md
+    about: Use one page with five review routes and a copy/paste report shape.
   - name: Start Here
     url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/START_HERE.md
     about: Start here if you are new to the project.

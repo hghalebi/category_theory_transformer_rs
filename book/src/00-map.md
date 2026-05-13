@@ -12,6 +12,17 @@ parameters.
 
 This chapter gives you the whole map before the book zooms in.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- place each printed line from `cargo run --bin category_ml` into domain
+  value, typed transformation, or training update,
+- explain how `src/domain.rs`, `src/category.rs`, `src/ml.rs`, and
+  `src/training.rs` divide responsibility,
+- translate the book's first pipeline into objects, morphisms, product input,
+  loss, and endomorphism language.
+
 ## Choose Your Path
 
 Use the book-first path if you want the concepts introduced in order:
@@ -400,6 +411,35 @@ for the type or function named by the line. The goal is not to memorize the
 demo. The goal is to use it as a routing table from terminal output to chapter,
 source file, ML role, and category-theory shape.
 
+## Source-Backed Wayfinding Rules
+
+This chapter uses sources to keep the opening map practical. Each source
+supports one local rule for how a first session should move from command output
+to source files and then to vocabulary.
+
+| Source | What the source supports | Local rule in this chapter | Repository evidence |
+| --- | --- | --- | --- |
+| [How People Learn II](https://www.nationalacademies.org/projects/DBASSE-BBCSS-13-06/publication/24783) | Learning should connect new ideas to prior knowledge and learner context. | Start from a familiar function, then attach Rust, ML, and category-theory names to one visible pipeline. | `## Worked Example: From One Function To A Pipeline`, `## The Three Readings` |
+| [Rust Book: Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html) | Rust packages organize code into crates and modules with separate responsibilities. | Treat the source tree as the learning map: nouns, arrows, ML arrows, training, structure, calculus, sketches, and demo. | `src/domain.rs`, `src/category.rs`, `src/ml.rs`, `src/training.rs`, `src/demo.rs` |
+| [Rust By Example](https://doc.rust-lang.org/rust-by-example/index.html) | Small runnable examples make syntax inspectable before a larger explanation. | Run one command, inspect its output, then route the output line to the matching source file. | `cargo run --example 01_token_sequence`, `cargo run --bin category_ml` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory is taught through compositional examples and recurring shapes. | Introduce object, morphism, product, composition, endomorphism, and law as names for shapes already visible in the tiny pipeline. | `TokenId -> Vector -> Logits -> Distribution`, `Distribution x TokenId -> Loss`, `Parameters -> Parameters` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Programming examples can make category-theory vocabulary less detached from code. | Translate from Rust file and function evidence to category vocabulary only after the typed path is visible. | `## Demo Output Wayfinding Checklist`, `Morphism<Input, Output>`, `Compose<F, G, Middle>` |
+
+The transfer pattern is:
+
+```text
+source rule -> route through files -> command/output evidence
+```
+
+For this chapter, that means using `cargo run --bin category_ml` as more than a
+demo. Treat it as a table of contents whose output routes you to
+`src/domain.rs`, `src/category.rs`, `src/ml.rs`, `src/training.rs`,
+`src/structure.rs`, `src/calculus.rs`, and `src/sketches.rs`.
+
+The table is not evidence that the book has solved every learner's route
+through the material. It is evidence that the first-session map is grounded in
+named sources, real files, and executable output.
+
 ## Binary Entrypoint
 
 The binary entrypoint is deliberately tiny:
@@ -480,17 +520,59 @@ This chapter gave the whole shape before the details. You now know the names of
 the source files, the major pipeline objects, and the difference between
 objects, morphisms, composition, endomorphisms, and laws.
 
-The next chapter slows down and studies the objects themselves. Before a
-pipeline can compose arrows safely, it needs values whose meanings are clear
-enough for arrows to start and end at them.
+The next chapter, [Domain Objects](01-domain-objects.md), slows down and
+studies the objects themselves. Before a pipeline can compose arrows safely, it
+needs values whose meanings are clear enough for arrows to start and end at
+them.
 
 ## Further Reading
 
-These pages are the best next stops after the map:
+Do not leave this chapter with only a list of links. Use the next sources to
+practice the map.
 
-- [Glossary](glossary.md): object, morphism, composition, endomorphism
-- [References](references.md): Rust modules and applied category theory
-- [Seven Sketches Through Rust](seven-sketches-rust.md): a paper-length concept map made executable
+Start from this local evidence:
+
+```text
+cargo run --example 01_token_sequence
+cargo run --bin category_ml
+src/domain.rs
+src/category.rs
+src/ml.rs
+src/training.rs
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [How People Learn II](https://www.nationalacademies.org/projects/DBASSE-BBCSS-13-06/publication/24783) | New ideas should connect to prior knowledge, context, and visible learner activity. | `## What You Already Know`, `## Demo Output Wayfinding Checklist` |
+| [Rust Book: Packages, Crates, and Modules](https://doc.rust-lang.org/book/ch07-01-packages-and-crates.html) | A Rust package can expose a library crate, binary crates, and modules with separate responsibilities. | `src/bin/category_ml.rs`, `src/lib.rs`, `src/domain.rs`, `src/category.rs` |
+| [Rust By Example](https://doc.rust-lang.org/rust-by-example/index.html) | Small runnable examples make syntax inspectable before a larger explanation. | `examples/01_token_sequence.rs`, `examples/02_morphism_composition.rs` |
+| [Seven Sketches](https://arxiv.org/abs/1803.05316) | Applied category theory can be introduced through concrete examples before abstraction. | `TokenId -> Vector -> Logits -> Distribution` |
+| [Category Theory for Programming](https://arxiv.org/abs/2209.01259) | Programming-shaped examples can keep category vocabulary attached to code. | `Morphism<Input, Output>`, `Compose<F, G, Middle>` |
+
+After reading one external source, ask four questions:
+
+1. Which command output line did it make easier to place?
+2. Which source file should you inspect next?
+3. Which category word did it clarify?
+4. Which later chapter should you read after this map?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --example 01_token_sequence
+cargo run --bin category_ml
+```
+
+For terminology recovery, use the [Glossary](glossary.md) entries for object,
+morphism, composition, and endomorphism. For source depth, use
+[References](references.md) and the [Seven Sketches Through Rust](seven-sketches-rust.md)
+companion chapter after you can already route the first demo output.
+
+If an external source does not help you connect one terminal line to one source
+file and one category-theory word, it has not transferred back into the map
+yet.
 
 ## Practice After This Chapter
 

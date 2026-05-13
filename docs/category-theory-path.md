@@ -61,6 +61,31 @@ If a boundary needs two objects, keep both objects visible. If a boundary
 returns the same public object but also needs extra context, name the context
 instead of forcing the word `endomorphism`.
 
+There is also parameter context. When the roadmap calls
+`LayerNormalization : HiddenSequence -> HiddenSequence` an endomorphism, it
+means one fixed layer instance is being applied. Its scale, shift, and epsilon
+are already stored in the Rust object. If those parameters are changing, the
+safe boundary is the larger training update:
+
+```text
+TransformerTrainingState -> TransformerTrainingState
+```
+
+Use the same rule for `PositionWiseFeedForward` and Transformer blocks:
+forward calls can be endomorphisms for fixed module values; learning those
+module values belongs to training state.
+
+Use this fixed-value checklist when a roadmap row returns
+`HiddenSequence -> HiddenSequence`:
+
+| Boundary | What must already be fixed? | If it changes |
+| --- | --- | --- |
+| `PositionalEncoding : HiddenSequence -> HiddenSequence` | the position table | name the table update or rebuild |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | scale, shift, and epsilon inside one layer value | use `TransformerTrainingState -> TransformerTrainingState` |
+| `PositionWiseFeedForward : HiddenSequence -> HiddenSequence` | weights, biases, and activation rule inside one feed-forward value | use `TransformerTrainingState -> TransformerTrainingState` |
+| `MultiHeadTransformerBlock : HiddenSequence -> HiddenSequence` | heads, projections, residual path, normalization, and feed-forward layers inside one block value | use `TransformerTrainingState -> TransformerTrainingState` |
+| fixed-mask view of a masked block | one named `AttentionMask` | return to `HiddenSequence x AttentionMask -> HiddenSequence`, or name the larger state carrying the mask |
+
 ## Active Practice
 
 Run the attention example:
@@ -92,6 +117,148 @@ count inputs -> name the category shape -> reject one overclaim
 In particular, explain why `A x B -> A` is not automatically an endomorphism
 on `A`.
 
+If you choose to treat the whole product as one source object, the arrow is:
+
+```text
+(A x B) -> A
+```
+
+That is a unary morphism out of the product object, not an endomorphism. An
+endomorphism on the product would have to return the same product object:
+
+```text
+(A x B) -> (A x B)
+```
+
+## Context-Fixing Mini-Drill
+
+Use this drill when an example seems to become unary only after some extra
+input has been chosen:
+
+```text
+1. Name the open boundary.
+2. Name the context that was fixed.
+3. Name the induced unary view.
+4. State when that view stops being valid.
+```
+
+For the masked attention block, the careful sequence is:
+
+```text
+open boundary:
+MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence
+
+fixed context:
+choose one mask M
+
+induced view:
+MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence
+```
+
+The view stops being valid as soon as the mask is no longer fixed or carried by
+a named state object. That is the difference between fixing context and hiding
+an input.
+
+Rust readers can use closure capture as the concrete analogy:
+
+```rust,ignore
+let fixed_mask = mask.clone();
+let fixed_mask_view = move |hidden: HiddenSequence| {
+    masked_block.apply(Product::new(hidden, fixed_mask.clone()))
+};
+```
+
+The closure captures `fixed_mask`; the call still receives `HiddenSequence`.
+That helps explain the fixed-context view without pretending the original open
+block had only one input.
+
+Use residual addition as the negative contrast:
+
+```text
+ResidualConnection : HiddenSequence x ProjectedAttentionOutput -> HiddenSequence
+```
+
+This is not a context-fixing example. The hidden stream is still supplied, and
+the projected sublayer output is still supplied. Nothing has been selected in
+advance. Returning `HiddenSequence` is not enough to make the boundary unary.
+It remains a product-input morphism unless one input is actually fixed or the
+whole product is named as the source object. If the whole product is named as
+the source object, the arrow is unary from that product:
+
+```text
+(HiddenSequence x ProjectedAttentionOutput) -> HiddenSequence
+```
+
+It still is not an endomorphism, because it does not return the same product
+object. That difference is the reason the text keeps "product-input morphism"
+visible.
+
+## Roadmap Precision Review Drill
+
+If you want to help with the most useful category-theory review target, use
+the Transformer roadmap as a boundary-classification drill.
+
+Run:
+
+```bash
+cargo run --example 06_attention_scores
+```
+
+Then open [Transformer Roadmap](../book/src/roadmap.md) and test this table:
+
+| Boundary from the roadmap | Careful classification | Evidence signal to report if unclear |
+| --- | --- | --- |
+| `AttentionScores -> AttentionWeights` | ordinary morphism | the score-to-probability row felt like an endomorphism |
+| `AttentionScores x AttentionMask -> AttentionScores` | product-input morphism returning scores | the mask input disappeared from the name |
+| `LayerNormalization : HiddenSequence -> HiddenSequence` | unary endomorphism for one fixed layer instance | the parameter context was not named |
+| `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | product-input morphism returning hidden state | returning `HiddenSequence` made it tempting to call this an endomorphism |
+| `MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence` | open product-input block boundary | the fixed-mask view was not distinguished from the open block |
+| fixed mask view of a masked block | induced `HiddenSequence -> HiddenSequence` view for one chosen mask | the text did not say which context was fixed |
+| whole Transformer training update | state endomorphism | the update object was not clearly `TransformerTrainingState` before and after |
+| linear self-attention scope | limited place where advanced endofunctor language may be compared | the warning about softmax, masking, residuals, normalization, or training did not feel bounded |
+
+Then run a second pass over the terminal output. Treat printed shape lines as
+evidence about targets, not as category names:
+
+| Printed output line | First question |
+| --- | --- |
+| `projected attention shape: 2 positions x model dimension 2` | Which boundary produced the projected object before residual addition? |
+| `residual shape: 2 positions x model dimension 2` | Which two inputs were needed before the result returned to hidden shape? |
+| `masked multi-head block shape: 2 positions x model dimension 2` | Is the mask still an open input or was one mask fixed first? |
+| `training state step: 0 -> 1` | Which whole state object returned for the next update? |
+
+The audit rule is:
+
+```text
+printed shape line -> target evidence
+typed transformation line -> source and target evidence
+category name -> only after both are known
+```
+
+A useful category-theory report names exactly one row and says which naming
+rule failed:
+
+```text
+count inputs
+name the source object
+name the target object
+reject the overclaim
+```
+
+If you get stuck, use the roadmap's `Reader Evidence Handoff` as the report
+shape and the `Source-Target Audit Card` as the precision check:
+
+```text
+book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
+book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
+cargo run --example 06_attention_scores
+one boundary row or printed output line
+```
+
+This drill does not ask a reviewer to prove the formal theory. It asks whether
+the public text keeps its category-theory names proportional to the Rust
+boundaries that readers can inspect.
+
 ## Checkpoint
 
 Explain the difference between these two boundaries:
@@ -105,8 +272,30 @@ A strong answer should say:
 
 - the first is a unary endomorphism on `HiddenSequence`
 - the second is a product-input morphism returning `HiddenSequence`
-- the second should not be called a unary endomorphism unless the whole product
-  input is treated as the source object
+- the second should not be called a unary endomorphism unless one input is
+  actually fixed or the whole product input is treated as the source object
+
+## Precision Failure Signals
+
+When a category-theory-flavored test fails, do not first ask whether the code
+"disproves category theory." Ask which small claim this tutorial was using the
+test to protect.
+
+| Command or test | If it fails, inspect this claim |
+| --- | --- |
+| `cargo test structure::tests --lib` | a functor, naturality, or trace-monoid example no longer matches its stated law |
+| `structure::tests::naturality_square_commutes` | the two paths around the `Vec<A> -> Option<A>` square no longer agree |
+| `structure::tests::pipeline_trace_obeys_monoid_laws` | trace composition may no longer have identity or associativity in the tiny example |
+| `cargo test sketches::tests --lib` | an applied sketch boundary changed without the chapter naming it |
+| `sketches::tests::feature_layer_abstraction_obeys_galois_law` | the feature-to-layer abstraction no longer satisfies the stated fit equivalence |
+| `sketches::tests::signal_matrix_composition_rejects_mismatched_middle_dimension` | signal-flow composition is no longer enforcing the middle-dimension boundary |
+| `sketches::tests::open_circuit_serial_composition_rejects_boundary_mismatch` | open-circuit composition is no longer enforcing matching ports |
+| `attention::tests::residual_connection_rejects_model_dimension_mismatch` | residual addition is no longer protecting `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` shape agreement |
+| `attention::tests::masked_multi_head_transformer_block_rejects_mask_shape_mismatch` | the masked block may be hiding mask context instead of enforcing the open product boundary |
+| `attention::tests::multi_head_transformer_block_rejects_output_projection_input_mismatch` | the block may be skipping the projection needed before residual composition |
+
+These tests are not a proof of the whole mathematical theory. They are local
+precision checks for claims the book makes about one executable model.
 
 ## Source Discipline
 
@@ -141,6 +330,9 @@ endomorphism
 illegal attempted composition
 ```
 
+For product-input rows, name the whole product as the source object before
+deciding whether the boundary is an endomorphism.
+
 ## Feedback
 
 If a term, law, diagram, product-input boundary, endomorphism claim, or
@@ -148,10 +340,19 @@ endofunctor warning becomes unclear, open the
 [chapter clarity feedback form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
 and include:
 
+For this path, use
+[Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores).
+The link fills the route, not the evidence; the evidence signal should come
+from what you personally read, ran, or attempted.
+
 ```text
 Perspective: category-theory reader
 Command or page tried:
+Evidence signal:
 First unclear term, law, diagram, or boundary:
 Last idea that was clear:
 What would have helped:
 ```
+
+Use the evidence signal for the exact law, table row, morphism shape, output
+line, or naming rule that became too compressed.

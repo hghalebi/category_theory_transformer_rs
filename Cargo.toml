@@ -2,5 +2,9 @@
 name = "category-theory-transformer-rs"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust book and lab for understanding tiny ML systems through category-theory structure."
+repository = "https://github.com/hghalebi/category_theory_transformer_rs"
+documentation = "https://hghalebi.github.io/category_theory_transformer_rs/"
+license-file = "LICENSE.md"
 
 [dependencies]

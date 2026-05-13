@@ -12,7 +12,8 @@ Maintainers are responsible for:
 - reviewing category-theory terminology carefully
 - keeping the README and first-run path clear
 - deciding which suggestions become roadmap work
-- choosing licenses before broader promotion
+- maintaining citation, reuse, and permission boundaries before broader
+  promotion
 
 ## Decision Rules
 
@@ -51,7 +52,21 @@ Contributors move through the ladder in
 4. reviewer for Rust, ML, or category-theory precision
 5. maintainer-level roadmap work
 
-## License Decision
+## Citation And Reuse Policy
 
-The project does not yet declare a final license. That decision belongs to the
-project owners before broader public promotion.
+The project declares citation and reuse terms in [LICENSE.md](LICENSE.md), with
+machine-readable citation metadata in [CITATION.cff](CITATION.cff).
+
+The public book will always remain open access at
+<https://hghalebi.github.io/category_theory_transformer_rs/>. The source
+repository is available at
+<https://github.com/hghalebi/category_theory_transformer_rs>.
+
+Maintainers should keep that policy visible in reader-facing docs and should
+not accept changes that imply unrestricted commercial or organizational
+multi-person reproduction of the book, exercises, diagrams, or substantial
+repository material. Citation should remain mandatory where reuse is allowed,
+but citation alone is not permission and should not be presented as a substitute
+for written permission when substantial material is reused by or for a company,
+team, workshop, course, cohort, class, training program, or other group setting
+with more than one person.

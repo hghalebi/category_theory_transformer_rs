@@ -5,6 +5,21 @@ labels:
   - category theory precision
   - documentation
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for a precise wording or terminology issue.
+
+        A useful terminology review names the term, the exact source location, the command or page you tried, the evidence signal, and the wording change that would make the claim more accurate.
+
+        This counts as direct reader evidence only if it comes from your own reading or command run and names one concrete evidence signal. If the issue is that a reader got stuck in a chapter, example, or exercise, use the chapter clarity form instead:
+        https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml
+
+        Good evidence signals include:
+        - a local Rust type such as `TokenId`, `Morphism<Input, Output>`, or `AttentionScores`
+        - a typed boundary such as `AttentionScores x AttentionMask -> AttentionScores`
+        - a chapter table row, glossary row, law statement, output line, test name, or constructor result
+        - a source-backed anchor such as `book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff` or the `Source-Target Audit Card`
   - type: input
     id: term
     attributes:
@@ -12,14 +27,72 @@ body:
       placeholder: "object, morphism, functor, loss"
     validations:
       required: true
+  - type: input
+    id: location
+    attributes:
+      label: Chapter, section, or file
+      placeholder: "book/src/roadmap.md -> Category Shape Diagnostic"
+    validations:
+      required: true
+  - type: textarea
+    id: command_or_page
+    attributes:
+      label: Command or page you tried
+      description: Paste the command, example, test, or public page that exposed the terminology issue.
+      placeholder: "cargo run --example 06_attention_scores"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_signal
+    attributes:
+      label: Evidence signal
+      description: Name the output line, table row, law statement, Rust type, typed boundary, test name, or constructor result that made the precision issue visible.
+      placeholder: "AttentionScores x AttentionMask -> AttentionScores"
+    validations:
+      required: true
+  - type: textarea
+    id: current_wording
+    attributes:
+      label: Current wording
+      description: Quote the exact sentence, row, heading, or phrase you want reviewed.
+    validations:
+      required: true
   - type: textarea
     id: concern
     attributes:
       label: Precision concern
-      description: Explain what may be imprecise or overloaded.
+      description: Explain what may be imprecise, overloaded, too broad, or unsupported by the local Rust boundary.
+      placeholder: "This sounds like an endomorphism, but the boundary still has a mask input."
+    validations:
+      required: true
+  - type: textarea
+    id: rust_handle
+    attributes:
+      label: Rust handle or executable boundary
+      description: Name the Rust type, function, test, example output, or typed transformation that should constrain the wording.
+      placeholder: "MaskedMultiHeadTransformerBlock : HiddenSequence x AttentionMask -> HiddenSequence"
+    validations:
+      required: true
+  - type: textarea
+    id: source_anchor
+    attributes:
+      label: Source or reference anchor
+      description: Name the local source file, glossary row, chapter table, official documentation, paper, or external reference that should anchor the wording.
+      placeholder: "src/attention.rs, book/src/glossary.md, or PyTorch MultiheadAttention docs"
     validations:
       required: true
   - type: textarea
     id: suggested_wording
     attributes:
       label: Suggested wording
+      description: Offer the smallest wording change that would keep the claim accurate.
+    validations:
+      required: true
+  - type: textarea
+    id: prevented_misreading
+    attributes:
+      label: What would this wording prevent?
+      description: Name the overclaim, false equivalence, or reader confusion this wording would avoid.
+      placeholder: "It would prevent readers from treating a product-input boundary as a unary endomorphism."
+    validations:
+      required: true

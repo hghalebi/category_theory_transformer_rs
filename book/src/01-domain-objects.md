@@ -40,6 +40,16 @@ So the code creates different types.
 > tuple struct, private field, constructor, or accessor is not decoration. It is
 > a small boundary that tells the rest of the pipeline which states it may trust.
 
+## Chapter Outcomes
+
+By the end of this chapter, you should be able to:
+
+- explain why `TokenId`, `VocabSize`, `ModelDimension`, and `StepCount` should
+  not all be raw `usize` values at the teaching boundary,
+- separate semantic wrappers from validated objects,
+- name one invalid ML state that each constructor prevents before prediction,
+  loss, or training sees it.
+
 ## What You Already Know
 
 If you have used a Rust struct, you already know that a value can carry a name
@@ -123,6 +133,43 @@ harder to express.
 
 Use this table as the chapter's review checklist. When a later section shows
 syntax, ask which mistake the syntax blocks.
+
+## Source-Backed Precision Rules
+
+This chapter uses Rust sources to keep the "domain object" claim precise. Each
+source supports one local teaching rule, and each rule is tied to a concrete
+constructor, accessor, example, or test. The chapter does not claim that every
+wrapper is fully validated. Some types only separate meanings; other types
+reject invalid states at construction.
+
+| Source | What the source supports | Local rule in this chapter | Rust evidence |
+| --- | --- | --- | --- |
+| [Rust Book: Structs](https://doc.rust-lang.org/book/ch05-01-defining-structs.html) | Structs and tuple structs give data a named type, even when the stored representation is small. | Use `TokenId`, `Vector`, and `Logits` to separate meanings that would otherwise share `usize` or `Vec<f32>`. | `TokenId(usize)`, `Vector(Vec<f32>)`, `Logits(Vec<f32>)` |
+| [Rust By Example: New Type Idiom](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) | A wrapper type can make the compiler require the intended semantic role before a value enters a function. | Treat `TokenId`, `VocabSize`, and `ModelDimension` as compile-time role labels before adding heavier validation. | `TokenId`, `VocabSize`, `ModelDimension` |
+| [Rust Book: Result](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) | `Result<T, E>` represents an operation that may either return a success value or an error value. | Use fallible constructors when raw input may violate an invariant. | `TokenSequence::new`, `Distribution::new`, `Loss::new`, `LearningRate::new` |
+| [Rust API Guidelines: Type Safety](https://rust-lang.github.io/api-guidelines/checklist.html#type-safety-c-newtype) | Newtypes provide static distinctions and arguments should convey meaning through custom types. | Do not let `usize`, `f32`, or `Vec<f32>` cross teaching boundaries when they mean different ML concepts. | `VocabSize`, `ModelDimension`, `LearningRate`, `Product<Distribution, TokenId>` |
+| [Rust API Guidelines: Dependability](https://rust-lang.github.io/api-guidelines/checklist.html#dependability-c-validate) | Functions should validate their arguments when invalid values would break later assumptions. | Validate once at construction, then let downstream morphisms trust the object. | `distribution_rejects_non_normalized_values`, `token_sequence_rejects_empty_input` |
+| [Rust API Guidelines: Future Proofing](https://rust-lang.github.io/api-guidelines/checklist.html#future-proofing-c-sealed) | Private fields and encapsulated newtypes protect invariants and implementation details. | Expose small accessors such as `as_slice`, `value`, and `index` instead of public mutable fields. | `TokenSequence(Vec<TokenId>)`, `Distribution(Vec<f32>)`, `Parameters` accessors |
+
+The transfer pattern is:
+
+```text
+source rule -> local domain type -> constructor, accessor, or test evidence
+```
+
+For this chapter, that means reading `cargo run --example 01_domain_objects`
+and `cargo test domain::tests` as evidence for the small boundary claims:
+
+```text
+TokenSequence is non-empty
+Distribution is non-empty, finite, non-negative, and normalized
+shape and training configuration values are not interchangeable
+```
+
+It is not evidence that every future ML value has already been modeled. It is
+evidence that the chapter's first layer of objects has explicit names,
+construction boundaries, and validation where the later pipeline depends on an
+invariant.
 
 ## Source Snapshot
 
@@ -1321,16 +1368,63 @@ dimension, logits are not probabilities, and a training set is not just any
 vector of pairs. Each type marks a stage where raw storage becomes a meaningful
 object.
 
-The next chapter adds arrows between those objects. Once the arrows exist, the
-book can talk about identity, composition, and repeated transformations without
-falling back to loose wiring conventions.
+The next chapter, [Morphism and Composition](02-morphisms-composition.md), adds
+arrows between those objects. Once the arrows exist, the book can talk about
+identity, composition, and repeated transformations without falling back to
+loose wiring conventions.
 
 ## Further Reading
 
-These pages extend the domain-object vocabulary used in this chapter:
+Do not read these sources as generic Rust advice. Read them as a way to answer
+one question:
 
-- [Glossary](glossary.md): object, product object, invariant, smart constructor
-- [References](references.md): Rust structs, enums, error handling, API design, and documentation
+```text
+what is the pipeline allowed to trust after this value is constructed?
+```
+
+Start from the local Rust evidence:
+
+```text
+TokenId::new(index)              -> TokenId
+TokenSequence::new(tokens)       -> Result<TokenSequence, CtError>
+Distribution::new(probabilities) -> Result<Distribution, CtError>
+LearningRate::new(value)         -> Result<LearningRate, CtError>
+Parameters::init(vocab, dim)     -> Parameters
+```
+
+Then read the sources in this order:
+
+| Source | What to transfer back into this chapter | Local evidence to inspect |
+| --- | --- | --- |
+| [Rust Book: Structs](https://doc.rust-lang.org/book/ch05-01-defining-structs.html) | A named struct or tuple struct can make two identical raw representations mean different things. | `TokenId(usize)`, `VocabSize(usize)`, `ModelDimension(usize)` |
+| [Rust By Example: New Type Idiom](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) | A small wrapper can make the compiler reject the wrong semantic role before runtime logic runs. | `TokenId`, `VocabSize`, `ModelDimension` |
+| [Rust Book: Result](https://doc.rust-lang.org/stable/book/ch09-02-recoverable-errors-with-result.html) | A constructor can return either a trusted value or a typed error. | `TokenSequence::new`, `Distribution::new`, `Loss::new`, `LearningRate::new` |
+| [Rust API Guidelines: Type Safety](https://rust-lang.github.io/api-guidelines/checklist.html#type-safety-c-newtype) | Newtypes provide static distinctions when raw arguments would hide meaning. | `Product<Distribution, TokenId>`, `LearningRate`, `ModelDimension` |
+| [Rust API Guidelines: Dependability](https://rust-lang.github.io/api-guidelines/checklist.html#dependability-c-validate) | Invalid arguments should be rejected at the boundary that owns the invariant. | `distribution_rejects_non_normalized_values`, `token_sequence_rejects_empty_input` |
+| [Rust API Guidelines: Future Proofing](https://rust-lang.github.io/api-guidelines/checklist.html#future-proofing-c-sealed) | Private fields and small accessors keep later code from bypassing the boundary. | `as_slice`, `value`, `index`, `Parameters` accessors |
+
+After reading one external source, ask four questions:
+
+1. Which domain type did it clarify?
+2. Does that type only separate meaning, or does it also validate an invariant?
+3. Which downstream morphism is allowed to trust the value?
+4. Which command would you run to see the evidence?
+
+For this chapter, the commands are:
+
+```bash
+cargo run --example 01_domain_objects
+cargo test domain::tests --lib
+```
+
+For terminology recovery, use the [Glossary](glossary.md) entries for object,
+product object, invariant, and smart constructor. For source depth, use
+[References](references.md) and follow the Rust struct, error-handling, and API
+design entries.
+
+If a source does not help you explain why `Distribution::new` rejects invalid
+probability mass before `CrossEntropy` sees it, it has not transferred back
+into the chapter yet.
 
 ## Practice After This Chapter
 
