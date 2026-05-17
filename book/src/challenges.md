@@ -189,3 +189,127 @@ paper claim -> Rust type -> invariant -> test -> executable example
 Before adding a challenge, name the source that owns the claim and the Rust file
 that owns the executable boundary. The public solution should be small enough
 that a reader can inspect it completely.
+
+## Where This Leaves Us
+
+The challenge track turns the book's recurring method into public practice:
+
+```text
+name the boundary
+make the failure visible
+repair the smallest Rust shape
+record the evidence
+```
+
+The next reference tool is the [Glossary](glossary.md). Use it when a challenge
+exposes a term you can run but cannot yet explain. For example:
+
+```text
+TokenId
+Distribution
+endomorphism
+optimizer state
+evidence signal
+```
+
+If the term is still unclear after the glossary, report the exact command,
+output line, compiler error, or table row that exposed the confusion.
+
+## Further Reading
+
+Use these sources only after you have run at least one challenge command:
+
+| Source | Use it to clarify | Bring it back to this evidence |
+| --- | --- | --- |
+| [Rustlings Usage](https://rustlings.rust-lang.org/usage/) | why a small exercise can be built around a compiler error or failing test | one Typed AI Rustlings exercise file |
+| [Rustlings Community Exercises](https://rustlings.rust-lang.org/community-exercises/) | how a focused exercise pack can target one topic | `challenges/typed-ai-rustlings/metadata.toml` |
+| [Adam](https://arxiv.org/abs/1412.6980) | why Adam carries first-moment and second-moment estimates | `AdamFirstMoment`, `AdamSecondMoment`, and `AdamStepCount` |
+| [PyTorch Adam](https://docs.pytorch.org/docs/main/generated/torch.optim.adam.Adam_class.html) | how a production optimizer exposes state and `step()` | `AdamModelState -> AdamModelState` |
+| [Rust Book: Writing Automated Tests](https://doc.rust-lang.org/stable/book/ch11-00-testing.html) | why tests are part of the learning artifact | `cargo test --test challenge_typed_ai` and `cargo test --test paper_to_rust_adam` |
+
+The safe reading rule is:
+
+```text
+read one source -> improve one challenge boundary -> run one command
+```
+
+Do not use a source link as proof that the challenge is correct. Use the source
+to refine the local Rust claim, then use a command or test as local evidence.
+
+## Practice After This Chapter
+
+Run one command from each track:
+
+```bash
+cargo test --test challenge_typed_ai
+cargo run --example challenge_adam
+```
+
+Then fill this challenge evidence card:
+
+```text
+challenge tried:
+command:
+visible evidence signal:
+AI boundary that became clearer:
+first unclear point, or none:
+smallest useful fix for the next reader:
+```
+
+For a Typed AI Rustlings challenge, the evidence signal should be a compiler
+error, type mismatch, test name, or solution test.
+
+For a Paper-To-Rust challenge, the evidence signal should be a source claim,
+Rust type, invariant, and passing test or output line.
+
+## Retrieval Practice
+
+### Recall
+
+Name the two challenge tracks without looking back.
+
+Name one boundary that Typed AI Rustlings should make visible.
+
+Name the complete Adam challenge shape.
+
+### Explain
+
+Explain why `Logits` should not be accepted where a `Distribution` is required.
+
+Explain why Adam's first moment, second moment, and step count belong to the
+optimizer state instead of being loose helper values.
+
+Explain why challenge completion evidence is not automatically accepted
+textbook reader evidence.
+
+### Apply
+
+Choose one paper, tutorial, or framework documentation page and write only this
+much:
+
+```text
+source claim:
+Rust boundary:
+invariant:
+test or output evidence:
+larger claim not implemented:
+```
+
+The answer is strong only if the Rust boundary is small enough for another
+reader to inspect completely.
+
+### Debug
+
+For each weak challenge design, name the missing piece:
+
+```text
+1. The challenge links to a paper but names no Rust type.
+2. The exercise fails, but the failure does not teach an AI boundary.
+3. The Adam challenge updates parameters but drops moment state.
+4. The completion report says "I liked it" but gives no output line.
+5. The challenge claims to implement a whole paper from one small test.
+```
+
+A useful answer should say whether the problem is a missing source claim,
+missing Rust boundary, missing invariant, missing evidence signal, or
+overclaim.
