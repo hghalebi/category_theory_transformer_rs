@@ -1,0 +1,41 @@
+name: Paper-To-Rust suggestion
+description: Suggest one paper idea that can become executable Rust.
+title: "[paper-to-rust] "
+labels:
+  - paper-to-rust
+body:
+  - type: input
+    id: paper
+    attributes:
+      label: Paper
+      placeholder: "Adam: A Method for Stochastic Optimization"
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Source link
+      placeholder: "https://arxiv.org/abs/1412.6980"
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: One idea to compile
+      description: Name one isolated claim, shape, invariant, or algorithm step.
+    validations:
+      required: true
+  - type: textarea
+    id: rust_boundary
+    attributes:
+      label: Proposed Rust boundary
+      placeholder: "AdamModelState -> AdamModelState"
+    validations:
+      required: true
+  - type: textarea
+    id: test_signal
+    attributes:
+      label: Test signal
+      description: What should fail if the idea is modeled incorrectly?
+    validations:
+      required: true

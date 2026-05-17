@@ -9,11 +9,13 @@
 //! - [`calculus`] shows the chain rule as a local backward pass.
 //! - [`attention`] sketches typed attention boundaries and Transformer state for the roadmap.
 //! - [`sketches`] gives Rust models for the seven applied-category-theory sketches.
+//! - [`challenges`] backs the public Typed AI Rustlings and Paper-To-Rust tracks.
 //! - [`demo`] connects the pieces into the terminal walkthrough.
 
 pub mod attention;
 pub mod calculus;
 pub mod category;
+pub mod challenges;
 pub mod demo;
 pub mod domain;
 pub mod error;
@@ -41,6 +43,14 @@ pub use attention::{
 pub use calculus::{LocalGradient, MulOp, Scalar};
 pub use category::{
     Compose, Endomorphism, Identity, Morphism, StepCount, apply_endomorphism_n_times,
+};
+pub use challenges::papers::adam::{
+    AdamConfig, AdamDecayRate, AdamEpsilon, AdamFirstMoment, AdamGradientVector, AdamModelState,
+    AdamOptimizerState, AdamParameterVector, AdamSecondMoment, AdamStepCount, AdamTrainStep,
+    AdamVectorDimension,
+};
+pub use challenges::typed_ai::{
+    loss_from_logits, require_target_in_distribution, token_index, uniform_distribution,
 };
 pub use demo::run_demo;
 pub use domain::{

@@ -222,6 +222,7 @@ evidence about targets, not as category names:
 
 | Printed output line | First question |
 | --- | --- |
+| `Q/K/V source diagnostic:` | Which source owns score rows, score columns, and local mask polarity before attention weights appear? |
 | `projected attention shape: 2 positions x model dimension 2` | Which boundary produced the projected object before residual addition? |
 | `residual shape: 2 positions x model dimension 2` | Which two inputs were needed before the result returned to hidden shape? |
 | `masked multi-head block shape: 2 positions x model dimension 2` | Is the mask still an open input or was one mask fixed first? |

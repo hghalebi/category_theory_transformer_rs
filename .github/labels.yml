@@ -22,6 +22,21 @@
 - name: exercise idea
   color: "84cc16"
   description: Suggests a learner exercise or checkpoint.
+- name: typed-ai-rustlings
+  color: "22c55e"
+  description: Rustlings-style compiler-fix exercise for AI concepts.
+- name: paper-to-rust
+  color: "0f766e"
+  description: Compiles one idea from one ML or category-theory paper.
+- name: challenge completion
+  color: "16a34a"
+  description: Reader completed one public challenge and supplied evidence.
+- name: easy win
+  color: "bef264"
+  description: Small challenge or explanation improvement with a clear path.
+- name: needs tests
+  color: "fb7185"
+  description: Needs regression or reference-solution tests.
 - name: glossary needed
   color: "06b6d4"
   description: Needs a glossary entry or clearer definition.

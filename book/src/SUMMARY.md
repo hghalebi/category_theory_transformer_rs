@@ -22,6 +22,7 @@
 # Practice
 
 - [Exercises](exercises.md)
+- [Challenges](challenges.md)
 - [Glossary](glossary.md)
 - [References](references.md)
 - [Transformer Roadmap](roadmap.md)

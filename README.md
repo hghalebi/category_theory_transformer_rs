@@ -26,6 +26,9 @@ executable AI education in Rust.
 
 - Public book: <https://hghalebi.github.io/category_theory_transformer_rs/>
 - First-session guide: [START_HERE.md](START_HERE.md)
+- Public challenges: [challenges/README.md](challenges/README.md)
+- Typed AI Rustlings: [challenges/typed-ai-rustlings/README.md](challenges/typed-ai-rustlings/README.md)
+- Paper-To-Rust: [challenges/paper-to-rust/README.md](challenges/paper-to-rust/README.md)
 - Reviewers needed: [REVIEWERS.md](REVIEWERS.md)
 - Review worksheet: [docs/review-worksheet.md](docs/review-worksheet.md)
 - Review guide: [docs/review-path.md](docs/review-path.md)
@@ -46,6 +49,7 @@ executable AI education in Rust.
 | You are new to one piece | [docs/beginner-path.md](docs/beginner-path.md) | Get unstuck across Rust, ML, and category words |
 | You know Rust | [docs/rust-path.md](docs/rust-path.md) | Trace how types, traits, and tests protect ML meaning |
 | You know ML frameworks | [docs/ml-path.md](docs/ml-path.md) | Map framework habits to tiny explicit Rust objects |
+| You want a shareable challenge | [challenges/README.md](challenges/README.md) | Fix compiler errors or compile one paper idea |
 | You want to help review | [REVIEWERS.md](REVIEWERS.md) | Pick a perspective and file one evidence-shaped report |
 | You want to review | [docs/review-path.md](docs/review-path.md) | File one precise clarity report |
 | A group wants to review | [docs/review-sprint.md](docs/review-sprint.md) | Collect five concrete reports from five reader perspectives |
@@ -58,6 +62,14 @@ executable AI education in Rust.
 The most useful public review is one precise report: what you ran or read, the
 last idea that made sense, the first point that became unclear, and the
 smallest edit that would help.
+
+Current high-value target: run `cargo run --example 06_attention_scores`, then
+report whether the first Q/K/V diagnostic makes this distinction clear before
+the weights appear:
+
+```text
+query rows own score rows; key/value rows own score columns
+```
 
 | Perspective | Public review path | First action |
 | --- | --- | --- |
@@ -219,6 +231,21 @@ mdbook build
 ```
 
 The local build output is written to `book/html/`.
+
+## Public challenges
+
+The challenge tracks turn the public draft into shareable practice:
+
+- [Typed AI Rustlings](challenges/typed-ai-rustlings/README.md): learn AI by
+  fixing compiler errors.
+- [Paper-To-Rust](challenges/paper-to-rust/README.md): stop summarizing papers.
+  Compile one idea.
+
+First challenge command:
+
+```bash
+cargo run --example challenge_adam
+```
 
 ## The small promise
 
@@ -491,6 +518,7 @@ Chapter maturity:
 | Functors, Naturality, Monoids, and Chain Rule | Draft | Law tracing and terminology precision |
 | Seven Sketches Through Rust | Draft | Transfer clarity across sketches |
 | Exercises | Draft | Evidence quality and transfer difficulty |
+| Challenges | Draft | Source-to-code transfer and challenge evidence quality |
 | Transformer Roadmap | Draft | Category precision and attention-shape clarity |
 
 ## How to contribute

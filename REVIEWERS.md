@@ -162,6 +162,21 @@ Use that handoff and audit card to report one boundary row, output line, or
 naming rule where the whole source object, target object, or context status
 became unclear.
 
+Start with the first four lines of `cargo run --example 06_attention_scores`.
+The most useful Q/K/V report says whether this line makes score ownership clear
+before any attention weights appear:
+
+```text
+query rows own score rows; key/value rows own score columns
+```
+
+Then report whether the next line keeps shared self-attention source separate
+from projected Q, K, and V roles:
+
+```text
+self-attention shares the hidden source before projection; projected roles stay distinct
+```
+
 One narrow target inside that handoff is the fixed-mask attention explanation:
 
 ```text

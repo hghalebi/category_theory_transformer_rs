@@ -861,6 +861,22 @@ This table prevents a common framework-reading mistake. Passing the same
 hidden sequence into Q, K, and V means the source object is shared. It does not
 mean the projected query, key, and value roles have become the same role.
 
+When you run the attention example, the first lines now anchor that diagnostic
+before any probabilities appear:
+
+```text
+Q/K/V source diagnostic:
+query rows own score rows; key/value rows own score columns
+self-attention shares the hidden source before projection; projected roles stay distinct
+mask polarity here: true = allowed, false = blocked
+```
+
+Use those four lines before interpreting `attention shape: 2 query positions x
+3 key positions`. The terminal output gives the learner one inspectable signal
+for the source-backed rule above: score rows come from the query side, score
+columns come from the key-value side, and the local mask polarity must be
+translated before comparing the Rust example with a framework API.
+
 PyTorch and TensorFlow/Keras use different names but expose the same shape
 split:
 

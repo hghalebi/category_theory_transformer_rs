@@ -538,6 +538,32 @@ supports it.
 
 ### Exercise 12: Trace Attention Shape Flow
 
+Expected Q/K/V diagnostic:
+
+| Printed diagnostic line | Meaning |
+| --- | --- |
+| `query rows own score rows; key/value rows own score columns` | the score table is query-by-source, so rows belong to the query side and columns belong to the key-value side |
+| `self-attention shares the hidden source before projection; projected roles stay distinct` | self-attention can feed one hidden sequence into Q, K, and V projections, but the projected outputs still have different roles |
+| `mask polarity here: true = allowed, false = blocked` | this repository's mask convention marks legal source positions with `true`; framework masks with the same shape may use the opposite polarity |
+
+Expected one-sentence explanations:
+
+```text
+query rows:
+Each score row belongs to one query position, so target/query length counts rows.
+
+key/value rows:
+Each score column belongs to one source key-value position, so source length counts columns.
+
+self-attention source:
+Self-attention shares the pre-projection hidden sequence, but QuerySequence,
+KeySequence, and ValueSequence remain separate typed roles after projection.
+
+mask polarity:
+The local AttentionMask uses true for "this query may read this source";
+compare framework masks only after translating boolean meaning.
+```
+
 Expected reasoning:
 
 - `ScaledDotProductScores` builds one score row for each query position and

@@ -1,0 +1,17 @@
+name = "typed-ai-rustlings"
+hook = "Learn AI by fixing compiler errors."
+status = "seed"
+
+[[exercise]]
+slug = "token_id_not_usize"
+concept = "A token id is not a raw usize."
+broken_file = "exercises/token_id_not_usize.rs"
+solution_file = "solutions/token_id_not_usize.rs"
+expected_error = "expected TokenId, found integer"
+
+[[exercise]]
+slug = "logits_are_not_probabilities"
+concept = "Cross entropy consumes probabilities, not logits."
+broken_file = "exercises/logits_are_not_probabilities.rs"
+solution_file = "solutions/logits_are_not_probabilities.rs"
+expected_error = "expected Distribution, found Logits"

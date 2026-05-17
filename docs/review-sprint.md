@@ -240,6 +240,9 @@ If the category-theory reviewer wants a narrow target, start with the roadmap
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 cargo run --example 06_attention_scores
+Q/K/V source diagnostic
+query rows own score rows; key/value rows own score columns
+mask polarity here: true = allowed, false = blocked
 AttentionScores x AttentionMask -> AttentionScores
 ```
 
@@ -262,6 +265,15 @@ The reviewer should run:
 cargo run --example 06_attention_scores
 ```
 
+First inspect the diagnostic printed before the attention weights:
+
+```text
+Q/K/V source diagnostic:
+query rows own score rows; key/value rows own score columns
+self-attention shares the hidden source before projection; projected roles stay distinct
+mask polarity here: true = allowed, false = blocked
+```
+
 Then read:
 
 ```text
@@ -272,7 +284,11 @@ book/src/roadmap.md -> Context Fixing Drill
 book/src/exercises.md -> Exercise 12
 ```
 
-The report should say whether the Source-Target Audit Card and
+First, the report should say whether the Q/K/V diagnostic makes query
+ownership, source ownership, and mask polarity visible before attention
+weights appear.
+
+Then the report should say whether the Source-Target Audit Card and
 closure-capture analogy make the fixed `AttentionMask` visible, or whether
 they accidentally hide the open product input. If the handoff itself is
 unclear, the report should name the first missing field, audit-card row,

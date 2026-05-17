@@ -1,0 +1,50 @@
+name: Challenge completion
+description: Share evidence from completing a public challenge.
+title: "[challenge completion] "
+labels:
+  - challenge completion
+body:
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      options:
+        - Typed AI Rustlings
+        - Paper-To-Rust
+    validations:
+      required: true
+  - type: input
+    id: challenge
+    attributes:
+      label: Challenge
+      placeholder: "token_id_not_usize or Adam"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Paste the command, output line, test name, or compiler error you used.
+    validations:
+      required: true
+  - type: textarea
+    id: lesson
+    attributes:
+      label: Lesson learned
+      description: What AI boundary became clearer?
+    validations:
+      required: true
+  - type: textarea
+    id: first_unclear_point
+    attributes:
+      label: First unclear point
+      description: Name the first unclear point, or write "none" if the path stayed clear.
+    validations:
+      required: true
+  - type: textarea
+    id: smallest_fix
+    attributes:
+      label: Smallest useful fix
+      description: What small edit would help the next reader complete this challenge?
+    validations:
+      required: true

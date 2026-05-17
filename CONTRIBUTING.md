@@ -15,6 +15,8 @@ Useful first contributions include:
 - review a category-theory term for precision
 - review a Rust example for idiom
 - add an exercise idea with an expected answer
+- add one Typed AI Rustlings compiler-fix exercise
+- compile one idea from one ML or category-theory paper
 - improve glossary coverage for one confusing term
 
 For a fast reader signal, use the quick issue form:
@@ -69,6 +71,11 @@ The project uses these labels to keep contribution work specific:
 - `category theory precision`
 - `Rust idiom review`
 - `exercise idea`
+- `typed-ai-rustlings`
+- `paper-to-rust`
+- `challenge completion`
+- `easy win`
+- `needs tests`
 - `glossary needed`
 - `bug`
 - `documentation`
@@ -84,6 +91,8 @@ Good starter issues are concrete. Examples:
 - `[good first feedback] Where does the book become unclear?`
 - `[needs diagram] Text → Tokens → TrainingPairs → ModelState pipeline`
 - `[needs Rust example] Morphism as typed transformation`
+- `[typed-ai-rustlings] TokenId is not usize`
+- `[paper-to-rust] Adam optimizer state is part of the update`
 - `[chapter expansion] Turn bullet sections into full explanations`
 - `[FAQ] What does this project unlock?`
 
@@ -97,6 +106,7 @@ Run the full gate before submitting code or book changes:
 cargo fmt --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-targets --all-features
+cargo run --example challenge_adam
 mdbook build
 mdbook test
 ```
@@ -105,6 +115,7 @@ For a smaller loop:
 
 ```bash
 cargo run --example 01_token_sequence
+cargo test --test challenge_typed_ai
 cargo test --all-targets --all-features
 mdbook test
 ```
@@ -119,6 +130,8 @@ For Rust code:
 - use `CtResult` and `CtError` for fallible tutorial logic
 - add or update examples when a concept changes
 - avoid hiding important ideas behind clever abstractions
+- keep intentionally broken challenge files under `challenges/`, not under
+  normal Cargo build paths
 
 For book material:
 
@@ -136,6 +149,15 @@ For issues:
 - say what would have helped: a smaller example, diagram, glossary entry,
   rewritten paragraph, or expected output
 - link the file or chapter when possible
+
+For challenge contributions:
+
+- start from [challenges/README.md](challenges/README.md)
+- one Typed AI Rustlings exercise should teach one compiler error
+- one Paper-To-Rust submission should compile one paper idea, not summarize the
+  whole paper
+- every tested challenge needs a reference implementation, a test, and a
+  runnable command when possible
 
 ## Pull Request Shape
 

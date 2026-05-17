@@ -18,6 +18,9 @@ contact_links:
   - name: Start Here
     url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/START_HERE.md
     about: Start here if you are new to the project.
+  - name: Public challenges
+    url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/challenges/README.md
+    about: Try Typed AI Rustlings or Paper-To-Rust.
   - name: Contributing
     url: https://github.com/hghalebi/category_theory_transformer_rs/blob/main/CONTRIBUTING.md
     about: Choose a focused contribution path.

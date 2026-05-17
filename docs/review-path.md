@@ -243,6 +243,16 @@ book/src/exercises.md -> Exercise 12
 A strong report names one exact signal:
 
 ```text
+Evidence signal: query rows own score rows; key/value rows own score columns
+Question tested: did I know which side owns score rows and score columns before reading attention weights?
+Last clear idea: the diagnostic says query rows own score rows
+First unclear point: I did not know whether self-attention makes Q, K, and V the same role
+What would have helped: one sentence saying shared source before projection does not erase projected roles
+```
+
+Or:
+
+```text
 Evidence signal: AttentionScores x AttentionMask -> AttentionScores
 Question tested: did I name the whole source object before deciding whether the row was an endomorphism?
 Last clear idea: the open block needs both hidden state and mask
@@ -252,7 +262,8 @@ What would have helped: name fixed_mask directly before the code block
 
 If the explanation works, report the first boundary row, output line, or
 sentence that made the difference. If it fails, report the first handoff field,
-audit-card row, or sentence where the mask context disappeared.
+diagnostic line, audit-card row, or sentence where source ownership, mask
+polarity, or mask context disappeared.
 
 ## What To Report
 

@@ -69,6 +69,8 @@ If you already know one side of the project, use a focused route:
   habits to tiny explicit objects and transformations
 - [docs/category-theory-path.md](docs/category-theory-path.md) for readers who
   want category-theory vocabulary anchored to runnable Rust boundaries
+- [challenges/README.md](challenges/README.md) if you want the public challenge
+  tracks: compiler-fix exercises and Paper-To-Rust seeds
 - [docs/review-path.md](docs/review-path.md) if you want to help by filing one
   precise clarity report
 - [docs/review-examples.md](docs/review-examples.md) if you want to see what a
@@ -122,6 +124,23 @@ Embedding then LinearToLogits is legal because Vector == Vector
 Embedding then Softmax is illegal because Vector != Logits
 ```
 
+## First public challenge
+
+After the first two examples, open [challenges/README.md](challenges/README.md).
+
+Use the seed tracks in this order:
+
+1. Typed AI Rustlings: fix `token_id_not_usize`.
+2. Typed AI Rustlings: fix `logits_are_not_probabilities`.
+3. Paper-To-Rust: run `cargo run --example challenge_adam`.
+
+The challenge promise is:
+
+```text
+Learn AI by fixing compiler errors.
+Stop summarizing papers. Compile one idea.
+```
+
 ## First public workshop
 
 The first public workshop for this project is open for registration:
@@ -162,6 +181,14 @@ ran, or attempted.
 
 For category-theory precision, the narrowest useful target is the roadmap
 Source-Target Audit Card after `cargo run --example 06_attention_scores`.
+Start with the Q/K/V diagnostic line:
+
+```text
+query rows own score rows; key/value rows own score columns
+```
+
+Then report whether that line makes score ownership clear before the attention
+weights appear.
 
 The most useful feedback names:
 

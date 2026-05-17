@@ -48,6 +48,7 @@ that interests you, then return to the chapter that teaches its role.
 | local derivative flow | `src/calculus.rs` | [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) |
 | typed masked attention, value-mixing, head-concatenation, output-projection, residual, normalization, feed-forward, positional, hidden-projection, single-head block, multi-head block, masked-block, readout, parameter-object, training-state, readout-training, local feed-forward training, and composed block-training boundaries with query/key/value gradients | `src/attention.rs` | [Transformer Roadmap](roadmap.md) |
 | applied category-theory sketches | `src/sketches.rs` | [Seven Sketches Through Rust](seven-sketches-rust.md) |
+| public challenge reference behavior | `src/challenges/` and `examples/challenge_adam.rs` | [Challenges](challenges.md) |
 | runnable end-to-end walkthrough | `src/demo.rs` | [Course Map](00-map.md) |
 | command-line entrypoint | `src/bin/category_ml.rs` | [Course Map](00-map.md) |
 
@@ -136,6 +137,30 @@ than the implementation alone.
 {{#include ../../src/sketches.rs}}
 ```
 
+### `src/challenges/mod.rs`
+
+```rust,ignore
+{{#include ../../src/challenges/mod.rs}}
+```
+
+### `src/challenges/typed_ai.rs`
+
+```rust,ignore
+{{#include ../../src/challenges/typed_ai.rs}}
+```
+
+### `src/challenges/papers/mod.rs`
+
+```rust,ignore
+{{#include ../../src/challenges/papers/mod.rs}}
+```
+
+### `src/challenges/papers/adam.rs`
+
+```rust,ignore
+{{#include ../../src/challenges/papers/adam.rs}}
+```
+
 ### `src/demo.rs`
 
 ```rust,ignore
@@ -196,6 +221,12 @@ than the implementation alone.
 
 ```rust,ignore
 {{#include ../../examples/07_transformer_training_state.rs}}
+```
+
+### `examples/challenge_adam.rs`
+
+```rust,ignore
+{{#include ../../examples/challenge_adam.rs}}
 ```
 
 ## Project Configuration

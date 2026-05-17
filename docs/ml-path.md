@@ -74,6 +74,13 @@ Then compare the output with the same source/target split used by
 and
 [TensorFlow/Keras MultiHeadAttention](https://www.tensorflow.org/api_docs/python/tf/keras/layers/MultiHeadAttention):
 
+The first diagnostic lines in the example are the anchor:
+
+```text
+query rows own score rows; key/value rows own score columns
+mask polarity here: true = allowed, false = blocked
+```
+
 | Framework cue | Rust roadmap object | ML meaning |
 | --- | --- | --- |
 | target length `L` or `T` | `QuerySequence` rows | positions asking for information |

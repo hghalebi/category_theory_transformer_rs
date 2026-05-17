@@ -15,7 +15,8 @@ The project already has:
 - GitHub Pages deployment
 
 The next phase is about adoption: clearer first-run experience, contributor
-onboarding, diagram refinement, issue structure, and sponsor-worthy milestones.
+onboarding, public challenges, diagram refinement, issue structure, and
+sponsor-worthy milestones.
 
 ## Milestone 1: First Visitor Clarity
 
@@ -59,7 +60,30 @@ Tasks:
 - add contributor-ladder guidance
 - review first-time contributor friction monthly
 
-## Milestone 4: Sponsor-Worthy Work
+## Milestone 4: Public Challenge Tracks
+
+Goal: make the project shareable through small compiler-fix and paper-to-code
+loops.
+
+Status: seeded.
+
+Entry point: [challenges/README.md](challenges/README.md).
+
+Tracks:
+
+- Typed AI Rustlings: learn AI by fixing compiler errors
+- Paper-To-Rust: stop summarizing papers and compile one idea
+- challenge completion reports with concrete command or compiler evidence
+- reference solutions and tests for every public challenge
+- one runnable seed example for each paper challenge
+
+Current seed:
+
+- `token_id_not_usize`
+- `logits_are_not_probabilities`
+- Adam optimizer state as `AdamModelState -> AdamModelState`
+
+## Milestone 5: Sponsor-Worthy Work
 
 Goal: give companies and technical sponsors clear reasons to support the work.
 
@@ -74,7 +98,7 @@ Sponsor-worthy tracks:
 - advanced modules that turn the current finite-difference checks into richer learner-facing gradient-checking exercises over structured Transformer state
 - facilitator notes for teams using the material internally
 
-## Milestone 5: Citation And Reuse Policy
+## Milestone 6: Citation And Reuse Policy
 
 Goal: keep citation, reuse, and permission boundaries explicit before broader
 public promotion.

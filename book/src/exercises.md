@@ -124,6 +124,7 @@ Use this map when you finish a chapter and want the matching practice task.
 | [Training as an Endomorphism](04-training-endomorphism.md) | Explain repeated `Parameters -> Parameters` updates | Exercise 5 |
 | [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) | Explain mapping, laws, traces, and local gradients | Exercise 6 and Exercise 14 |
 | [Seven Sketches Through Rust](seven-sketches-rust.md) | Identify the law or boundary a structure protects | Exercise 10 |
+| [Challenges](challenges.md) | Turn one compiler-fix or paper-to-code task into evidence | Challenge completion report |
 | [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12, Exercise 16, and Advanced Exercise 5 |
 
 The map is not a separate syllabus. It is a repair tool. If a chapter feels
@@ -1000,6 +1001,24 @@ Run:
 cargo run --example 06_attention_scores
 ```
 
+First copy the four-line Q/K/V diagnostic printed before the attention weights:
+
+```text
+Q/K/V source diagnostic:
+query rows own score rows; key/value rows own score columns
+self-attention shares the hidden source before projection; projected roles stay distinct
+mask polarity here: true = allowed, false = blocked
+```
+
+Then write one sentence for each line:
+
+```text
+query rows:
+key/value rows:
+self-attention source:
+mask polarity:
+```
+
 Write down the first time the output mentions each shape:
 
 ```text
@@ -1252,6 +1271,8 @@ Pass condition:
 - You state that this repository's `AttentionMask` uses `true` for an allowed
   source position, while some framework masks use `true` for a blocked or
   padding position.
+- You explain the four-line Q/K/V diagnostic before using later attention
+  weights or shape lines as evidence.
 - You keep claims about linear Q/K/V projections separate from softmax,
   masking, residual addition, normalization, and training state.
 - You classify the quick roadmap drill by counting inputs before naming

@@ -19,6 +19,13 @@ fn main() -> CtResult<()> {
     let values = ValueSequence::new(vec![vec![1.0, 10.0], vec![2.0, 20.0], vec![3.0, 30.0]])?;
     let mask = AttentionMask::new(vec![vec![true, false, true], vec![true, true, true]])?;
 
+    println!("Q/K/V source diagnostic:");
+    println!("query rows own score rows; key/value rows own score columns");
+    println!(
+        "self-attention shares the hidden source before projection; projected roles stay distinct"
+    );
+    println!("mask polarity here: true = allowed, false = blocked\n");
+
     let scores = ScaledDotProductScores.apply(Product::new(queries, keys))?;
     let masked_scores = MaskedAttentionScores.apply(Product::new(scores, mask))?;
     let weights = AttentionSoftmax.apply(masked_scores)?;
