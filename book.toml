@@ -16,5 +16,5 @@ site-url = "/category_theory_transformer_rs/"
 additional-css = ["book/theme/learning.css"]
 default-theme = "light"
 preferred-dark-theme = "navy"
-mathjax-support = false
+mathjax-support = true
 no-section-label = false

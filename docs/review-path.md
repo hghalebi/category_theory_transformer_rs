@@ -69,6 +69,22 @@ when it only says the project looks interesting, confusing, or useful.
 Fastest no-clone path:
 [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=public+book+path).
 
+## Diagram-Focused Review
+
+If a diagram is the first thing that becomes hard to track, use it as the
+evidence signal. The most useful diagram report names:
+
+- the chapter and diagram;
+- the object or arrow that became hard to follow;
+- whether a rendered math view, a plain-text view, or a reconstruction exercise
+  would have helped;
+- one Rust type, function, command, or test that the diagram should connect to.
+
+To test whether the diagram is teaching rather than decorating, try
+[Exercise 17: Reconstruct A Diagram By Hand](../book/src/exercises.md#exercise-17-reconstruct-a-diagram-by-hand).
+If you cannot label the objects, arrows, checked path, Rust handle, and safe
+non-claim, open a report at the first missing label.
+
 ## What Counts As Direct Reader Evidence
 
 A report counts as direct reader evidence only when it comes from your own
@@ -184,7 +200,7 @@ maintainer planning, or private maintenance details.
 | --- | --- | --- |
 | Rust engineer | [Rust engineer first-run path](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | Run `cargo run --example 01_domain_objects` and `cargo run --example 02_morphism_composition` |
 | ML engineer or learner | [ML engineer training and attention path](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | Run `cargo run --example 03_training_endomorphism` and `cargo run --example 07_transformer_training_state` |
-| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Run `cargo run --example 02_morphism_composition` and `cargo run --example 06_attention_scores` |
+| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Run `cargo run --example 02_morphism_composition`, `cargo run --example 05_seven_sketches`, and `cargo run --example 06_attention_scores` |
 | Technical educator | [Technical educator learning path](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | Review `README.md`, `START_HERE.md`, `docs/educator-path.md`, and `book/src/exercises.md` |
 | Beginner-adjacent learner | [Beginner-adjacent first confusion path](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | Run `cargo run --example 01_token_sequence` or read the public start path |
 
@@ -202,25 +218,30 @@ If you have one signal but do not need the prefilled route, use the
 | --- | --- |
 | Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
 ## Current High-Value Review Target
 
-The weakest remaining non-code review target is category precision in the
-Transformer Roadmap. Start with the roadmap `Reader Evidence Handoff`:
+The weakest remaining non-code review targets are category precision in the
+Transformer Roadmap and transfer from Seven Sketches back to tiny ML.
+
+For the roadmap route, start with the roadmap Attention Mental Model Repair
+Table, then use the `Reader Evidence Handoff`:
 
 ```text
+book/src/roadmap.md -> Attention Mental Model Repair Table
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 cargo run --example 06_attention_scores
 AttentionScores x AttentionMask -> AttentionScores
 ```
 
-A useful report can focus on this single question:
+A useful report can focus on one repair question:
 
 ```text
+Does the repair table reject the shortcut I was about to use?
 Does the Source-Target Audit Card make the fixed context visible?
 ```
 
@@ -233,6 +254,7 @@ cargo run --example 06_attention_scores
 Then read:
 
 ```text
+book/src/roadmap.md -> Attention Mental Model Repair Table
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 docs/category-theory-path.md -> Context-Fixing Mini-Drill
@@ -260,10 +282,38 @@ First unclear point: the closure-capture analogy did not make it clear which val
 What would have helped: name fixed_mask directly before the code block
 ```
 
-If the explanation works, report the first boundary row, output line, or
-sentence that made the difference. If it fails, report the first handoff field,
-diagnostic line, audit-card row, or sentence where source ownership, mask
-polarity, or mask context disappeared.
+If the explanation works, report the first repair-table row, boundary row,
+output line, or sentence that made the difference. If it fails, report the
+first handoff field, diagnostic line, repair-table row, audit-card row, or
+sentence where source ownership, mask polarity, or mask context disappeared.
+
+For the Seven Sketches transfer route, run:
+
+```bash
+cargo run --example 05_seven_sketches
+```
+
+Then read:
+
+```text
+docs/category-theory-path.md -> Seven Sketches Transfer Drill
+book/src/seven-sketches-rust.md -> Bridge Back To Tiny ML
+book/src/exercises.md -> Exercise 10 -> Bridge-back-to-tiny-ML option
+```
+
+A strong report names one exact bridge:
+
+```text
+Evidence signal: SignalMatrix::compose_after rejects mismatched dimensions
+Question tested: did I see how an applied-category law becomes a tiny ML boundary check?
+Last clear idea: composition needs a matching middle dimension
+First unclear point: I could not tell which ML shortcut this rejected
+What would have helped: name the shortcut as "matrix-shaped data can be wired by position alone"
+```
+
+If the route works, report the first row, output line, test name, or exercise
+prompt that made the transfer clear. If it fails, report where the source law,
+Rust handle, tiny ML pressure, bad shortcut, or safe non-claim stopped lining up.
 
 ## What To Report
 

@@ -22,3 +22,20 @@ body:
     id: files
     attributes:
       label: Related chapter or example
+      description: Name the chapter, example, command, or test the diagram should connect to.
+  - type: textarea
+    id: reconstruction
+    attributes:
+      label: What became hard to reconstruct?
+      description: Name the object, arrow, product input, state update, or safe non-claim that was hard to recover from the current diagram.
+      placeholder: "I could not tell whether Distribution x TokenId was one product input or two unrelated arrows."
+  - type: dropdown
+    id: diagram_shape
+    attributes:
+      label: Smallest useful diagram change
+      options:
+        - rendered math view
+        - clearer plain-text diagram
+        - Mermaid flow diagram
+        - diagram reconstruction exercise
+        - link diagram to Rust command or test

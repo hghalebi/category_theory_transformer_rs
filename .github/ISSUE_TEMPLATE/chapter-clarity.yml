@@ -32,8 +32,9 @@ body:
         Evidence signal examples:
         - Rust: compiler error, test name, constructor result, output line, or type boundary.
         - ML: trace line, loss value, framework-translation row, diagram row, or state-update output.
-        - Category theory: law, table row, morphism shape, output line, or naming rule.
-        - Roadmap category precision: `book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff`, the `Source-Target Audit Card`, `cargo run --example 06_attention_scores`, or `AttentionScores x AttentionMask -> AttentionScores`.
+        - Category theory: law, table row, morphism shape, output line, naming rule, or sketch-transfer row.
+        - Category-theory transfer: `docs/category-theory-path.md -> Seven Sketches Transfer Drill`, `cargo run --example 05_seven_sketches`, or one bad ML shortcut and safe non-claim.
+        - Roadmap category precision: `book/src/roadmap.md -> Attention Mental Model Repair Table`, `book/src/roadmap.md -> Category Shape Diagnostic`, the `Source-Target Audit Card`, `cargo run --example 06_attention_scores`, or `AttentionScores x AttentionMask -> AttentionScores`.
         - Public book or beginner/educator path: public book page, output line, page section, command result, heading, diagram, exercise prompt, link, or missing next action.
 
         If you are not sure where to start, choose one public review path:

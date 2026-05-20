@@ -18,6 +18,11 @@ Start with these terms:
 - calibrated confidence
 - loss
 - training step
+- evidence signal
+- challenge completion
+- source claim
+- optimizer state
+- Paper-To-Rust
 
 ## Source-Backed Recovery Rule
 
@@ -56,6 +61,11 @@ plain explanation.
 | parameter-changing update | `cargo run --example 07_transformer_training_state` | readout, feed-forward, or block update returns `TransformerTrainingState` | why changing scale, shift, weights, or biases belongs to training state |
 | attention mask | `cargo run --example 06_attention_scores`; [Transformer Roadmap](../book/src/roadmap.md#self-attention-and-cross-attention-boundary) | `query 0 attends with [0.5, 0.0, 0.5]` and `AttentionScores x AttentionMask -> AttentionScores` | why mask cells select legal score cells before softmax, not token rows after probability mass has been assigned |
 | mask polarity | [Transformer Roadmap](../book/src/roadmap.md#mask-polarity-ledger) | `true -> allowed`, `false -> blocked` in `AttentionMask` | why two masks can have the same shape and opposite boolean meaning across APIs |
+| evidence signal | [Challenges](../book/src/challenges.md#challenge-evidence-and-textbook-feedback) | one compiler error, output line, test name, constructor rejection, or table row | what you personally saw that proves where learning succeeded or got blocked |
+| challenge completion | `cargo test --test challenge_typed_ai`; `cargo run --example challenge_adam` | a command, output line, compiler error, test name, lesson learned, first unclear point, and smallest useful fix | why practice evidence is useful but not the same as accepted textbook reader feedback |
+| source claim | [Challenges](../book/src/challenges.md#source-backed-challenge-contract) | a source link paired with a local Rust boundary | which narrow claim the repository is allowed to translate into code |
+| optimizer state | `cargo run --example challenge_adam`; [Challenges](../book/src/challenges.md#worked-paper-to-rust-ledger-adam) | `AdamModelState -> AdamModelState` and `AdamOptimizerState` carrying moments and step count | why an Adam-style update carries memory forward with parameters |
+| Paper-To-Rust | [Challenges](../book/src/challenges.md#paper-to-rust) | `source claim -> Rust boundary -> invariant -> test signal` | how to compile one paper idea without claiming to reimplement the whole paper |
 
 If a term still feels abstract after the recovery step, open the canonical
 glossary and look for the Rust handle first. Do not start from the most formal
@@ -75,3 +85,5 @@ the real blocker:
 | returning the same visible object is always an endomorphism | how many inputs did the boundary require? |
 | a layer endomorphism hides changing parameters | which fixed module value is being applied, or is this really a training-state update? |
 | an attention mask removes tokens | which query-source score cells were made illegal before softmax? |
+| challenge completion proves the chapter is clear | did the report name the first unclear point or explicitly say none? |
+| Paper-To-Rust means summarize the whole paper | which one source claim became one Rust boundary and test signal? |

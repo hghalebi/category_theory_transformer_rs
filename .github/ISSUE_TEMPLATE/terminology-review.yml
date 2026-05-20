@@ -18,8 +18,8 @@ body:
         Good evidence signals include:
         - a local Rust type such as `TokenId`, `Morphism<Input, Output>`, or `AttentionScores`
         - a typed boundary such as `AttentionScores x AttentionMask -> AttentionScores`
-        - a chapter table row, glossary row, law statement, output line, test name, or constructor result
-        - a source-backed anchor such as `book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff` or the `Source-Target Audit Card`
+        - a chapter table row, glossary row, law statement, output line, test name, constructor result, or sketch-transfer row
+        - a source-backed anchor such as `docs/category-theory-path.md -> Seven Sketches Transfer Drill`, `book/src/roadmap.md -> Category Shape Diagnostic`, or the `Source-Target Audit Card`
   - type: input
     id: term
     attributes:
@@ -39,7 +39,7 @@ body:
     attributes:
       label: Command or page you tried
       description: Paste the command, example, test, or public page that exposed the terminology issue.
-      placeholder: "cargo run --example 06_attention_scores"
+      placeholder: "cargo run --example 05_seven_sketches, then cargo run --example 06_attention_scores"
     validations:
       required: true
   - type: textarea

@@ -216,6 +216,33 @@ fixed as context" beside the handoff checklist.
 Why this is useful: it tests the exact public handoff that should turn a
 roadmap confusion into one actionable chapter-clarity report.
 
+## Category-Theory Seven Sketches Transfer Example
+
+```text
+Perspective: category-theory reader
+Friction lens: category-theory precision
+Chapter or file: docs/category-theory-path.md -> Seven Sketches Transfer Drill
+Command or page tried: cargo run --example 05_seven_sketches
+Evidence signal: SignalMatrix::compose_after rejects mismatched middle dimension
+Question tested: did the transfer row connect the sketch law to a tiny ML shortcut?
+First unclear sentence, output line, table row, code block, or exercise:
+The drill named matrix composition, but I did not know which tiny ML shortcut
+was being rejected.
+Last clear idea:
+The output feature dimension of one stage must match the input feature
+dimension of the next stage.
+What you expected:
+I expected the row to name the bad shortcut directly.
+What happened instead:
+I saw the Rust boundary check but did not connect it back to ML pipeline safety.
+What would have helped:
+Add "bad shortcut rejected: matrix-shaped data can be wired by position alone"
+beside the SignalMatrix row.
+```
+
+Why this is useful: it checks whether Seven Sketches vocabulary becomes a
+small typed ML safety lesson instead of a detached analogy.
+
 ## Technical Educator Example
 
 ```text

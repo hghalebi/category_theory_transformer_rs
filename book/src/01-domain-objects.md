@@ -111,6 +111,42 @@ This is the Rust API idea behind the chapter: put meaning and validation near
 construction, then expose small accessors for the raw representation when lower
 level code really needs it.
 
+The domain-boundary diagram is:
+
+\[
+\begin{array}{ccccc}
+\mathrm{usize}
+& \xrightarrow{\mathrm{TokenId::new}}
+& \mathrm{TokenId}
+& \xrightarrow{\mathrm{Embedding}}
+& \mathrm{Vector} \\
+\mathrm{Vec}\langle\mathrm{TokenId}\rangle
+& \xrightarrow{\mathrm{TokenSequence::new}}
+& \mathrm{TokenSequence}
+& \xrightarrow{\mathrm{DatasetWindowing}}
+& \mathrm{TrainingSet} \\
+\mathrm{Vec}\langle f32\rangle
+& \xrightarrow{\mathrm{Distribution::new}}
+& \mathrm{Distribution}
+& \xrightarrow{\mathrm{Product(-, target)}}
+& \mathrm{Product}\langle\mathrm{Distribution},\mathrm{TokenId}\rangle
+\end{array}
+\]
+
+How to read this diagram:
+
+- the left column is raw representation,
+- the first arrow is the constructor or naming boundary,
+- the middle object is what downstream code is allowed to trust,
+- the last arrow is the first later stage that benefits from the boundary,
+- redrawing the diagram should tell you which rows are semantic wrappers and
+  which rows validate an invariant.
+
+The diagram is deliberately modest. It does not claim that `TokenId::new`
+checks membership in a real tokenizer vocabulary. It does claim that once code
+asks for a `TokenId`, a reader no longer has to wonder whether the value is a
+model dimension, loop index, or training step count.
+
 ## Mistakes These Types Prevent
 
 Before reading the whole file, scan the reason each type exists. The point is
@@ -170,6 +206,41 @@ It is not evidence that every future ML value has already been modeled. It is
 evidence that the chapter's first layer of objects has explicit names,
 construction boundaries, and validation where the later pipeline depends on an
 invariant.
+
+## Primitive-To-Domain Responsibility Ledger
+
+Use this ledger whenever a raw value crosses into the tiny ML pipeline. The
+question is not only "what type wraps this value?" The question is "which
+boundary now owns the meaning, and what is downstream code allowed to trust?"
+
+| Raw value | Domain object | Constructor or boundary | Invariant owned here | Downstream code may trust | Unsafe shortcut rejected | Source-backed limit | Validation command |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `usize` | `TokenId` | `TokenId::new(index)` | semantic role label only; vocabulary membership is checked later by lookup code | this value is being used as a token index, not a dimension or step count | passing bare `usize` through morphism boundaries | a newtype name does not prove the index exists in a specific vocabulary | `cargo test domain::tests --lib` |
+| `Vec<TokenId>` | `TokenSequence` | `TokenSequence::new(tokens)` | sequence is non-empty | dataset windowing can ask for adjacent pairs without handling an empty sequence as a valid training path | accepting any raw vector as sequence data | non-empty does not prove the sequence is long enough for every downstream task; each later boundary still owns its own check | `cargo test domain::tests::token_sequence_rejects_empty_input --lib` |
+| `Vec<f32>` | `Distribution` | `Distribution::new(probabilities)` | values are finite, non-negative, non-empty, and sum to one within the local tolerance | `CrossEntropy` can read a probability assigned to the target token | treating logits or arbitrary floats as probabilities | this proves a local normalized vector, not calibration, statistical quality, or framework equivalence | `cargo test domain::tests::distribution_rejects_non_normalized_values --lib` |
+| `usize`, `usize` | `Parameters` | `Parameters::init(VocabSize, ModelDimension)` | vocabulary size and model dimension have already rejected zero | model state has one owner for embedding rows, output head, and bias | constructing loose matrices with swapped or zero shape inputs | deterministic teaching initialization is not production initialization | `cargo run --example 01_domain_objects` |
+
+The first row is intentionally different from the third row. `TokenId::new`
+only gives a number a role. `Distribution::new` rejects invalid probability
+mass. Both are domain boundaries, but they own different kinds of
+responsibility.
+
+This distinction protects the rest of the book from two common mistakes:
+
+```text
+mistake 1: "Every wrapper validates everything."
+mistake 2: "If a type stores a primitive, it is only decoration."
+```
+
+The right reading is narrower:
+
+```text
+semantic wrapper:
+  prevents role confusion at typed boundaries
+
+validated object:
+  prevents a specific invalid state before later code can trust the value
+```
 
 ## Source Snapshot
 

@@ -147,6 +147,10 @@ The first public workshop for this project is open for registration:
 
 [Register for the public workshop](https://luma.com/event/evt-Pb1kYMQvzs8JrQq)
 
+Use the [first online workshop curriculum](community/first-online-workshop-curriculum.md)
+to see the session path, commands, lab card, and closeout shape before the
+event.
+
 ## How to give feedback
 
 Open the [chapter clarity feedback form](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml)
@@ -175,13 +179,15 @@ ran, or attempted.
 | --- | --- |
 | Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
-For category-theory precision, the narrowest useful target is the roadmap
-Source-Target Audit Card after `cargo run --example 06_attention_scores`.
-Start with the Q/K/V diagnostic line:
+For category-theory precision, the narrowest useful target has two parts:
+the Seven Sketches Transfer Drill after `cargo run --example 05_seven_sketches`,
+and the roadmap Source-Target Audit Card after
+`cargo run --example 06_attention_scores`. For the roadmap side, start with the
+Q/K/V diagnostic line:
 
 ```text
 query rows own score rows; key/value rows own score columns

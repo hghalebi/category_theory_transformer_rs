@@ -119,13 +119,13 @@ Use this map when you finish a chapter and want the matching practice task.
 | [Welcome](welcome.md) | Explain the three-lens reading contract | Beginner Exercise 3 |
 | [Course Map](00-map.md) | Connect terminal output to pipeline stages | Exercise 2 and Exercise 8 |
 | [Domain Objects](01-domain-objects.md) | Explain wrappers, invariants, and typed objects | Exercise 1 and Exercise 7 |
-| [Morphism and Composition](02-morphisms-composition.md) | Explain legal and illegal composition | Exercise 4 |
-| [The Tiny ML Pipeline](03-ml-pipeline.md) | Trace adjacent pairs, prediction, and loss | Exercise 3, Exercise 9, and Exercise 13 |
-| [Training as an Endomorphism](04-training-endomorphism.md) | Explain repeated `Parameters -> Parameters` updates | Exercise 5 |
-| [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) | Explain mapping, laws, traces, and local gradients | Exercise 6 and Exercise 14 |
+| [Morphism and Composition](02-morphisms-composition.md) | Explain legal and illegal composition | Exercise 4 and Exercise 17 |
+| [The Tiny ML Pipeline](03-ml-pipeline.md) | Trace adjacent pairs, prediction, and loss | Exercise 3, Exercise 9, Exercise 13, and Exercise 17 |
+| [Training as an Endomorphism](04-training-endomorphism.md) | Explain repeated `Parameters -> Parameters` updates | Exercise 5 and Exercise 17 |
+| [Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md) | Explain mapping, laws, traces, and local gradients | Exercise 6, Exercise 14, and Exercise 17 |
 | [Seven Sketches Through Rust](seven-sketches-rust.md) | Identify the law or boundary a structure protects | Exercise 10 |
 | [Challenges](challenges.md) | Turn one compiler-fix or paper-to-code task into evidence | Challenge completion report |
-| [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12, Exercise 16, and Advanced Exercise 5 |
+| [Transformer Roadmap](roadmap.md) | Trace attention shapes, classify category shapes, and explain finite-difference checks for structured training state | Exercise 12, Exercise 16, Exercise 17, and Advanced Exercise 5 |
 
 The map is not a separate syllabus. It is a repair tool. If a chapter feels
 clear while reading but vague one hour later, use the matching exercise to make
@@ -243,6 +243,7 @@ evidence should exist when an exercise is complete.
 | Exercise 14 | `cargo test structure::tests --lib` | naturality paths and monoid laws are both named |
 | Exercise 15 | mixed boundary diagnosis | each failure is classified as an invariant, composition, endomorphism, shape, or local-to-global boundary |
 | Exercise 16 | `cargo run --example 07_transformer_training_state` | three different updates preserve `TransformerTrainingState -> TransformerTrainingState` |
+| Exercise 17 | diagram reconstruction sheet | objects, arrows, paths, Rust handles, and safe non-claims are all labeled |
 
 This is not extra bureaucracy. Rustlings-style practice works because the
 learner gets a concrete feedback signal. This course uses the same idea:
@@ -554,6 +555,31 @@ Pass condition:
 - You name the raw representation.
 - You name the invariant or semantic distinction.
 - You name the pipeline stage where the type appears.
+- You distinguish a semantic wrapper from a validated object when that
+  distinction matters.
+
+Primitive-to-domain audit option:
+
+Use the chapter's `Primitive-To-Domain Responsibility Ledger`. Fill this card:
+
+```text
+raw value:
+domain object:
+constructor or boundary:
+invariant owned here:
+downstream code allowed to trust:
+unsafe shortcut rejected:
+source-backed limit:
+validation command:
+```
+
+Pass condition:
+
+- Your audit names the constructor or boundary that owns the conversion.
+- It distinguishes semantic role labeling from invariant validation.
+- It names what downstream code is allowed to trust after construction.
+- It rejects one raw-primitive shortcut without overclaiming what the type
+  proves.
 
 First-principles hint:
 
@@ -676,6 +702,22 @@ Category theory concept:
 which middle object failed to match?
 ```
 
+Source-target-middle repair audit option:
+
+Use the chapter's `Source-Target-Middle Repair Ledger`. Fill this card:
+
+```text
+composition attempt:
+first arrow:
+second arrow:
+claimed middle object:
+actual first target:
+actual second source:
+repair:
+unsafe shortcut rejected:
+validation command or output:
+```
+
 Pass condition:
 
 - You name `Embedding : TokenId -> Vector` and
@@ -684,6 +726,9 @@ Pass condition:
 - You restore `LinearToLogits : Vector -> Logits` instead of weakening
   `Softmax`.
 - You explain why the skipped ML stage is vocabulary scoring.
+- Your repair audit names the attempted composition, the actual first target,
+  the actual second source, the missing repair arrow, the unsafe shortcut, and
+  one validation command or output line.
 
 Debugging hint:
 
@@ -738,6 +783,30 @@ Category theory concept:
 why can the update be repeated?
 ```
 
+Framework-to-Rust audit option:
+
+Use the `Framework-To-Rust Responsibility Ledger` in
+[Training as an Endomorphism](04-training-endomorphism.md). Pick one framework
+cue:
+
+```text
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
+optimizer state_dict
+```
+
+Fill this card:
+
+```text
+framework cue:
+responsibility:
+local Rust handle:
+returned object:
+category boundary:
+safe non-claim:
+```
+
 Expected observation:
 
 One step should preserve the shape of the parameters but may not reduce loss
@@ -755,6 +824,10 @@ Pass condition:
   `Parameters x TrainingSet -> Loss`.
 - You explain that loss is a measurement, not the updated model state.
 - You identify `StepCount` as repetition of the same update shape.
+- Your framework-to-Rust audit distinguishes preparation, gradient computation,
+  parameter update, and optimizer-state scope.
+- You name the returned object and avoid calling the tiny step a framework
+  optimizer or autograd engine.
 - You avoid claiming that more steps always means better behavior.
 
 ## Exercise 6: Explain `Distribution<T>::map`
@@ -941,6 +1014,68 @@ Pass condition:
   or `cargo test sketches::tests --lib`
 - your transfer card names one invalid shortcut and one non-claim
 
+Page-to-Rust decision-ladder option:
+
+Use the chapter's `Page-To-Rust Decision Ladder`. Pick one paragraph shape from
+the source text:
+
+```text
+definition or named object
+relation, order, or feasibility statement
+composition rule
+theorem, law, or proof step
+worked example or application story
+richer machinery beyond the local handle
+```
+
+Then fill:
+
+```text
+source paragraph shape:
+first Rust move:
+invalid state or shortcut to reject:
+local evidence command or test:
+safe non-claim:
+```
+
+Pass condition:
+
+- your first Rust move is concrete: newtype, enum, struct, constructor, method,
+  fixture, output line, or named test
+- your evidence names a command or test that exists in this repository
+- your safe non-claim prevents turning one local handle into a claim about the
+  whole source text
+- you do not start by inventing a broad trait or framework when a small typed
+  boundary would expose the issue
+
+Bridge-back-to-tiny-ML option:
+
+Use the chapter's `Bridge Back To Tiny ML` table. Pick one row and fill:
+
+```text
+sketch:
+tiny ML pressure:
+Rust handle:
+bad shortcut rejected:
+safe non-claim:
+evidence command or test:
+one-sentence transfer:
+```
+
+The one-sentence transfer must use this shape:
+
+```text
+This sketch helps me reject this ML shortcut: ...
+```
+
+Pass condition:
+
+- your row matches one actual bridge row in the Seven Sketches chapter
+- your bad shortcut is something a tiny ML system could plausibly get wrong
+- your safe non-claim prevents overclaiming the larger category-theory source
+- your evidence points to `cargo run --example 05_seven_sketches` or
+  `cargo test sketches::tests --lib`
+
 Co-design option:
 
 Use `DesignRequirement`, `ImplementationOffer`, and `FeasibilityRelation`.
@@ -1069,6 +1204,23 @@ AttentionScores x AttentionMask -> AttentionScores:
 LayerNormalization : HiddenSequence -> HiddenSequence:
 HiddenSequence x ProjectedAttentionOutput -> HiddenSequence:
 TransformerTrainingState -> TransformerTrainingState:
+```
+
+Then trace three boundaries through the roadmap decision flow:
+
+```text
+AttentionScores x AttentionMask -> AttentionScores:
+MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence:
+HiddenSequence x MultiHeadOutput -> HiddenSequence:
+```
+
+For each one, answer:
+
+```text
+does it type-check?
+how many inputs are visible?
+was one context fixed first?
+safe local name:
 ```
 
 Finally, explain this trap in one sentence:
@@ -1277,6 +1429,8 @@ Pass condition:
   masking, residual addition, normalization, and training state.
 - You classify the quick roadmap drill by counting inputs before naming
   endomorphisms.
+- You use the roadmap decision flow before the same-output and source-target
+  audit cards.
 - You explain that anatomy-of-attention research supports decomposition, while
   parametric-endofunctor research supports a narrower linear self-attention
   comparison.
@@ -1353,11 +1507,29 @@ Category theory concept:
 why is CrossEntropy a morphism from Distribution x TokenId to Loss?
 ```
 
+Target-probability responsibility audit option:
+
+Use the chapter's `Target-Probability Responsibility Ledger`. Fill this card:
+
+```text
+pipeline cue:
+Rust handle:
+ML responsibility:
+category boundary:
+unsafe shortcut rejected:
+source-backed limit:
+validation command:
+```
+
 Pass condition:
 
 - You compute approximate losses for `0.90` and `0.10`.
 - You explain why the target index is `0` in both cases.
 - You connect the test name to the learning claim.
+- Your target-probability audit identifies `target.index()`, rejects the
+  largest-probability shortcut, separates `Logits -> Distribution` from
+  `Distribution x TokenId -> Loss`, and states that normalized probability is
+  not calibrated confidence or full framework equivalence.
 
 ## Exercise 14: Trace Naturality And Monoid Laws
 
@@ -1386,6 +1558,27 @@ right identity:
 associativity:
 ```
 
+Output-to-law audit option:
+
+Use the `Output-To-Law Audit` section in
+[Functors, Naturality, Monoids, and Chain Rule](05-structure-and-calculus.md).
+Pick one output line from:
+
+```text
+cargo run --example 04_structure_and_calculus
+```
+
+Fill:
+
+```text
+output line:
+Rust handle:
+law or boundary:
+source support:
+safe non-claim:
+validation command:
+```
+
 Then explain:
 
 ```text
@@ -1407,6 +1600,8 @@ Pass condition:
 - You explain why both naturality paths return the same `Option` value.
 - You explain why changing parentheses in trace combination should not change
   the final trace.
+- Your output-to-law audit connects one printed line to one Rust handle, one
+  law-shaped claim, one source-backed limit, and one validation command.
 
 ## Exercise 15: Mixed Boundary Diagnosis
 
@@ -1527,6 +1722,76 @@ Pass condition:
   `TransformerTrainingState -> TransformerTrainingState`.
 - You explain why returning loose weights would make the next update rebuild
   context by hand.
+
+## Exercise 17: Reconstruct A Diagram By Hand
+
+Use this exercise whenever a chapter diagram feels dense. The goal is not to
+make a prettier copy. The goal is to prove that you can recover the objects,
+arrows, paths, and safe claim without relying on the book's layout.
+
+Choose one diagram from:
+
+```text
+Course Map:
+Text -> TokenSequence -> TrainingSet -> Loss, with Parameters -> Parameters
+
+Domain Objects:
+raw representation -> domain object -> trusted downstream boundary
+
+Morphism and Composition:
+TokenId -> Vector -> Logits -> Distribution
+
+Tiny ML Pipeline:
+Distribution x TokenId -> Loss
+
+Training as an Endomorphism:
+Parameters -> Parameters
+
+Structure and Laws:
+Vec<A> -> Option<B> naturality square
+
+Transformer Roadmap:
+AttentionWeights x ValueSequence -> AttentionOutput
+```
+
+Then fill this reconstruction sheet:
+
+```text
+chapter:
+diagram chosen:
+objects:
+arrows:
+two paths or state transition:
+Rust handle:
+command or test:
+what would break if one arrow was skipped:
+safe non-claim:
+```
+
+For the structures chapter, use:
+
+```bash
+cargo run --example 04_structure_and_calculus
+cargo test structure::tests --lib
+```
+
+For the roadmap attention path, use:
+
+```bash
+cargo run --example 06_attention_scores
+```
+
+Pass condition:
+
+- You redraw the diagram without copying the original layout.
+- You label every object and arrow.
+- You say whether the diagram is a pipeline, a constructor boundary, a product
+  input, a law square, or a state update.
+- You name at least one Rust type, function, example, or test connected to the
+  diagram.
+- You explain one thing the diagram does **not** prove.
+- You explain what would break if a key arrow, product input, or state object
+  was removed.
 
 ## Retrieval Practice
 

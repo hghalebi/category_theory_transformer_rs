@@ -50,7 +50,7 @@ point.
 | --- | --- | --- |
 | Rust engineer | [issue #8](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [issue #9](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [issue #10](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [issue #10](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [issue #11](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [issue #12](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
@@ -210,7 +210,7 @@ opinions.
 | --- | --- | --- |
 | Rust engineer | [Rust path](rust-path.md) | first unclear type, constructor, trait boundary, compiler signal, test name, or example output |
 | ML engineer or learner | [ML path](ml-path.md) | first unclear logits, probability, loss, training update, attention role, or state transition |
-| Category-theory reader | [Category-theory path](category-theory-path.md) | first overloaded term, missing law, unclear morphism shape, roadmap precision-drill row, or precision concern |
+| Category-theory reader | [Category-theory path](category-theory-path.md) | first overloaded term, missing law, unclear morphism shape, Seven Sketches Transfer Drill row, bad ML shortcut, safe non-claim, roadmap repair-table row, roadmap precision-drill row, or precision concern |
 | Technical educator | [Educator path](educator-path.md) | first missing next action, weak practice loop, unclear exercise expectation, or feedback cue |
 | Beginner-adjacent learner | [Beginner path](beginner-path.md) | first sentence, command, output line, or term that becomes too compressed |
 
@@ -227,16 +227,21 @@ the evidence signal from their own reading or command run.
 | --- | --- |
 | Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
 ## Current Category-Precision Target
 
-If the category-theory reviewer wants a narrow target, start with the roadmap
-`Reader Evidence Handoff`:
+If the category-theory reviewer wants a narrow target, choose one of two
+routes.
+
+Route A tests whether the roadmap repairs the common attention shortcuts before
+it names category shapes. Start with the roadmap repair table, then use the
+roadmap `Reader Evidence Handoff`:
 
 ```text
+book/src/roadmap.md -> Attention Mental Model Repair Table
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 cargo run --example 06_attention_scores
@@ -244,6 +249,15 @@ Q/K/V source diagnostic
 query rows own score rows; key/value rows own score columns
 mask polarity here: true = allowed, false = blocked
 AttentionScores x AttentionMask -> AttentionScores
+```
+
+Use the repair table to test one shortcut directly:
+
+```text
+query turns into key, then key turns into value
+raw scores are already attention probabilities
+same output shape means endomorphism
+fixing a mask means the mask disappeared
 ```
 
 Then use the fixed-context attention drill as one concrete row to test:
@@ -277,6 +291,7 @@ mask polarity here: true = allowed, false = blocked
 Then read:
 
 ```text
+book/src/roadmap.md -> Attention Mental Model Repair Table
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 docs/category-theory-path.md -> Context-Fixing Mini-Drill
@@ -288,11 +303,42 @@ First, the report should say whether the Q/K/V diagnostic makes query
 ownership, source ownership, and mask polarity visible before attention
 weights appear.
 
-Then the report should say whether the Source-Target Audit Card and
-closure-capture analogy make the fixed `AttentionMask` visible, or whether
-they accidentally hide the open product input. If the handoff itself is
+Then the report should say whether the Attention Mental Model Repair Table,
+Source-Target Audit Card, and closure-capture analogy make the fixed
+`AttentionMask` visible, or whether they accidentally hide the open product
+input. If the handoff itself is
 unclear, the report should name the first missing field, audit-card row,
-boundary row, output line, or prompt.
+repair-table row, boundary row, output line, or prompt.
+
+Route B tests whether the Seven Sketches chapter transfers applied-category
+vocabulary back into tiny ML without overclaiming:
+
+```bash
+cargo run --example 05_seven_sketches
+```
+
+Then read:
+
+```text
+docs/category-theory-path.md -> Seven Sketches Transfer Drill
+book/src/seven-sketches-rust.md -> Bridge Back To Tiny ML
+book/src/exercises.md -> Exercise 10 -> Bridge-back-to-tiny-ML option
+```
+
+The report should name one exact transfer row:
+
+```text
+sketch law:
+Rust handle:
+tiny ML pressure:
+bad ML shortcut rejected:
+safe non-claim:
+evidence command or test:
+```
+
+If the route works, report the row, output line, or exercise prompt that made
+the transfer clear. If it fails, report the first place where the source law,
+Rust handle, ML shortcut, or safe non-claim became hard to connect.
 
 ## Time Box
 

@@ -306,6 +306,27 @@ Vector
 Logits
 ```
 
+The same legal path as a rendered math view:
+
+\[
+\mathrm{TokenId}
+  \xrightarrow{\mathrm{Embedding}}
+\mathrm{Vector}
+  \xrightarrow{\mathrm{LinearToLogits}}
+\mathrm{Logits}
+  \xrightarrow{\mathrm{Softmax}}
+\mathrm{Distribution}
+\]
+
+How to read this diagram:
+
+- the objects are the Rust domain types,
+- the arrows are morphism implementations,
+- composition is legal only when the target object of one arrow is the source
+  object of the next arrow,
+- the diagram is a reading aid, not a claim that Rust proves every category
+  law.
+
 For the broken shortcut:
 
 | Attempted composition | First target | Second source | Result |
@@ -320,6 +341,21 @@ the missing morphism:
 Vector -> Logits
 ```
 
+The broken shortcut is useful to draw because it exposes the missing middle
+object:
+
+\[
+\begin{array}{ccccc}
+\mathrm{TokenId} & \xrightarrow{\mathrm{Embedding}} & \mathrm{Vector}
+  & \not\!\xrightarrow{\mathrm{Softmax}} & \mathrm{Distribution} \\
+&& \downarrow \mathrm{LinearToLogits} && \\
+&& \mathrm{Logits} & \xrightarrow{\mathrm{Softmax}} & \mathrm{Distribution}
+\end{array}
+\]
+
+Reconstruct this diagram by hand when a composition error appears. Label the
+first target, the second source, and the repair arrow before changing code.
+
 This checklist is useful beyond this chapter. Most pipeline bugs can be read
 as one of three failures:
 
@@ -332,6 +368,53 @@ as one of three failures:
 The category-theory word "composition" is doing practical engineering work
 here. It tells you to debug the boundary, not the individual matrix
 multiplication, softmax formula, or display output first.
+
+## Source-Target-Middle Repair Ledger
+
+When a composition breaks, write a small ledger before changing code. The
+ledger forces the abstract word "composition" back into source object, target
+object, middle object, and repair.
+
+| Composition attempt | First arrow | Second arrow | Claimed middle | Actual mismatch | Repair | Unsafe shortcut rejected | Validation evidence |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| legal embedding then projection | `Embedding : TokenId -> Vector` | `LinearToLogits : Vector -> Logits` | `Vector` | none | keep the order | skipping vocabulary scoring | `Embedding then LinearToLogits is legal because Vector == Vector` |
+| illegal embedding then softmax | `Embedding : TokenId -> Vector` | `Softmax : Logits -> Distribution` | `Vector` | `Softmax` needs `Logits`, not `Vector` | restore `LinearToLogits : Vector -> Logits` | making `Softmax` accept hidden features | `Embedding then Softmax is illegal because Vector != Logits` |
+| legal projection then softmax | `LinearToLogits : Vector -> Logits` | `Softmax : Logits -> Distribution` | `Logits` | none | keep the order | treating logits as optional decoration | `Compose::<_, _, Logits>` |
+
+Use this audit card when the compiler, a diagram, or a reader's intuition says
+two stages should connect:
+
+```text
+composition attempt:
+first arrow:
+second arrow:
+claimed middle object:
+actual first target:
+actual second source:
+repair:
+unsafe shortcut rejected:
+validation command or output:
+```
+
+Worked audit:
+
+```text
+composition attempt: Embedding then Softmax
+first arrow: Embedding : TokenId -> Vector
+second arrow: Softmax : Logits -> Distribution
+claimed middle object: Vector
+actual first target: Vector
+actual second source: Logits
+repair: insert LinearToLogits : Vector -> Logits
+unsafe shortcut rejected: changing Softmax to accept Vector
+validation command or output:
+  cargo run --example 02_morphism_composition
+  Embedding then Softmax is illegal because Vector != Logits
+```
+
+The source-backed limit is important. The Rust compiler is not proving every
+theorem about categories. It is checking the local trait bounds that make this
+pipeline composition legal or illegal.
 
 ## Compiler Error As Evidence
 

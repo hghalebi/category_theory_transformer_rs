@@ -392,6 +392,9 @@ The first public workshop for the project is available through
 The workshop is a guided study path through the same tiny pipeline. It is useful
 if you want to see the code, diagrams, and vocabulary connected live.
 
+The public session plan is available in the repository:
+[First online workshop curriculum](https://github.com/hghalebi/category_theory_transformer_rs/blob/main/community/first-online-workshop-curriculum.md).
+
 ## What To Remember
 
 The central discipline is:

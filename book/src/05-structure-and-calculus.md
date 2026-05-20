@@ -1342,6 +1342,32 @@ flowchart LR
     OA -->|OptionFunctor::fmap x10| OB
 ```
 
+The same square as a rendered math view:
+
+\[
+\begin{array}{ccc}
+\mathrm{Vec}\langle A\rangle
+& \xrightarrow{\mathrm{VecFunctor::fmap}(f)}
+& \mathrm{Vec}\langle B\rangle \\
+\downarrow \mathrm{VecToFirstOption}
+&& \downarrow \mathrm{VecToFirstOption} \\
+\mathrm{Option}\langle A\rangle
+& \xrightarrow{\mathrm{OptionFunctor::fmap}(f)}
+& \mathrm{Option}\langle B\rangle
+\end{array}
+\]
+
+How to read this diagram:
+
+- the top path maps inside the vector, then selects the first item,
+- the left-bottom path selects the first item, then maps inside the option,
+- the square commutes when both paths produce the same `Option<B>`,
+- the Rust handle is `naturality_square_holds_for_first_option`.
+
+If you had to redraw this by hand, that is a useful learning signal. Redrawing
+forces you to decide which objects sit at the corners and which arrows are
+responsible for each conversion.
+
 Read it as two executable paths:
 
 ```text
@@ -1614,6 +1640,27 @@ flowchart LR
     BC --> ABC2
 ```
 
+The same law as a rendered math view:
+
+\[
+\begin{array}{ccc}
+(\mathrm{embedding} \diamond \mathrm{linear}) \diamond \mathrm{softmax}
+& = &
+\mathrm{embedding} \diamond (\mathrm{linear} \diamond \mathrm{softmax})
+\end{array}
+\]
+
+Here `\(\diamond\)` means `PipelineTrace::combine`. The equality is not about
+string formatting. It says the final trace meaning should not depend on where
+the parentheses were placed.
+
+How to read this diagram:
+
+- the objects are trace values,
+- the arrow-like operation is `combine`,
+- the identity object is `PipelineTrace::empty()`,
+- the Rust handle is `monoid_laws_hold_for_pipeline_trace`.
+
 The two final traces should contain the same step names in the same order. The
 law is not about performance or formatting. It says grouping nested trace
 combinations should not change what the trace means.
@@ -1844,6 +1891,29 @@ The chain rule is composition of local derivative maps.
 A big neural network is many small maps composed forward, then many local
 gradient rules composed backward.
 
+The local multiplication example as a rendered math view:
+
+\[
+\begin{array}{ccccc}
+x,y
+& \xrightarrow{\mathrm{MulOp::forward}}
+& z = x \cdot y
+& \xrightarrow{\mathrm{loss}}
+& L \\
+&& \uparrow \mathrm{d}L/\mathrm{d}z && \\
+\mathrm{d}L/\mathrm{d}x = (\mathrm{d}L/\mathrm{d}z)\,y
+&&
+\mathrm{d}L/\mathrm{d}y = (\mathrm{d}L/\mathrm{d}z)\,x
+\end{array}
+\]
+
+How to read this diagram:
+
+- the top row is the forward computation,
+- the bottom row names the local backward results,
+- the upstream gradient `dL/dz` is the signal being carried backward,
+- the Rust handle is `MulOp::backward`.
+
 ## Production Autograd Boundary
 
 Production frameworks do not ask the user to manually call one `backward`
@@ -1945,6 +2015,56 @@ The four pattern names are useful only if they protect these boundaries. A
 functor protects wrapper-preserving mapping. A natural transformation protects
 agreement between two paths. A monoid protects repeated combination. The chain
 rule protects local-to-global gradient composition.
+
+## Output-To-Law Audit
+
+When the example prints a result, do not stop at "it worked." Turn the output
+line into a law-shaped claim and then narrow the claim back to the local Rust
+evidence.
+
+Use this audit card:
+
+```text
+output line:
+Rust handle:
+law or boundary:
+source support:
+safe non-claim:
+validation command:
+```
+
+Worked audit:
+
+```text
+output line: naturality square holds: true
+Rust handle: naturality_square_holds_for_first_option
+law or boundary: mapping before first-or-none matches first-or-none before mapping
+source support: formal naturality vocabulary; programming-shaped wrapper conversion
+safe non-claim: this checks one concrete square, not every natural transformation
+validation command: cargo test structure::tests::naturality_square_commutes --lib
+```
+
+Second worked audit:
+
+```text
+output line: dL/dx: 3 and dL/dy: 2
+Rust handle: MulOp::backward
+law or boundary: upstream gradient is multiplied by the local derivatives of x * y
+source support: chain rule and reverse traversal through a computation graph
+safe non-claim: this is one local derivative rule, not a production autograd engine
+validation command: cargo test calculus::tests::multiply_backward_returns_local_chain_rule_gradients --lib
+```
+
+The pattern is the same as the rest of the book:
+
+```text
+visible output -> Rust handle -> law-shaped claim -> source-backed limit
+```
+
+That last step matters. A passing law-shaped test is good evidence for the
+teaching example. It is not permission to claim the repository proves all
+functor laws, all naturality squares, every monoid, or every differentiable
+program.
 
 ## Core Mental Model
 

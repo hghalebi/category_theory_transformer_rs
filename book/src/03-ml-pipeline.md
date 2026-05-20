@@ -64,6 +64,28 @@ The update boundary returns a complete next model state:
 Parameters -> Updated Parameters
 ```
 
+The same orientation as a compact rendered math view:
+
+\[
+\begin{array}{ccccccc}
+\mathrm{Text}
+& \to & \mathrm{TokenSequence}
+& \to & \mathrm{TrainingSet}
+& \to & \mathrm{Loss} \\
+&&&& \uparrow && \downarrow \\
+&&&& \mathrm{Parameters}
+& \to & \mathrm{UpdatedParameters}
+\end{array}
+\]
+
+How to read this diagram:
+
+- the top row is the data path from text into measured loss,
+- `Parameters` enters the prediction and loss boundary as model state,
+- the returned object is a complete updated parameter object,
+- the diagram is a map of responsibilities; the later sections name the exact
+  Rust functions that own each arrow.
+
 ## Chapter Outcomes
 
 By the end of this chapter, you should be able to:
@@ -319,6 +341,47 @@ which target index selects the probability used by loss?
 When moving back to frameworks, remember that the compact API still owns both
 roles: score normalization and target-conditioned loss.
 
+## Target-Probability Responsibility Ledger
+
+This chapter's most important debugging habit is to keep responsibility in the
+right place. Each boundary owns one job.
+
+| Pipeline cue | Rust handle | ML responsibility | Category boundary | Unsafe shortcut rejected | Source-backed limit |
+| --- | --- | --- | --- | --- | --- |
+| raw vocabulary scores | `LinearToLogits : Vector -> Logits` | produce one unnormalized score per token | `Vector -> Logits` | treating logits as probabilities | this is a tiny linear projection, not a full classifier stack |
+| normalized probabilities | `Softmax : Logits -> Distribution` and `Distribution::new` | exponentiate, normalize, and validate a probability vector | `Logits -> Distribution` | skipping the probability invariant | normalized probability is not calibrated confidence |
+| target probability | `target.index()` and `distribution.as_slice().get(...)` | select the probability assigned to the correct next token | part of `Distribution x TokenId -> Loss` | using the largest probability | this checks supervised class-index loss, not every target encoding |
+| scalar surprise | `Loss::new(-probability.max(1e-9).ln())` | turn the target probability into a non-negative penalty | `Distribution x TokenId -> Loss` | hiding target selection inside a vague loss word | this is the expanded teaching path, not a fused production kernel |
+
+Use this audit card whenever the loss boundary feels slippery:
+
+```text
+pipeline cue:
+Rust handle:
+ML responsibility:
+category boundary:
+unsafe shortcut rejected:
+source-backed limit:
+validation command:
+```
+
+Worked audit:
+
+```text
+pipeline cue: target probability
+Rust handle: distribution.as_slice().get(target.index())
+ML responsibility: select the probability assigned to the correct next token
+category boundary: CrossEntropy : Distribution x TokenId -> Loss
+unsafe shortcut rejected: using the largest probability
+source-backed limit: this checks one local supervised classification boundary,
+  not calibration and not full framework equivalence
+validation command:
+  cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib
+```
+
+The phrase "probability assigned to the target" should now point to one line of
+Rust, one ML responsibility, and one category-shaped boundary.
+
 ## Source-Backed Precision Rules
 
 This chapter uses external sources to keep the tiny prediction-and-loss path
@@ -387,6 +450,33 @@ Loss
 The left side is the prediction path. The right side carries the target token.
 `CrossEntropy` is the first stage that needs both, so the chapter uses
 `Product<Distribution, TokenId>` at that boundary.
+
+The loss boundary as a rendered math view:
+
+\[
+\begin{array}{ccccc}
+\mathrm{TokenId}
+& \xrightarrow{\mathrm{Embedding}}
+\mathrm{Vector}
+& \xrightarrow{\mathrm{LinearToLogits}}
+\mathrm{Logits}
+& \xrightarrow{\mathrm{Softmax}}
+\mathrm{Distribution} \\
+&&&& \downarrow \mathrm{Product(-, target)} \\
+&&&& \mathrm{Product}\langle \mathrm{Distribution}, \mathrm{TokenId}\rangle
+  \xrightarrow{\mathrm{CrossEntropy}}
+  \mathrm{Loss}
+\end{array}
+\]
+
+How to read this diagram:
+
+- the prediction path produces a `Distribution`,
+- the target token does not become a prediction; it selects which probability
+  becomes the loss,
+- `CrossEntropy` is the first arrow that needs the product input,
+- redrawing the diagram should make the target side visible, not hidden inside
+  the word "loss".
 
 ## `DatasetWindowing`
 

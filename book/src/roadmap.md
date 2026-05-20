@@ -266,6 +266,28 @@ used as a shortcut around the typed Rust boundary.
 | [On the Anatomy of Attention](https://arxiv.org/abs/2407.02423) studies attention by decomposing variants into components | decompose attention first, then compare variants | the roadmap names scores, masks, weights, values, heads, projection, residuals, normalization, and feed-forward separately |
 | [Self-Attention as a Parametric Endofunctor](https://arxiv.org/abs/2501.02931) focuses on linear self-attention structure and explicitly separates nonlinear pieces | use "endofunctor" language only after naming the linear scope; do not carry it through softmax, masking, residuals, normalization, or training state without a new argument | `HiddenSequence -> QuerySequence` is a linear role-producing morphism; `AttentionScores x AttentionMask -> AttentionScores` is still product-input context |
 
+### Attention Mental Model Repair Table
+
+Use this table before the first attention example. Each row repairs a tempting
+mental model with one source-backed rule and one local Rust checkpoint.
+
+| Tempting mental model | Safer model | Rust checkpoint |
+| --- | --- | --- |
+| query turns into key, then key turns into value | query, key, and value are roles; in self-attention they are parallel projections from the same hidden source, and in cross-attention the query side and key-value side may come from different sequence objects | `HiddenSequence -> QuerySequence`, `HiddenSequence -> KeySequence`, and `HiddenSequence -> ValueSequence` are siblings, not a pipeline |
+| raw scores are already attention probabilities | scores become probabilities only after mask handling and row-wise softmax; value mixing happens after weights exist | `AttentionScores x AttentionMask -> AttentionScores -> AttentionWeights` comes before `AttentionWeights x ValueSequence -> AttentionOutput` |
+| same output shape means endomorphism | count the whole source object first; `A x B -> A` returns `A`, but it is still a product-input boundary while `B` is open | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` is not the same shape as `HiddenSequence -> HiddenSequence` |
+| fixing a mask means the mask disappeared | a fixed-context view is a new named view after one mask has been chosen; the open boundary remains product-input | `MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence` is valid only after naming the fixed `AttentionMask` `M` |
+
+The repair pattern is:
+
+```text
+bad shortcut -> source-backed role or shape rule -> local Rust boundary
+```
+
+Do this before using a category-theory label. The label should describe the
+boundary the reader can inspect, not the shortcut the reader is trying to
+remember.
+
 If a future chapter cites a stronger categorical result, it should add the same
 three pieces:
 
@@ -1046,6 +1068,33 @@ flowchart LR
     R --> N["Normalized HiddenSequence"]
     N --> FF["FeedForward HiddenSequence"]
 ```
+
+The same attention core as a compact rendered math view:
+
+\[
+\begin{array}{rcl}
+\mathrm{QuerySequence} \times \mathrm{KeySequence}
+& \to & \mathrm{AttentionScores} \\
+\mathrm{AttentionScores} \times \mathrm{AttentionMask}
+& \to & \mathrm{MaskedScores} \\
+\mathrm{MaskedScores}
+& \to & \mathrm{AttentionWeights} \\
+\mathrm{AttentionWeights} \times \mathrm{ValueSequence}
+& \to & \mathrm{AttentionOutput} \\
+\mathrm{AttentionOutput}
+& \to & \mathrm{ProjectedAttentionOutput} \\
+\mathrm{HiddenSequence} \times \mathrm{ProjectedAttentionOutput}
+& \to & \mathrm{HiddenSequence}
+\end{array}
+\]
+
+How to read this diagram:
+
+- every product input means two roles must stay visible,
+- masking happens before row-wise softmax produces weights,
+- value mixing is separate from score calculation,
+- the residual step is the first row here that explicitly returns to
+  `HiddenSequence`.
 
 What to notice:
 
@@ -2380,6 +2429,50 @@ Do not call the whole block an endofunctor when the explanation only checked
 one internal linear path. In this chapter, use the smaller safe name first:
 ordinary morphism, product-input morphism, shape-preserving endomorphism, state
 endomorphism, or illegal attempted composition.
+
+The decision flow is:
+
+```mermaid
+flowchart TD
+    B["Boundary shape"] --> T{"Does it type-check?"}
+    T -->|"no"| I["Illegal attempted composition: name the missing conversion"]
+    T -->|"yes"| C{"How many inputs are visible?"}
+    C -->|"one input"| O{"Same whole source and target object?"}
+    O -->|"yes"| E["Endomorphism: A -> A"]
+    O -->|"no"| M["Ordinary morphism: A -> B"]
+    C -->|"product input"| F{"Was one context fixed first?"}
+    F -->|"yes"| U["Induced unary view: name the fixed context"]
+    F -->|"no"| P["Product-input morphism: keep A x B visible"]
+```
+
+The same naming rule as a compact rendered math view:
+
+\[
+\begin{array}{rcl}
+A \to B &:& \text{ordinary morphism} \\
+A \to A &:& \text{endomorphism} \\
+A \times B \to C &:& \text{product-input morphism} \\
+A \times B \to A &:& \text{not automatically an endomorphism} \\
+A \xrightarrow{f_b} A
+&:& \text{fixed-context induced endomorphism, after } b \text{ is fixed}
+\end{array}
+\]
+
+How to read this diagram:
+
+- count the visible inputs before naming the category shape,
+- compare the whole source object with the whole target object,
+- fix context explicitly before using a unary view,
+- reject same-output shortcuts that ignore product inputs.
+
+Read the diagram from top to bottom before naming an attention boundary. It is
+only a local naming aid, but it prevents three common shortcuts:
+
+| Shortcut | Safer move |
+| --- | --- |
+| output shape matches, so the boundary is an endomorphism | compare the whole source object with the target object |
+| the product can be read as one source, so the boundary is an endomorphism | check whether the target is the same product object |
+| context was fixed in prose, so the original boundary had one input | name the open boundary first, then name the fixed context |
 
 ### Two-Minute Classification Drill
 

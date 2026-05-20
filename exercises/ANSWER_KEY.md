@@ -228,6 +228,36 @@ Category theory concept:
 It is the object produced by Softmax and consumed with TokenId by CrossEntropy.
 ```
 
+Expected primitive-to-domain audit:
+
+```text
+raw value: Vec<f32> of probability-like numbers
+domain object: Distribution
+constructor or boundary: Distribution::new(probabilities)
+invariant owned here: finite, non-negative, non-empty, and normalized
+downstream code allowed to trust: CrossEntropy can read the target probability
+unsafe shortcut rejected: passing Logits or arbitrary Vec<f32> as probabilities
+source-backed limit: this validates one local vector, not calibration or full framework equivalence
+validation command: cargo test domain::tests::distribution_rejects_non_normalized_values --lib
+```
+
+Second acceptable audit:
+
+```text
+raw value: usize
+domain object: TokenId
+constructor or boundary: TokenId::new(index)
+invariant owned here: semantic role label only
+downstream code allowed to trust: this value is a token index role, not a dimension or step count
+unsafe shortcut rejected: passing bare usize across morphism boundaries
+source-backed limit: TokenId::new does not prove the index exists in every vocabulary
+validation command: cargo test domain::tests --lib
+```
+
+Reject primitive-to-domain audits that say every wrapper validates every
+property. A semantic wrapper and a validated object are both useful, but they do
+different work.
+
 ### Exercise 2: Add A Token
 
 Expected reasoning:
@@ -291,11 +321,29 @@ The missing middle stage is `LinearToLogits`. In ML terms, the skipped stage is
 vocabulary scoring: the model needs logits before `Softmax` can produce a
 probability distribution.
 
+Expected source-target-middle repair audit:
+
+```text
+composition attempt: Embedding then Softmax
+first arrow: Embedding : TokenId -> Vector
+second arrow: Softmax : Logits -> Distribution
+claimed middle object: Vector
+actual first target: Vector
+actual second source: Logits
+repair: insert LinearToLogits : Vector -> Logits
+unsafe shortcut rejected: changing Softmax to accept Vector
+validation command or output:
+cargo run --example 02_morphism_composition
+Embedding then Softmax is illegal because Vector != Logits
+```
+
 Facilitator note:
 
 Do not let learners solve this by weakening types. The lesson is that the type
 boundary correctly rejects the skipped prediction stage. A strong answer
-debugs source, target, and middle objects before changing code.
+debugs source, target, and middle objects before changing code. Reject repair
+audits that name only "type mismatch" without naming the actual first target,
+actual second source, and missing repair arrow.
 
 ### Exercise 5: Change The Training Repetition Count
 
@@ -319,6 +367,38 @@ Expected training diagnostic:
 Loss is evidence about the current parameters. It is not the object returned by
 the update. The update returns another `Parameters` value, which is why the next
 step can run without reconstructing the model state.
+
+Expected framework-to-Rust audit:
+
+```text
+framework cue: optimizer.step()
+responsibility: apply gradients to parameters
+local Rust handle: *value -= learning_rate * grad * batch_scale;
+returned object: Parameters
+category boundary: TrainStep(dataset, learning_rate) : Parameters -> Parameters
+safe non-claim: this is one full-batch teaching update, not a production
+optimizer with parameter groups, state_dict, schedulers, mixed precision, or
+distributed training
+```
+
+Second acceptable audit:
+
+```text
+framework cue: loss.backward()
+responsibility: compute gradients from the current loss signal
+local Rust handle: dlogits[target_id] -= 1.0 plus grad_embedding,
+grad_lm_head, and grad_bias accumulation
+returned object: Parameters, after those local gradients are used by the update
+category boundary: gradient computation is internal to TrainStep; the exposed
+arrow is Parameters -> Parameters
+safe non-claim: this is a hand-written tiny gradient path, not a general
+autograd tape
+```
+
+Reject framework-to-Rust audits that say the tiny code "implements PyTorch" or
+that `loss.backward()` directly returns the next model state. The production
+framework call computes gradient information; the exposed tiny Rust morphism
+still returns `Parameters`.
 
 Facilitator note:
 
@@ -520,6 +600,68 @@ Reject answers that say the chapter "implements Seven Sketches." A good answer
 says which local Rust handle carries one executable boundary from the larger
 source text.
 
+Expected page-to-Rust decision-ladder answer:
+
+```text
+source paragraph shape: composition rule
+first Rust move: SignalMatrix::compose_after
+invalid state or shortcut to reject: composing two linear stages when the
+output width of the first does not match the input height of the second
+local evidence command or test:
+sketches::tests::signal_matrix_composition_rejects_mismatched_middle_dimension
+safe non-claim: this checks one matrix-composition boundary; it does not build
+a complete signal-flow graph language or neural-network framework
+```
+
+A second valid answer:
+
+```text
+source paragraph shape: definition or named object
+first Rust move: InformationLevel enum
+invalid state or shortcut to reject: treating an observation as if it were
+already a decision
+local evidence command or test:
+sketches::tests::information_order_has_preorder_laws
+safe non-claim: this finite enum is a teaching model for one ordered domain,
+not a theory of all information refinement
+```
+
+Reject answers that start by inventing a broad framework before naming one
+Rust boundary. The ladder starts with the smallest local handle that can expose
+one law, relation, rejected shortcut, or non-claim.
+
+Expected bridge-back-to-tiny-ML answer:
+
+```text
+sketch: Signal matrices
+tiny ML pressure: linear stages compose only when dimensions line up
+Rust handle: SignalMatrix::compose_after
+bad shortcut rejected: multiplying stages before checking the middle dimension
+safe non-claim: this is matrix composition, not a full autodiff or neural-network framework
+evidence command or test: cargo run --example 05_seven_sketches
+one-sentence transfer: This sketch helps me reject this ML shortcut: composing
+linear stages before the output width of the first stage matches the input
+width of the second stage.
+```
+
+Another strong answer:
+
+```text
+sketch: Open circuits
+tiny ML pressure: components need explicit input and output boundaries
+Rust handle: OpenCircuit::then
+bad shortcut rejected: wiring pieces by name while ignoring boundary shape
+safe non-claim: the circuit model is an interface analogy, not a full circuit algebra
+evidence command or test: cargo test sketches::tests --lib
+one-sentence transfer: This sketch helps me reject this ML shortcut: connecting
+a tokenizer directly to a classifier whose input object is Logits rather than
+TokenSequence.
+```
+
+Reject answers that copy a bridge row without a tiny ML shortcut. The transfer
+is complete only when the learner names a mistake the row would prevent in a
+small ML or software system.
+
 ### Exercise 11: Write A New Block Explanation
 
 Expected reasoning:
@@ -624,6 +766,23 @@ Expected quick roadmap classification drill:
 | `LayerNormalization : HiddenSequence -> HiddenSequence` | endomorphism | one input object returns the same public object |
 | `HiddenSequence x ProjectedAttentionOutput -> HiddenSequence` | product-input morphism returning hidden state | residual addition needs both the old hidden stream and the projected sublayer output |
 | `TransformerTrainingState -> TransformerTrainingState` | state endomorphism | the whole training state returns as the same object for the next update |
+
+Expected decision-flow answers:
+
+| Boundary | Type-checks? | Visible inputs | Fixed context? | Safe local name |
+| --- | --- | --- | --- | --- |
+| `AttentionScores x AttentionMask -> AttentionScores` | yes | product input | no | product-input morphism returning scores |
+| `MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence` | yes, after choosing one mask | one visible input | yes, mask `M` was selected first | induced endomorphism for that mask |
+| `HiddenSequence x MultiHeadOutput -> HiddenSequence` | no | attempted product input | no | illegal attempted boundary; name `MultiHeadOutput -> ProjectedAttentionOutput` first |
+
+The decision flow is useful only if the answer follows it in order:
+
+```text
+type-check first
+count visible inputs
+ask whether context was fixed
+then choose the safe local name
+```
 
 Trap explanation:
 
@@ -932,6 +1091,20 @@ Distribution x TokenId -> Loss. It cannot compute the loss from the
 distribution alone because loss depends on which token was correct.
 ```
 
+Expected target-probability responsibility audit:
+
+```text
+pipeline cue: target probability
+Rust handle: distribution.as_slice().get(target.index())
+ML responsibility: select the probability assigned to the correct target token
+category boundary: CrossEntropy : Distribution x TokenId -> Loss
+unsafe shortcut rejected: using the largest probability
+source-backed limit: this local test checks supervised class-index loss; it is
+not evidence of calibrated confidence or full framework equivalence
+validation command:
+cargo test cross_entropy_is_lower_for_more_confident_target_probability --lib
+```
+
 Facilitator note:
 
 If a learner compares the largest probability in each distribution instead of
@@ -970,6 +1143,38 @@ a.combine(&PipelineTrace::empty()) == a
 associativity:
 a.combine(&b).combine(&c) == a.combine(&b.combine(&c))
 ```
+
+Expected output-to-law audit:
+
+```text
+output line: naturality square holds: true
+Rust handle: naturality_square_holds_for_first_option
+law or boundary: mapping before first-or-none matches first-or-none before
+mapping
+source support: formal naturality vocabulary and programming-shaped wrapper
+conversion
+safe non-claim: this checks one concrete square, not every natural
+transformation
+validation command:
+cargo test structure::tests::naturality_square_commutes --lib
+```
+
+Second acceptable audit:
+
+```text
+output line: monoid laws hold: true
+Rust handle: monoid_laws_hold_for_pipeline_trace
+law or boundary: empty trace and regrouping leave the combined pipeline trace
+unchanged
+source support: monoid identity and associativity vocabulary
+safe non-claim: this checks one trace type, not every possible monoid
+validation command:
+cargo test structure::tests::pipeline_trace_obeys_monoid_laws --lib
+```
+
+Reject audits that only say "the output is true." A strong audit names the
+function, law-shaped claim, source support, safe non-claim, and validation
+command.
 
 Expected three-lens answer:
 
@@ -1076,6 +1281,89 @@ state invariant: after every update the next step still has parameters,
 learning rate, and step count. Returning only readout weights, only
 feed-forward weights, or a bag of changed matrices would make the next update
 reconstruct missing context by hand.
+
+### Exercise 17: Reconstruct A Diagram By Hand
+
+Expected answer shape:
+
+```text
+chapter: Functors, Naturality, Monoids, and Chain Rule
+diagram chosen: Vec<A> -> Option<B> naturality square
+
+objects:
+Vec<A>, Vec<B>, Option<A>, Option<B>
+
+arrows:
+VecFunctor::fmap(f)
+VecToFirstOption::transform
+OptionFunctor::fmap(f)
+
+two paths or state transition:
+top then right:
+Vec<A> -> Vec<B> -> Option<B>
+
+left then bottom:
+Vec<A> -> Option<A> -> Option<B>
+
+Rust handle:
+naturality_square_holds_for_first_option
+
+command or test:
+cargo test structure::tests::naturality_square_commutes --lib
+
+what would break if one arrow was skipped:
+the reader could not compare mapping-before-conversion with
+conversion-before-mapping, so the square would be only a picture, not a
+commutativity claim.
+
+safe non-claim:
+this checks one concrete naturality square for the first-item conversion, not
+every natural transformation.
+```
+
+Other acceptable reconstructions:
+
+```text
+Course Map:
+Text -> TokenSequence -> TrainingSet -> Loss, with Parameters -> Parameters.
+The map is a route through the code, not a claim that every real ML system has
+this exact shape. The executable handle is cargo run --bin category_ml or
+cargo run --example 01_token_sequence.
+
+Domain Objects:
+usize -> TokenId -> Vector, Vec<TokenId> -> TokenSequence -> TrainingSet, or
+Vec<f32> -> Distribution -> Product<Distribution, TokenId>.
+The key point is the constructor boundary: a raw representation becomes a
+trusted domain object before a later morphism consumes it. The diagram does not
+claim every wrapper validates every possible invariant.
+
+Morphism and Composition:
+TokenId -> Vector -> Logits -> Distribution.
+The skipped-arrow failure is Embedding then Softmax, where Vector is not Logits.
+The repair arrow is LinearToLogits : Vector -> Logits.
+
+Tiny ML Pipeline:
+Distribution x TokenId -> Loss.
+The target token selects the probability that becomes cross-entropy loss.
+The diagram does not prove calibrated confidence or production framework
+equivalence.
+
+Training as an Endomorphism:
+Parameters_t -> Parameters_{t+1}.
+The measurement boundary is Parameters x TrainingSet -> Loss, while the update
+boundary is Parameters -> Parameters.
+The diagram does not claim the tiny training step is a production optimizer.
+
+Transformer Roadmap:
+AttentionWeights x ValueSequence -> AttentionOutput.
+Weights choose how much each value row contributes.
+The diagram does not collapse query-key scoring, masking, value mixing,
+projection, and residual addition into one vague HiddenSequence arrow.
+```
+
+Reject reconstructions that copy only the visual shape without naming Rust
+handles. A strong answer labels objects, arrows, the checked path or state
+transition, the command or test evidence, and one safe non-claim.
 
 ## Beginner Exercises
 

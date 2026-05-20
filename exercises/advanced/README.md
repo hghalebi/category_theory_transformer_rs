@@ -25,6 +25,11 @@ The diagram has an adjacent explanation that names:
 - the ML or software meaning,
 - the category-theory relationship.
 
+For a dense pipeline, law, or state-update section, prefer a compact rendered
+math view next to the plain-text or Mermaid view. The rendered view should make
+the objects, arrows, products, or repeated state object easier to track; it
+should not replace the nearby Rust handles or validation command.
+
 ## Exercise 2: Extend The Sketches Module
 
 Choose one concept from `book/src/seven-sketches-rust.md` that is currently

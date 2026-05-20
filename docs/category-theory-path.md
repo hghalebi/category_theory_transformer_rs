@@ -130,6 +130,77 @@ endomorphism on the product would have to return the same product object:
 (A x B) -> (A x B)
 ```
 
+## Seven Sketches Transfer Drill
+
+Use this drill when category-theory vocabulary feels clear in the abstract but
+hard to connect back to tiny ML.
+
+Run:
+
+```bash
+cargo run --example 05_seven_sketches
+```
+
+Then open:
+
+```text
+book/src/seven-sketches-rust.md -> Page-To-Rust Decision Ladder
+book/src/seven-sketches-rust.md -> Bridge Back To Tiny ML
+book/src/exercises.md -> Exercise 10 -> Page-to-Rust decision-ladder option
+book/src/exercises.md -> Exercise 10 -> Bridge-back-to-tiny-ML option
+```
+
+If you are reading the source text page by page, start with the decision
+ladder. Classify the paragraph as a definition, relation, composition rule,
+law, worked example, or larger theory paragraph before choosing the Rust
+handle. That prevents the common shortcut of creating a broad framework before
+one local boundary is visible.
+
+Pick one bridge row and fill this path:
+
+```text
+source idea:
+Rust handle:
+category-theory shape:
+tiny ML pressure:
+bad shortcut rejected:
+safe non-claim:
+evidence command or test:
+```
+
+The check sentence is:
+
+```text
+This sketch helps me reject this ML shortcut: ...
+```
+
+Examples of good transfer targets:
+
+| Category word | Rust handle | Tiny ML pressure | Bad shortcut to reject |
+| --- | --- | --- | --- |
+| order | `InformationLevel::can_flow_to` | observations, features, scores, and decisions should not be interchangeable | treating a score as a decision |
+| schema arrow | `CompanyInstance::new` | structured training rows should not contain dangling references | letting malformed source data reach feature extraction |
+| matrix composition | `SignalMatrix::compose_after` | linear stages need matching middle dimensions | composing layers before checking shape |
+| open interface | `OpenCircuit::then` | components need explicit input and output boundaries | wiring pieces by label while ignoring type shape |
+| local-to-global claim | `SafetyCover::global_truth` | global safety depends on local checks | claiming global behavior while one local check failed |
+
+The safe category-theory move is:
+
+```text
+name the structure -> name the Rust handle -> name the ML shortcut -> name the
+non-claim
+```
+
+The non-claim matters. For example, `SignalMatrix::compose_after` checks one
+matrix-composition boundary. It does not make this repository a general
+automatic-differentiation system. `OpenCircuit::then` checks one interface
+composition boundary. It does not implement the full theory of circuits from
+the source text.
+
+When this drill is useful for review, report the exact row that stopped
+working. A strong report names the bridge row, the command output or test, and
+the first place where the tiny ML transfer became unclear.
+
 ## Context-Fixing Mini-Drill
 
 Use this drill when an example seems to become unary only after some extra
@@ -204,7 +275,22 @@ Run:
 cargo run --example 06_attention_scores
 ```
 
-Then open [Transformer Roadmap](../book/src/roadmap.md) and test this table:
+Then open [Transformer Roadmap](../book/src/roadmap.md) and test the
+`Attention Mental Model Repair Table` before the longer classification table.
+Pick one shortcut and decide whether the repair points to a concrete Rust
+boundary:
+
+| Shortcut to test | Repair should make visible |
+| --- | --- |
+| query turns into key, then key turns into value | Q, K, and V are sibling roles, not a role-to-role pipeline |
+| raw scores are already attention probabilities | masking and row-wise softmax happen before value mixing |
+| same output shape means endomorphism | the whole source object must be counted first |
+| fixing a mask means the mask disappeared | the fixed mask remains named context |
+
+A useful report can name one row from that repair table and say whether the
+local Rust checkpoint made the safer model inspectable.
+
+Then test this classification table:
 
 | Boundary from the roadmap | Careful classification | Evidence signal to report if unclear |
 | --- | --- | --- |
@@ -342,7 +428,7 @@ endofunctor warning becomes unclear, open the
 and include:
 
 For this path, use
-[Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores).
+[Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores).
 The link fills the route, not the evidence; the evidence signal should come
 from what you personally read, ran, or attempted.
 

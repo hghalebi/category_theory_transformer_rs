@@ -243,6 +243,32 @@ This book compresses the same teaching shape into one explicit Rust morphism:
 TrainStep(dataset, learning_rate) : Parameters -> Parameters
 ```
 
+The same training boundary as a rendered math view:
+
+\[
+\begin{array}{ccccc}
+\mathrm{Parameters}_t
+& \xrightarrow{\mathrm{average\_loss}(-,\mathrm{TrainingSet})}
+& \mathrm{Loss}_t
+& \xrightarrow{\mathrm{local\ gradients}}
+& \nabla_t \\
+&&&& \downarrow \mathrm{apply\ learning\ rate} \\
+\mathrm{Parameters}_{t+1}
+& \xleftarrow{\mathrm{TrainStep(dataset, learning\_rate)}}
+& \mathrm{Parameters}_t
+&&
+\end{array}
+\]
+
+How to read this diagram:
+
+- the upper path measures how wrong the current parameters are,
+- the gradient path explains what should change,
+- the bottom arrow is the typed update that returns the next full
+  `Parameters` object,
+- only the bottom arrow has the endomorphism shape
+  `Parameters -> Parameters`.
+
 The tiny Rust boundary is smaller than a production optimizer. It does not
 model momentum, parameter groups, optimizer state dictionaries, closures,
 schedulers, mixed precision, or distributed training. It keeps one full-batch
@@ -261,6 +287,45 @@ When you return to a framework, the useful transfer question is:
 ```text
 which object owns the update state, and which call turns current parameters
 into next parameters?
+```
+
+## Framework-To-Rust Responsibility Ledger
+
+If you already know the framework loop, use this ledger before reading
+`TrainStep::apply`. It prevents two common mistakes: treating the tiny Rust code
+as a hidden framework clone, or treating framework calls as unrelated magic.
+
+| Framework cue | Production responsibility | Tiny Rust handle | Category boundary | Safe non-claim |
+| --- | --- | --- | --- | --- |
+| `optimizer.zero_grad()` | clear accumulated gradient buffers before the next backward pass | `grad_embedding`, `grad_lm_head`, and `grad_bias` start as local zeroed buffers inside `TrainStep::apply` | preparation inside one update arrow | no persistent gradient field is stored on `Parameters` |
+| `loss.backward()` | compute gradients from the current loss through the recorded graph | `dlogits[target_id] -= 1.0` and local gradient accumulation for the tiny softmax-linear path | measurement informs the update | not a general autograd tape |
+| `optimizer.step()` | update parameters using gradients and optimizer state | `*value -= learning_rate * grad * batch_scale;` and returned `Parameters` | `Parameters -> Parameters` | not Adam, momentum, scheduler, mixed precision, or distributed training |
+| optimizer `state_dict` | persist optimizer state and parameter-group metadata | no corresponding field in `TrainStep`; only `TrainingSet` and `LearningRate` configure the teaching update | larger state would need a larger object | the tiny step does not serialize optimizer state |
+
+The useful habit is to translate a framework call into a responsibility, then
+ask where that responsibility appears in the local Rust code. If no local
+handle exists, say so explicitly.
+
+Framework-to-Rust audit card:
+
+```text
+framework cue:
+responsibility:
+local Rust handle:
+returned object:
+category boundary:
+safe non-claim:
+```
+
+Example:
+
+```text
+framework cue: optimizer.step()
+responsibility: apply gradients to parameters
+local Rust handle: *value -= learning_rate * grad * batch_scale;
+returned object: Parameters
+category boundary: TrainStep(dataset, learning_rate) : Parameters -> Parameters
+safe non-claim: this is one full-batch teaching update, not a production optimizer
 ```
 
 ## Source-Backed Precision Rules
@@ -1281,6 +1346,20 @@ TrainStep(dataset, learning_rate) : Parameters -> Parameters
 
 The first boundary measures. The second boundary updates. Only the second one
 is the endomorphism that can be repeated by `apply_endomorphism_n_times`.
+
+Draw the distinction like this:
+
+\[
+\begin{array}{rcl}
+\mathrm{measure} &:& \mathrm{Parameters} \times \mathrm{TrainingSet}
+  \to \mathrm{Loss} \\
+\mathrm{update} &:& \mathrm{Parameters}
+  \to \mathrm{Parameters}
+\end{array}
+\]
+
+If a diagram makes the measurement arrow return `Parameters`, or makes the
+update arrow return only `Loss`, the training story has changed meaning.
 
 Checkpoint:
 

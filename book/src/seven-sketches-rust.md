@@ -153,6 +153,41 @@ Use this ledger while reading the PDF beside the Rust:
 | an open system or circuit interface | Which boundary ports must agree? | `OpenCircuit::then` |
 | a local-to-global behavior claim | Which local checks combine into a global result? | `SafetyCover::global_truth` |
 
+### Page-To-Rust Decision Ladder
+
+Use this ladder when you are reading the PDF page by page and do not yet know
+what to implement.
+
+| Source paragraph shape | First Rust move | Evidence to seek | Safe non-claim |
+| --- | --- | --- | --- |
+| definition or named object | create a newtype, enum, or struct with private fields | constructor rejects an impossible value | this is one typed domain object, not the whole theory |
+| relation, order, or feasibility statement | write a method that returns `bool` or `CtResult<T>` | one passing case and one rejected case | this is one relation, not a complete semantics |
+| composition rule | write a method that consumes two typed inputs | mismatched middle object, dimension, or port returns `Err(...)` | this is one composition boundary, not a general algebra |
+| theorem, law, or proof step | write the smallest law test | the test names the exact law being checked | one passing test is local evidence, not a proof of the source text |
+| worked example or application story | build a tiny fixture and print one output line | `cargo run --example 05_seven_sketches` shows the protected boundary | the fixture is an analogy, not a production model |
+| richer machinery beyond the local handle | write a larger-claim-not-implemented sentence | the non-claim names the missing theory explicitly | the chapter cites the source; it does not compress it |
+
+The ladder keeps the reading order concrete:
+
+```text
+source paragraph shape
+  -> first Rust move
+  -> local evidence
+  -> safe non-claim
+```
+
+Example decisions:
+
+| If the source section is about... | Do not start with... | Start with... |
+| --- | --- | --- |
+| schemas and instances | a trait called `Category` | `CompanyInstance::new` rejecting a dangling department |
+| signal-flow semantics | a full graph language | `SignalMatrix::compose_after` checking the middle dimension |
+| open-system composition | a general operad library | `OpenCircuit::then` checking output/input ports |
+
+This is how the chapter can cover the whole source at the level promised by
+the book: not every theorem becomes a library feature, but every major reading
+shape has a disciplined path toward a Rust handle, a test, and a non-claim.
+
 This is also the limit of the chapter. If a PDF section develops a richer
 construction than the Rust handle, record the richer construction as context,
 not as something the code has proved. The safe sentence is:
@@ -169,6 +204,13 @@ limited teaching claim, and each claim is tied to one local Rust boundary or
 test. The chapter does not claim that `src/sketches.rs` implements the full
 source text, a general categorical semantics library, or a production ML
 architecture theory.
+
+The [Bridge Back To Tiny ML](#bridge-back-to-tiny-ml) section below is part of
+this source contract. Its check sentence is:
+
+```text
+This sketch helps me reject this ML shortcut.
+```
 
 | Source | What the source supports | Local rule in this chapter | Rust evidence |
 | --- | --- | --- | --- |
@@ -290,6 +332,36 @@ This table is the chapter's law-and-boundary index. The point is not to
 memorize eight rows. The point is to see that each sketch earns its abstraction
 by protecting one concrete relationship.
 
+## Bridge Back To Tiny ML
+
+The source text and the MIT course both use applied examples to make category
+theory portable across domains. This chapter uses the same move in a smaller
+way: each sketch should transfer back to one tiny ML design pressure.
+
+Use the bridge below when the chapter starts to feel like a separate category
+theory tour.
+
+| Sketch | Tiny ML pressure | Rust handle to inspect | Bad shortcut the sketch helps reject | Safe non-claim |
+| --- | --- | --- | --- | --- |
+| Information order | raw observations, features, scores, and decisions should not be interchangeable | `InformationLevel::can_flow_to` | treating a score as if it were already a decision | the enum is a teaching model, not a calibrated decision theory |
+| Feature/layer planning | concrete feature count and abstract model capacity are different views | `FeatureCount`, `LayerBudget` | treating abstraction and concretization as inverse functions | the Galois-style law is a tiny planning check, not a full architecture search method |
+| Resources | training and inference choices depend on compute and memory together | `ResourceBundle::tensor` | collapsing all resource constraints into one raw number | the bundle is a two-resource sketch, not a deployment cost model |
+| Database instance | training rows should not carry dangling references into feature extraction | `CompanyInstance::new` | letting malformed structured data reach the model | this validates one schema arrow, not a full data platform |
+| Co-design feasibility | model choice is often a relation between requirements and candidate implementations | `FeasibilityRelation::relates` | forcing every design question into a single function | one feasible offer is not proof that every implementation satisfies the constraint |
+| Signal matrices | linear stages compose only when dimensions line up | `SignalMatrix::compose_after` | multiplying stages before checking the middle dimension | this is matrix composition, not a full autodiff or neural-network framework |
+| Open circuits | components need explicit input and output boundaries | `OpenCircuit::then` | wiring pieces by name while ignoring boundary shape | the circuit model is an interface analogy, not a full circuit algebra |
+| Logic of behavior | local checks must support global claims | `SafetyCover::global_truth` | claiming global safety while one local interval failed | conjunction over intervals is a tiny behavior check, not full sheaf theory |
+
+Read each row as a transfer sentence:
+
+```text
+This sketch helps me reject this ML shortcut.
+```
+
+That sentence is the practical reason to keep the sketch in the book. The
+formal category-theory vocabulary matters only after the engineering shortcut
+is visible.
+
 ### Transfer Triage Card
 
 Use this card when a source idea feels too large to turn into code. The goal is
@@ -325,6 +397,20 @@ protected law, relation, or boundary: EmployeeRecord -> DepartmentId must resolv
 invalid shortcut rejected: letting a missing department reach feature extraction
 tiny ML transfer: validate structured training rows before training
 larger claim not implemented: a general categorical database semantics
+local evidence command or test: cargo test sketches::tests --lib
+```
+
+Second example:
+
+```text
+source idea: open systems have boundaries
+local Rust handle: OpenCircuit::then
+protected law, relation, or boundary: previous outputs must match next inputs
+invalid shortcut rejected: wiring components by label while ignoring shape
+tiny ML transfer: Tokenizer -> Embedder is legal only when the output object
+matches the next input object
+larger claim not implemented: decorated cospans, hypergraph categories, and
+operads for general circuit composition
 local evidence command or test: cargo test sketches::tests --lib
 ```
 

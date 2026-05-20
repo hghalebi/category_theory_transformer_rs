@@ -63,9 +63,12 @@ The most useful public review is one precise report: what you ran or read, the
 last idea that made sense, the first point that became unclear, and the
 smallest edit that would help.
 
-Current high-value target: run `cargo run --example 06_attention_scores`, then
-report whether the first Q/K/V diagnostic makes this distinction clear before
-the weights appear:
+Current high-value target: run `cargo run --example 05_seven_sketches`, then
+`cargo run --example 06_attention_scores`. Report whether the Seven Sketches
+transfer drill gives you a safe Rust handle for the category word, whether the
+roadmap Attention Mental Model Repair Table rejects one tempting shortcut, and
+whether the first Q/K/V diagnostic makes this distinction clear before the
+weights appear:
 
 ```text
 query rows own score rows; key/value rows own score columns
@@ -75,7 +78,7 @@ query rows own score rows; key/value rows own score columns
 | --- | --- | --- |
 | Rust engineer | [Rust engineer first-run path](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | Run examples 01 and 02, then inspect the typed boundaries |
 | ML engineer or learner | [ML engineer training and attention path](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | Run the tiny training and training-state examples |
-| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Use the Source-Target Audit Card to classify morphism and attention boundaries |
+| Category-theory reader | [Category-theory precision path](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | Use the Seven Sketches Transfer Drill, Attention Mental Model Repair Table, and Source-Target Audit Card to classify sketch-transfer and attention boundaries |
 | Technical educator | [Technical educator learning path](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | Check whether each entry point gives the learner a next action |
 | Beginner-adjacent learner | [Beginner-adjacent first confusion path](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | Run the first example or read the public start path |
 
@@ -87,7 +90,7 @@ personally read, ran, or attempted.
 | --- | --- |
 | Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
@@ -475,6 +478,10 @@ If you prefer a guided walkthrough, join the public workshop:
 https://luma.com/event/evt-Pb1kYMQvzs8JrQq
 ```
 
+The [first online workshop curriculum](community/first-online-workshop-curriculum.md)
+shows the 60-minute agenda, runnable commands, participant lab card, and
+feedback closeout.
+
 ## Current status
 
 This is a working public draft.
@@ -530,7 +537,8 @@ Good contributions include:
 - pointing out unclear explanations
 - opening issues where a chapter becomes hard to follow
 - suggesting smaller examples
-- improving diagrams
+- improving diagrams, especially when a rendered math view or reconstruction
+  exercise would make the objects and arrows easier to track
 - adding exercises
 - simplifying Rust code
 - fixing terminology

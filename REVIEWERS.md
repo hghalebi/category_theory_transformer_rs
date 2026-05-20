@@ -44,7 +44,7 @@ find the path, but the slot is not filled until a report includes evidence.
 | --- | --- | --- |
 | Rust engineer | [issue #8](https://github.com/hghalebi/category_theory_transformer_rs/issues/8) | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [issue #9](https://github.com/hghalebi/category_theory_transformer_rs/issues/9) | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [issue #10](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [issue #10](https://github.com/hghalebi/category_theory_transformer_rs/issues/10) | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [issue #11](https://github.com/hghalebi/category_theory_transformer_rs/issues/11) | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [issue #12](https://github.com/hghalebi/category_theory_transformer_rs/issues/12) | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
@@ -90,6 +90,11 @@ Full chapter-clarity form:
 https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml
 ```
 
+If a diagram is where the path stops working, use
+[Exercise 17: Reconstruct A Diagram By Hand](book/src/exercises.md#exercise-17-reconstruct-a-diagram-by-hand)
+as the review method. A useful diagram report says which object, arrow, product
+input, state update, or safe non-claim could not be recovered from the page.
+
 ## No-Clone Review
 
 If you cannot clone the repository right now, you can still give useful direct
@@ -121,7 +126,7 @@ The most useful review round has one report from each perspective:
 | --- | --- | --- |
 | Rust engineer | Run `cargo run --example 01_domain_objects` and `cargo run --example 02_morphism_composition` | first unclear type, constructor, trait boundary, compiler signal, test name, or output line |
 | ML engineer or learner | Run `cargo run --example 03_training_endomorphism` and `cargo run --example 07_transformer_training_state` | first unclear logits, probability, loss, training update, attention role, or state transition |
-| Category-theory reader | Run `cargo run --example 02_morphism_composition` and `cargo run --example 06_attention_scores` | first overloaded term, missing law, unclear morphism shape, fixed-mask context issue, or roadmap precision issue |
+| Category-theory reader | Run `cargo run --example 02_morphism_composition`, `cargo run --example 05_seven_sketches`, and `cargo run --example 06_attention_scores` | first overloaded term, missing law, unclear morphism shape, sketch-transfer issue, fixed-mask context issue, or roadmap precision issue |
 | Technical educator | Review `README.md`, `START_HERE.md`, `docs/educator-path.md`, and `book/src/exercises.md` | first missing next action, weak practice loop, unclear exercise expectation, or feedback cue |
 | Beginner-adjacent learner | Run `cargo run --example 01_token_sequence` or read `START_HERE.md` | first sentence, command, output line, or term that becomes too compressed |
 
@@ -142,25 +147,39 @@ links below.
 | --- | --- |
 | Rust engineer | [Open Rust engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+Rust+engineer+brief&location=docs%2Frust-path.md&command=cargo+run+--example+01_domain_objects%0Acargo+run+--example+02_morphism_composition%0Acargo+test+domain%3A%3Atests+--lib%0Acargo+test+category%3A%3Atests+--lib) |
 | ML engineer or learner | [Open ML engineer report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+ML+engineer+brief&location=docs%2Fml-path.md&command=cargo+run+--example+01_token_sequence%0Acargo+run+--bin+category_ml%0Acargo+run+--example+03_training_endomorphism%0Acargo+run+--example+07_transformer_training_state) |
-| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic+-%3E+Reader+Evidence+Handoff&command=cargo+run+--example+06_attention_scores) |
+| Category-theory reader | [Open category-theory reader report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+category-theory+reader+brief&location=docs%2Fcategory-theory-path.md+-%3E+Seven+Sketches+Transfer+Drill%3B+book%2Fsrc%2Froadmap.md+-%3E+Category+Shape+Diagnostic&command=cargo+run+--example+05_seven_sketches%0Acargo+run+--example+06_attention_scores) |
 | Technical educator | [Open technical educator report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+technical+educator+brief&location=README.md%2C+START_HERE.md%2C+docs%2Feducator-path.md%2C+book%2Fsrc%2Fwelcome.md%2C+book%2Fsrc%2F00-map.md%2C+or+book%2Fsrc%2Fexercises.md&command=public+book+review+path+or+local+file+review) |
 | Beginner-adjacent learner | [Open beginner-adjacent learner report](https://github.com/hghalebi/category_theory_transformer_rs/issues/new?template=chapter-clarity.yml&title=%5Bgood+first+feedback%5D+beginner-adjacent+reader+brief&location=Welcome%2C+Course+Map%2C+Domain+Objects%2C+or+Morphism+and+Composition&command=cargo+run+--example+01_token_sequence+or+public+book+path) |
 
 ## Current High-Value Target
 
-The most useful category-theory report right now starts at the roadmap
-`Reader Evidence Handoff`:
+The most useful category-theory report right now can start at either the
+Seven Sketches transfer route or the roadmap `Reader Evidence Handoff`.
+
+Use this route when the issue is whether applied-category vocabulary transfers
+back into tiny ML:
 
 ```text
+docs/category-theory-path.md -> Seven Sketches Transfer Drill
+book/src/seven-sketches-rust.md -> Bridge Back To Tiny ML
+book/src/exercises.md -> Exercise 10 -> Bridge-back-to-tiny-ML option
+cargo run --example 05_seven_sketches
+```
+
+Use this route when the issue is source, target, product input, or fixed
+context:
+
+```text
+book/src/roadmap.md -> Attention Mental Model Repair Table
 book/src/roadmap.md -> Category Shape Diagnostic -> Reader Evidence Handoff
 book/src/roadmap.md -> Category Shape Diagnostic -> Source-Target Audit Card
 cargo run --example 06_attention_scores
 AttentionScores x AttentionMask -> AttentionScores
 ```
 
-Use that handoff and audit card to report one boundary row, output line, or
-naming rule where the whole source object, target object, or context status
-became unclear.
+Use the repair table, handoff, and audit card to report one shortcut row,
+boundary row, output line, or naming rule where the whole source object,
+target object, or context status became unclear.
 
 Start with the first four lines of `cargo run --example 06_attention_scores`.
 The most useful Q/K/V report says whether this line makes score ownership clear
@@ -190,13 +209,16 @@ induced view:
 MaskedMultiHeadTransformerBlock[M] : HiddenSequence -> HiddenSequence
 ```
 
-Run `cargo run --example 06_attention_scores`, then read the roadmap handoff
-and the Context-Fixing Mini-Drill in
+Run `cargo run --example 05_seven_sketches`, then the transfer drill if the
+confusion is about sketch vocabulary. Run
+`cargo run --example 06_attention_scores`, then read the roadmap handoff and
+the Context-Fixing Mini-Drill in
 [docs/category-theory-path.md](docs/category-theory-path.md). If the
-closure-capture analogy helps or fails, open one report with the exact
-sentence, code block, table row, or handoff field where the explanation became
-clear or unclear. The highest-value report says whether the Source-Target
-Audit Card helped you avoid calling a product-input boundary an endomorphism.
+transfer table, closure-capture analogy, or audit card helps or fails, open one
+report with the exact sentence, code block, table row, or handoff field where
+the explanation became clear or unclear. The highest-value report says whether
+the Source-Target Audit Card helped you avoid calling a product-input boundary
+an endomorphism.
 
 ## What Counts
 

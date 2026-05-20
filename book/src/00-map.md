@@ -214,9 +214,42 @@ TokenId --Embedding--> Vector --LinearToLogits--> Logits --Softmax--> Distributi
 Parameters --TrainStep--> Updated Parameters
 ```
 
+The same course map as a compact rendered math view:
+
+\[
+\begin{array}{ccccccccc}
+\mathrm{Text}
+& \to &
+\mathrm{TokenSequence}
+& \xrightarrow{\mathrm{DatasetWindowing}} &
+\mathrm{TrainingSet}
+& \leadsto &
+\mathrm{Product}\langle\mathrm{Distribution},\mathrm{TokenId}\rangle
+& \xrightarrow{\mathrm{CrossEntropy}} &
+\mathrm{Loss} \\
+&&&
+&&&
+\uparrow \mathrm{Softmax \circ LinearToLogits \circ Embedding}
+&& \\
+&&&
+&&&
+\mathrm{TokenId}
+&& \\
+\mathrm{Parameters}
+& \xrightarrow{\mathrm{TrainStep}}
+& \mathrm{UpdatedParameters}
+&&&&&&
+\end{array}
+\]
+
 Read the top path as prediction and evaluation. Read the bottom path as
 training state. The two meet because `TrainStep` uses the training set, current
 parameters, prediction path, and loss to produce updated parameters.
+
+If the text diagram is easier to read first, use it first. If the rendered
+view is easier to track, redraw it and label the Rust object behind every
+mathematical name. Both views are teaching aids; the proof that the map is
+real is still the code and the commands.
 
 Read that map in three ways.
 
